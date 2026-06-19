@@ -3,7 +3,7 @@ import numpy as np
 from src.constants import constants
 
 class soil:
-    def __init__(self, unit_weight:float = 0, friction_angle:float = 0, cohesion:float = 0):
+    def __init__(self, unit_weight:float = 0, friction_angle:float = 0, cohesion:float = 0, n60: float=0):
         '''
         To initialize soil parameters
 
@@ -18,14 +18,18 @@ class soil:
         self._sanity_check_unit_weight(unit_weight)
         self._sanity_check_friction_angle(friction_angle)
         self._sanity_check_cohesion(cohesion)
+        self._sanity_check_n60(n60)
 
         self.unit_weight = unit_weight
         self.friction_angle = friction_angle
         self.cohesion = cohesion
+        soil.n60 = n60
+
+        self.soil_type = self._determine_soil_type()
 
     @classmethod
     def from_dict(cls, data:dict):
-        return cls(unit_weight = data["unit_weight"], friction_angle = data["friction_angle"], cohesion = data["cohesion"])
+        return cls(unit_weight = data["unit_weight"], friction_angle = data["friction_angle"], cohesion = data["cohesion"], n60 = data["n60"])
 
     def _sanity_check_unit_weight(self, unit_weight):
         '''
@@ -83,6 +87,29 @@ class soil:
         
         return True
     
+    def _sanity_check_n60(self, n60):
+        '''
+        To perform sanity check on N60 blowcounts
+
+        Args:
+            n60: standard penetration blowcounts. Not corrected by effective stress 
+
+        Returns:
+            True if passes
+        '''
+
+        # sanity check on soil cohesion
+
+        if isinstance(n60, constants.NUMERIC_TYPES) == False:
+            raise TypeError("n60 data type shall be float, int, np.ndarray, np.generic.")
+        
+        # sanity check on soil unit weight
+        if np.min(np.asarray(n60)) < 0:
+            raise ValueError(f"ERROR: n60 shall be zero or greater.")
+
+        
+        return True
+    
     def modify_unit_weight(self, unit_weight_new):
         '''
         To modify self.unit_weight.
@@ -110,5 +137,21 @@ class soil:
 
         self.cohesion = cohesion_new
 
+    def _determine_soil_type(self)->int:
+        '''
+        To determine soil type
+        Type 0: mixed of cohesionless and cohesive. This case is RARE in calculation.
+        Type 1: cohesionless, sand.
+        Type 2: cohesive, clay.
+        
+        '''
+        if self.friction_angle !=0 and self.cohesion !=0:
+            return 0
+        elif self.friction_angle !=0:
+            return 1
+        elif self.cohesion !=0:
+            return 2
+        else:
+            return -1
 
 

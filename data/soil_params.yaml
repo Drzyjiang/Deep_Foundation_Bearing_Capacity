@@ -1,0 +1,9 @@
+- unit_weight: 120 # pcf
+  friction_angle: 30 # degree
+  cohesion: 0 # psf
+  n60: 16
+
+- unit_weight: 120 
+  friction_angle: 0
+  cohesion: 2000
+  n60: 6

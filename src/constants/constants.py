@@ -1,7 +1,7 @@
 from typing import Union
 import numpy as np
 
-# This file includes all constants to be share for CPT process
+
 
 # convert psf to tsf by multiplying
 PSF2TSF = 0.000446

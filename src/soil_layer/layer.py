@@ -4,7 +4,7 @@ from src.soil_layer.soil import soil
 from src.constants import constants
 
 class layer:
-    def __init__(self, ground_water_depth:float, soil: soil = None, top_depth = None, thickness = None):
+    def __init__(self, soil: soil = None, ground_water_depth:float = 0, top_depth = None, thickness = None):
         '''
         To initialize layer parameters
 
@@ -26,9 +26,15 @@ class layer:
         # thickness of the layer
         self.thickness = thickness
 
-        # 
 
-    def _sanity_check_ground_water_depth(ground_water_depth):
+        # calculate effective vertical stress at mid point
+        self.effective_stress_mid = self._calculate_effective_stress(self.top_depth + 0.5 * self.thickness)
+
+
+        
+
+
+    def _sanity_check_ground_water_depth(self, ground_water_depth):
         '''
         To perform sanity check on ground_water_depth
         '''
@@ -38,7 +44,7 @@ class layer:
     
         return True
         
-    def _sanity_check_top_depth(top_depth):
+    def _sanity_check_top_depth(self, top_depth):
         '''
         To perform sanity check on top_depth
         '''
@@ -47,7 +53,7 @@ class layer:
     
         return True
     
-    def _sanity_check_thickness(thickness):
+    def _sanity_check_thickness(self,thickness):
         '''
         To perform sanity check on thickness
         '''
@@ -59,3 +65,22 @@ class layer:
     
         return True
 
+    def _calculate_effective_stress(self, depth_target):
+        '''
+        To calculate vertical effective stress at a given depth of the layer
+
+        Args:
+            depth_target (constants.SCALAR_TYPE): depth at which effective stress to be calcualted
+
+        Returns:
+            effective vertical stress: in unit of psf
+        '''
+
+        depth_target = self.top_depth + 0.5 * self.thickness
+
+        if depth_target <= self.ground_water_depth:
+            return depth_target * self.soil.unit_weight
+        else:
+            return (self.ground_water_depth * self.soil.unit_weight +
+                    (depth_target - self.ground_water_depth) *(self.soil.unit_weight - constants.UNIT_WEIGHT_WATER))
+        
