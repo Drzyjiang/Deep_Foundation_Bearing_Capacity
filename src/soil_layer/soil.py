@@ -140,6 +140,14 @@ class soil:
 
         self.cohesion = cohesion_new
 
+    def _change_to_gravelly_sand(self)-> bool:
+        '''
+        To manually change soil type of gravelly sand (Type 3)
+        '''
+        self.soil_type = 3
+
+        return True
+
     def _determine_soil_type(self)->int:
         '''
         To determine soil 
@@ -147,6 +155,7 @@ class soil:
         Type 0: mixed of cohesionless and cohesive. This case is RARE in calculation.
         Type 1: cohesionless only, sand.
         Type 2: cohesive only, clay.
+        Type 3: gravelly sand. Resevered for deep foundation beta
         
         '''
         if self.friction_angle !=0 and self.cohesion !=0:
