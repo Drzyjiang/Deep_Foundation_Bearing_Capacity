@@ -1,12 +1,13 @@
 # method for Vesic shallow foundation bearing capacity
 
-import numpy as np
-from typing import Union, overload
 import copy
 
+import numpy as np
+
 from src.bearing_capacity.general_bearing_capacity import general_bearing_capacity
-from src.foundation.shallow_foundation import ShallowFoundation
 from src.constants import constants
+from src.foundation.shallow_foundation import ShallowFoundation
+
 
 class vesic_bearing_capacity (general_bearing_capacity):
     '''
@@ -25,12 +26,14 @@ class vesic_bearing_capacity (general_bearing_capacity):
     zeta_qr, zeta_qi, zeta_qt, zeta_qg
     
     '''
-    def __init__(self, shallow_foundation, layer, factor_of_safety = 3.0, large_foundation_correction:bool = True, adjustment_to_depth = 0):
+    def __init__(self, shallow_foundation, layer, factor_of_safety = 3.0, 
+                 large_foundation_correction:bool = True, adjustment_to_depth = 0):
         super().__init__(shallow_foundation, layer, factor_of_safety, large_foundation_correction)
 
         self._sanity_check_adjustment_to_depth(adjustment_to_depth)
 
-        self._references = ["EPRI: EL-2870 Transmission Line Structure Foundations for Uplift Compression Loading. Chapter 7"]
+        self._references = ["EPRI: EL-2870 Transmission Line Structure Foundations "
+        "for Uplift Compression Loading. Chapter 7"]
 
         # foundation width
         self.b = self.shallow_foundation.foundation_width
@@ -72,8 +75,7 @@ class vesic_bearing_capacity (general_bearing_capacity):
         To calculate foundation shape factor zeta_qs
         
         '''
-        b = self.shallow_foundation.foundation_width
-        l = self.shallow_foundation.foundation_length       
+       
 
         return 1 + (self.b/self.l) * np.tan(self.phi)
     
@@ -103,7 +105,7 @@ class vesic_bearing_capacity (general_bearing_capacity):
         To calculate foundation depth factor zeta_cd
         '''
         zeta_qd = self._calculate_zeta_qd()
-        nc = self._calculate_Nc()
+ 
 
         if self.phi > 0:
             return zeta_qd - (1 - zeta_qd) / (self._calculate_Nc() * np.tan(self.phi))
@@ -138,14 +140,17 @@ class vesic_bearing_capacity (general_bearing_capacity):
         # must use effective soil unit weight
         r_total = self.layer.soil.unit_weight
 
-        if self.layer.ground_water_depth >= self.shallow_foundation.foundation_embedment + self.shallow_foundation.foundation_width:  # no impact from GWT at all
+        if self.layer.ground_water_depth >= (
+            self.shallow_foundation.foundation_embedment + 
+            self.shallow_foundation.foundation_width):  # no impact from GWT at all
             r_prime = r_total
         elif self.layer.ground_water_depth <= self.shallow_foundation.foundation_embedment: # full impact from GWT
             r_prime = (r_total - constants.UNIT_WEIGHT_WATER)
         else: # GWT is between foundation embedment and embedment + width. Use interpolation 
             slope = constants.UNIT_WEIGHT_WATER / self.shallow_foundation.foundation_width
 
-            r_prime = (r_total - constants.UNIT_WEIGHT_WATER + slope * (self.layer.ground_water_depth - self.shallow_foundation.foundation_embedment))
+            r_prime = (r_total - constants.UNIT_WEIGHT_WATER + 
+                       slope * (self.layer.ground_water_depth - self.shallow_foundation.foundation_embedment))
  
         return r_prime
     
@@ -158,7 +163,8 @@ class vesic_bearing_capacity (general_bearing_capacity):
             q = self.shallow_foundation.foundation_embedment * self.layer.soil.unit_weight
         else: 
             q = self.shallow_foundation.foundation_embedment * self.layer.soil.unit_weight + \
-                (self.layer.ground_water_depth - self.shallow_foundation.foundation_embedment) * (self.layer.soil.unit_weight - constants.UNIT_WEIGHT_WATER)
+                (self.layer.ground_water_depth - self.shallow_foundation.foundation_embedment) * (
+                    self.layer.soil.unit_weight - constants.UNIT_WEIGHT_WATER)
 
         return q
         
@@ -182,14 +188,13 @@ class vesic_bearing_capacity (general_bearing_capacity):
         c = self.layer.soil.cohesion
         b = self.b
 
-        r_total = self.layer.soil.unit_weight
-
         gamma_r = self._calculate_gamma_r()
 
         
         q = self._calculate_surcharge()
 
-        return c * nc * zeta_cs * zeta_cd + 0.5 * b * self.r_prime * nr * zeta_rs * zeta_rd * gamma_r + q * nq * zeta_qs * zeta_qd
+        return c * nc * zeta_cs * zeta_cd + (
+            0.5 * b * self.r_prime * nr * zeta_rs * zeta_rd * gamma_r + q * nq * zeta_qs * zeta_qd)
     
     def calculate_bearing_capacity_allowable(self):
         '''
@@ -213,7 +218,8 @@ class vesic_bearing_capacity_layered:
     Case 3: cohesive over cohesionless
     
     '''
-    def __init__(self, bearing_capacity_upper_obj: vesic_bearing_capacity, bearing_capacity_lower_obj: vesic_bearing_capacity, foundation:ShallowFoundation):
+    def __init__(self, bearing_capacity_upper_obj: vesic_bearing_capacity, 
+                 bearing_capacity_lower_obj: vesic_bearing_capacity, foundation:ShallowFoundation):
         
         #
         self.bearing_capacity_upper_obj = bearing_capacity_upper_obj
@@ -273,7 +279,8 @@ class vesic_bearing_capacity_layered:
         '''
         To calculate relative strength kappa
         '''
-        kappa = self.bearing_capacity_lower_obj.layer.soil.cohesion / self.bearing_capacity_upper_obj.layer.soil.cohesion
+        kappa = self.bearing_capacity_lower_obj.layer.soil.cohesion / (
+            self.bearing_capacity_upper_obj.layer.soil.cohesion)
 
         return kappa
         
@@ -316,8 +323,12 @@ class vesic_bearing_capacity_layered:
        
 
         if kappa >= 1: # c2 >= c1, soft over stiff
-            nominator = kappa * nstar * (nstar + beta - 1)*((kappa+1)*np.square(nstar) + (1+kappa*beta)*nstar + beta-1)
-            denominator = (kappa*(kappa+1)*nstar + kappa + beta -1) * ((nstar+beta)*nstar + beta -1) - (kappa*nstar+beta-1)*(nstar+1)
+            nominator = kappa * nstar * (nstar + beta - 1)*(
+                (kappa+1)*np.square(nstar) + (1+kappa*beta)*nstar + beta-1)
+            
+            denominator = (kappa*(kappa+1)*nstar + kappa + beta -1) * (
+                (nstar+beta)*nstar + beta -1) - (kappa*nstar+beta-1)*(nstar+1)
+            
             nm = nominator / denominator
         else: # stiff over soft
             nm = 1.0/beta + kappa * zeta_cs * nc
@@ -332,7 +343,8 @@ class vesic_bearing_capacity_layered:
         '''
         upper_friction_angle = self.bearing_capacity_upper_obj.layer.soil.friction_angle
 
-        k = (1 - np.square(np.sin(np.radians(upper_friction_angle)))) / (1 + np.square(np.sin(np.radians(upper_friction_angle))))
+        k = (1 - np.square(np.sin(np.radians(upper_friction_angle)))) / (
+            1 + np.square(np.sin(np.radians(upper_friction_angle))))
 
         return k
 
@@ -368,13 +380,18 @@ class vesic_bearing_capacity_layered:
         # i.e., foundation_embedment = foundation_embedment + self.h
 
         bearing_capacity_lower_obj_update = copy.deepcopy(self.bearing_capacity_lower_obj)
-        bearing_capacity_lower_obj_update.shallow_foundation.foundation_embedment = bearing_capacity_lower_obj_update.shallow_foundation.foundation_embedment +\
-                                                                                       self.h
+        bearing_capacity_lower_obj_update.shallow_foundation.foundation_embedment = (
+            bearing_capacity_lower_obj_update.shallow_foundation.foundation_embedment + self.h)
         
         bearing_capacity_lower_val_update = bearing_capacity_lower_obj_update.calculate_bearing_capacity_ultimate()
 
-        temp = (bearing_capacity_lower_val_update + (1.0/k)* upper_cohesion * (1.0 / np.tan(np.radians(upper_friction_angle)))) * \
-              np.exp(2*(1+self.b/self.l) * k * np.tan(np.radians(upper_friction_angle)) * self.h/self.b) - (1/k) * upper_cohesion *(1/np.tan(np.radians(upper_friction_angle)))
+        temp = (
+            bearing_capacity_lower_val_update + (
+            1.0/k)* upper_cohesion * (1.0 / np.tan(np.radians(upper_friction_angle)))
+            ) * (
+            np.exp(2*(1+self.b/self.l) * k * np.tan(np.radians(upper_friction_angle)) * self.h/self.b) - 
+            (1/k) * upper_cohesion *(1/np.tan(np.radians(upper_friction_angle)))
+            )
 
         return min([self.bearing_capacity_upper_val, temp])
     

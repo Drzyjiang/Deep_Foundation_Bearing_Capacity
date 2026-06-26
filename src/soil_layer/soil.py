@@ -1,6 +1,8 @@
 # class for input soil parameters
 import numpy as np
+
 from src.constants import constants
+
 
 class soil:
     def __init__(self, unit_weight:float = 0, friction_angle:float = 0, cohesion:float = 0, n60: float=0):
@@ -29,20 +31,21 @@ class soil:
 
     @classmethod
     def from_dict(cls, data:dict):
-        return cls(unit_weight = data["unit_weight"], friction_angle = data["friction_angle"], cohesion = data["cohesion"], n60 = data["n60"])
+        return cls(unit_weight = data["unit_weight"], friction_angle = data["friction_angle"],
+                    cohesion = data["cohesion"], n60 = data["n60"])
 
     def _sanity_check_unit_weight(self, unit_weight):
         '''
         To perform sanity check on unit weight
         '''
 
-        if isinstance(unit_weight, constants.NUMERIC_TYPES) == False:
+        if not isinstance(unit_weight, constants.NUMERIC_TYPES):
             raise TypeError("unit_weight data type shall be float, int, np.ndarray, np.generic.")
         
         # sanity check on soil unit weight
 
         if np.min(np.asarray(unit_weight)) < constants.UNIT_WEIGHT_WATER:
-            raise ValueError(f"ERROR: soil unit weight is unlikely smaller than water unit weight.")
+            raise ValueError("ERROR: soil unit weight is unlikely smaller than water unit weight.")
 
         return True
 
@@ -55,12 +58,12 @@ class soil:
                                     For clay (cohesive), use zero
         '''
 
-        if isinstance(friction_angle, constants.NUMERIC_TYPES) == False:
+        if not isinstance(friction_angle, constants.NUMERIC_TYPES):
             raise TypeError("unit_weight data type shall be float, int, np.generic, np.ndarray.")
         
         # sanity check on soil unit weight
         if np.min(np.asarray(friction_angle)) < 0:
-            raise ValueError(f"ERROR: friction angle shall be zero or greater.")
+            raise ValueError("ERROR: friction angle shall be zero or greater.")
         
         return True
     
@@ -77,12 +80,12 @@ class soil:
 
         # sanity check on soil cohesion
 
-        if isinstance(cohesion, constants.NUMERIC_TYPES) == False:
+        if not isinstance(cohesion, constants.NUMERIC_TYPES):
             raise TypeError("cohesion data type shall be float, int, np.ndarray, np.generic.")
         
         # sanity check on soil unit weight
         if np.min(np.asarray(cohesion)) < 0:
-            raise ValueError(f"ERROR: cohesion shall be zero or greater.")
+            raise ValueError("ERROR: cohesion shall be zero or greater.")
 
         
         return True
@@ -100,12 +103,12 @@ class soil:
 
         # sanity check on soil cohesion
 
-        if isinstance(n60, constants.NUMERIC_TYPES) == False:
+        if not isinstance(n60, constants.NUMERIC_TYPES):
             raise TypeError("n60 data type shall be float, int, np.ndarray, np.generic.")
         
         # sanity check on soil unit weight
         if np.min(np.asarray(n60)) < 0:
-            raise ValueError(f"ERROR: n60 shall be zero or greater.")
+            raise ValueError("ERROR: n60 shall be zero or greater.")
 
         
         return True
@@ -139,10 +142,11 @@ class soil:
 
     def _determine_soil_type(self)->int:
         '''
-        To determine soil type
+        To determine soil 
+        Type -1: error
         Type 0: mixed of cohesionless and cohesive. This case is RARE in calculation.
-        Type 1: cohesionless, sand.
-        Type 2: cohesive, clay.
+        Type 1: cohesionless only, sand.
+        Type 2: cohesive only, clay.
         
         '''
         if self.friction_angle !=0 and self.cohesion !=0:

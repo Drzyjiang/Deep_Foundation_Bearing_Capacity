@@ -1,11 +1,12 @@
 # method for general shallow foundation bearing capacity
 import numpy as np
-from src.foundation.shallow_foundation import ShallowFoundation
-from src.soil_layer.soil import soil
+
 from src.constants import constants
 
+
 class general_bearing_capacity:
-    def __init__(self, shallow_foundation, layer, factor_of_safety:float = 3.0, large_foundation_correction:bool = True):
+    def __init__(self, shallow_foundation, layer, 
+                 factor_of_safety:float = 3.0, large_foundation_correction:bool = True):
         '''
         To initialize for general bearing capacity factors 
 
@@ -104,7 +105,8 @@ class general_bearing_capacity:
         nq_calculated = np.round(self._calculate_Nq(), decimal_length)
 
         # compare
-        validate =  np.max(np.abs((nq_calculated - nq_benchmark) /(nq_benchmark + constants.NONZERO_OFFSET) ) <= epsilon)
+        validate =  np.max(np.abs((nq_calculated - nq_benchmark) /
+                                  (nq_benchmark + constants.NONZERO_OFFSET) ) <= epsilon)
 
         # restore friction angle
         self.layer.soil.friction_angle = friction_angle_backup
@@ -138,7 +140,8 @@ class general_bearing_capacity:
         nc_calculated = np.round(self._calculate_Nc(), decimal_length)
 
         # compare
-        validate =  np.max(np.abs((nc_calculated - nc_benchmark) /(nc_benchmark + constants.NONZERO_OFFSET) ) <= epsilon)
+        validate =  np.max(np.abs((nc_calculated - nc_benchmark) /
+                                  (nc_benchmark + constants.NONZERO_OFFSET) ) <= epsilon)
 
         # restore friction angle
         self.layer.soil.friction_angle = friction_angle_backup
@@ -171,7 +174,8 @@ class general_bearing_capacity:
         nr_calculated = np.round(self._calculate_Nr(), decimal_length)
    
         # compare
-        validate =  np.max(np.abs((nr_calculated - nr_benchmark) /(nr_benchmark + constants.NONZERO_OFFSET) ) <= epsilon)
+        validate =  np.max(np.abs((nr_calculated - nr_benchmark) /
+                                  (nr_benchmark + constants.NONZERO_OFFSET) ) <= epsilon)
 
         # restore friction angle
         self.layer.soil.friction_angle = friction_angle_backup

@@ -1,7 +1,8 @@
 # class for layer parameters
 
-from src.soil_layer.soil import soil
 from src.constants import constants
+from src.soil_layer.soil import soil
+
 
 class layer:
     def __init__(self, soil: soil = None, ground_water_depth:float = 0, top_depth = None, thickness = None):

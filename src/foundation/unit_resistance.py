@@ -1,6 +1,7 @@
 # unit resistance for deep foundations
 from src.soil_layer.layer import layer
 
+
 class SideResistance:
     '''
     To determine side resistance for deep foundations
@@ -35,7 +36,7 @@ class SideResistance:
             side_resistance_cohesionless (constants.SCALR_TYPE): side resistance of coheionless soil in unit of psf
         '''
 
-        references = [""]
+        # references = [""]
 
         # sanity check
         if self.layer.soil.soil_type != 1:

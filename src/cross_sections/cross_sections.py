@@ -1,8 +1,10 @@
 # Deep foundation classes
 
-from abc import ABC, abstractclassmethod
-from src.constants import constants
+from abc import ABC
+
 import numpy as np
+
+from src.constants import constants
 
 
 class CrossSection:

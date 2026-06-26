@@ -1,6 +1,8 @@
 # class for factor of safety
 
 from src.constants import constants
+
+
 class FactorOfSafety:
     '''
     Class for factor of safety of general foundations

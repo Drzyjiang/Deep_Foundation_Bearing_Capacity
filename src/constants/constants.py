@@ -1,7 +1,6 @@
 from typing import Union
+
 import numpy as np
-
-
 
 # convert psf to tsf by multiplying
 PSF2TSF = 0.000446

@@ -3,6 +3,7 @@ import numpy as np
 
 from src.constants import constants
 
+
 class ShallowFoundation:
     def __init__(self, foundation_width: float, foundation_length:float, foundation_embedment: float):
         '''
@@ -39,7 +40,7 @@ class ShallowFoundation:
             raise TypeError("ERROR: foundation_width shall be float.")
         
         if np.min(np.asarray(foundation_width)) <= 0:
-            raise ValueError(f"ERROR: minimum foundation width shall be greater than zero.")
+            raise ValueError("ERROR: minimum foundation width shall be greater than zero.")
         
         
         return True
@@ -64,7 +65,7 @@ class ShallowFoundation:
             raise TypeError("ERROR: foundation_length shall be float.")
     
         if np.min(np.asarray(foundation_length)) <= 0:
-            raise ValueError(f"ERROR: minimum foundation length shall be greater than zero.")
+            raise ValueError("ERROR: minimum foundation length shall be greater than zero.")
         
         return True
 
@@ -86,6 +87,6 @@ class ShallowFoundation:
             raise TypeError("ERROR: foundation_embedment shall be float.")
     
         if np.min(np.asarray(foundation_embedment)) <= 0:
-            raise ValueError(f"ERROR: minimum foundation length shall be greater than zero.")
+            raise ValueError("ERROR: minimum foundation length shall be greater than zero.")
         
         return True
