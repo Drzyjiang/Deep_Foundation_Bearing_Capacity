@@ -27,7 +27,11 @@ class soil:
         self.cohesion = cohesion
         soil.n60 = n60
 
-        self.soil_type = self._determine_soil_type()
+        # Soil type general
+        self.soil_type_general = self._determine_soil_type()
+
+        # Soil type advanced (str)
+        self.soil_type_advanced = None
 
     @classmethod
     def from_dict(cls, data:dict):
@@ -140,11 +144,11 @@ class soil:
 
         self.cohesion = cohesion_new
 
-    def _change_to_gravelly_sand(self)-> bool:
+    def modify_soil_type_advanced(self, advanced_type: str)-> bool:
         '''
         To manually change soil type of gravelly sand (Type 3)
         '''
-        self.soil_type = 3
+        self.soil_type_general = advanced_type
 
         return True
 

@@ -39,7 +39,7 @@ class SideResistance:
         # references = [""]
 
         # sanity check
-        if self.layer.soil.soil_type != 1:
+        if self.layer.soil.soil_type_general != 1:
             raise ValueError("ERROR: soil type is not cohesionless.")
 
         beta = self._calculate_beta() 
