@@ -119,14 +119,14 @@ class soil:
         
         return True
     
-    def _sanity_check_n60(soil_type_advanced):
+    def _sanity_check_soil_type_advanced(soil_type_advanced):
         '''
         Sanity check on soil_type_advanced
         Valid list:
             gs: gravelly sand
-        
+            igm: intermediate geomaterial
         '''
-        soil_type_advanced_dict = ["gs"]
+        soil_type_advanced_dict = ["gs", "igm_coheionless", "igm_cohesive"]
 
         if not isinstance(soil_type_advanced, str):
             raise TypeError("Error: soil_type_advanced shall be str.")
