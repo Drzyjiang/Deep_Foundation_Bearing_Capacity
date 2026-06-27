@@ -1,5 +1,5 @@
 # unit resistance for deep foundations
-from src.soil_layer.layer import layer
+from soil_layer.layer import layer
 
 
 class SideResistance:

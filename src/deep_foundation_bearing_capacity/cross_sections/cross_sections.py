@@ -12,17 +12,12 @@ class CrossSection:
     '''
     Class for general cross section
     '''
-    def __init__(self, section_length: constants.SCALAR_TYPE):
+    def __init__(self):
         '''
         Args:
             section_length (constants.SCALAR_TYPE): length in unit of ft for current section
         
         '''
-
-        # sanity check on section_length
-        self._sanity_check_section_dimension(section_length)
-
-        self.section_length = section_length
 
         # calculate cross-section area
         @property
@@ -39,16 +34,7 @@ class CrossSection:
         #self.side_resistance = _calculate_side_resistance()
 
 
-    def _sanity_check_section_dimension(self, section_length)->bool:
-        '''
-        Args:
-            section_length (constants.SCALAR_TYPE): length in unit of ft for current section
-        '''
 
-        if isinstance(section_length, constants.SCALAR_TYPES):
-            return True
-        else:
-            raise TypeError(f"ERROR: section_length shall be type {constants.SCALAR_TYPES}")
 
 class CircularSection(CrossSection):
     '''
