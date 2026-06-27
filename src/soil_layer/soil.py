@@ -5,7 +5,8 @@ from src.constants import constants
 
 
 class soil:
-    def __init__(self, unit_weight:float = 0, friction_angle:float = 0, cohesion:float = 0, n60: float=0):
+    def __init__(self, unit_weight:float = 0, friction_angle:float = 0, cohesion:float = 0, n60: float=-1,
+                 soil_type_advanced = None):
         '''
         To initialize soil parameters
 
@@ -21,17 +22,18 @@ class soil:
         self._sanity_check_friction_angle(friction_angle)
         self._sanity_check_cohesion(cohesion)
         self._sanity_check_n60(n60)
+        self._sanity_check_n60(soil_type_advanced)
 
         self.unit_weight = unit_weight
         self.friction_angle = friction_angle
         self.cohesion = cohesion
-        soil.n60 = n60
+        self.n60 = n60
 
-        # Soil type general
+        # Soil type general (int)
         self.soil_type_general = self._determine_soil_type()
 
         # Soil type advanced (str)
-        self.soil_type_advanced = None
+        self.soil_type_advanced = soil_type_advanced
 
     @classmethod
     def from_dict(cls, data:dict):
@@ -116,6 +118,21 @@ class soil:
 
         
         return True
+    
+    def _sanity_check_n60(soil_type_advanced):
+        '''
+        Sanity check on soil_type_advanced
+        Valid list:
+            gs: gravelly sand
+        
+        '''
+        soil_type_advanced_dict = ["gs"]
+
+        if not isinstance(soil_type_advanced, str):
+            raise TypeError("Error: soil_type_advanced shall be str.")
+
+        if soil_type_advanced not in soil_type_advanced_dict:
+            raise ValueError("ERROR: input soil_type_advanced is undefined.")
     
     def modify_unit_weight(self, unit_weight_new):
         '''
