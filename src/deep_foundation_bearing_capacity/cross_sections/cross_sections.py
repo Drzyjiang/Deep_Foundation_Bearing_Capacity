@@ -4,14 +4,15 @@ from abc import ABC
 
 import numpy as np
 
-from src.constants import constants
+#from soil_layer.layer import Layer
+from constants import constants
 
 
 class CrossSection:
     '''
     Class for general cross section
     '''
-    def __init__(self, section_length: constants.SCALAR_TYPE):
+    def __init__(self, section_length: constants.SCALAR_TYPE, layer):
         '''
         Args:
             section_length (constants.SCALAR_TYPE): length in unit of ft for current section
@@ -23,9 +24,15 @@ class CrossSection:
 
         self.section_length = section_length
 
+
+        self.layer = layer
+
+        @property
         @ABC
-        def calculate_area(self):
-            pass
+        def calculate_cross_section_area(self):
+            ...
+
+        #self.side_resistance = _calculate_side_resistance()
 
 
     def _sanity_check_section_dimension(self, section_length)->bool:
@@ -49,9 +56,9 @@ class CircularSection(CrossSection):
         # 
         self._sanity_check_section_dimension(section_dimension)
         self.diameter = section_dimension
-        self.area = self.calculate_area()
 
-    def calculate_area(self):
+
+    def calculate_cross_section_area(self):
         '''
         To calculate area of the cross-section
         '''
@@ -68,9 +75,9 @@ class SquareSection(CrossSection):
         # 
         self._sanity_check_section_dimension(section_dimension)
         self.diameter = section_dimension
-        self.area = self.calculate_area()
 
-    def calculate_area(self):
+
+    def calculate_cross_section_area(self):
         '''
         To calculate area of the cross-section
         '''

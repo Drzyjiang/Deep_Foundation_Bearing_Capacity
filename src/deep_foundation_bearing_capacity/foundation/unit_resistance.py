@@ -21,7 +21,7 @@ class SideResistance:
 
         depth_mid = self.layer.top_depth + 0.5 * self.layer.thickness
 
-        print(self.layer.soil.n60)
+      
         if self.layer.soil.n60 >= 15:
             # note: when depth is in unit of foot, use coefficient of 0.135, not 0.245
             return 1.5 - 0.135 * depth_mid**0.5
@@ -43,6 +43,5 @@ class SideResistance:
             raise ValueError("ERROR: soil type is not cohesionless.")
 
         beta = self._calculate_beta() 
-        print(beta)
 
         return beta * self.layer.effective_stress_mid
