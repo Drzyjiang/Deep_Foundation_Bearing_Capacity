@@ -12,7 +12,7 @@ class CrossSection:
     '''
     Class for general cross section
     '''
-    def __init__(self, section_length: constants.SCALAR_TYPE, layer):
+    def __init__(self, section_length: constants.SCALAR_TYPE):
         '''
         Args:
             section_length (constants.SCALAR_TYPE): length in unit of ft for current section
@@ -24,12 +24,16 @@ class CrossSection:
 
         self.section_length = section_length
 
-
-        self.layer = layer
-
+        # calculate cross-section area
         @property
         @ABC
-        def calculate_cross_section_area(self):
+        def _calculate_cross_section_area(self):
+            ...
+
+        # calculate side surface area
+        @property
+        @ABC
+        def _calculate_side_surface_area(self):
             ...
 
         #self.side_resistance = _calculate_side_resistance()
@@ -58,12 +62,17 @@ class CircularSection(CrossSection):
         self.diameter = section_dimension
 
 
-    def calculate_cross_section_area(self):
+    def _calculate_cross_section_area(self):
         '''
         To calculate area of the cross-section
         '''
 
         return 0.25* np.pi *self.diameter*self.diameter
+    
+    def _calculate_side_surface_area(self):
+        '''
+        To
+        '''
 
 class SquareSection(CrossSection):
     '''
@@ -77,7 +86,7 @@ class SquareSection(CrossSection):
         self.diameter = section_dimension
 
 
-    def calculate_cross_section_area(self):
+    def _calculate_cross_section_area(self):
         '''
         To calculate area of the cross-section
         '''
