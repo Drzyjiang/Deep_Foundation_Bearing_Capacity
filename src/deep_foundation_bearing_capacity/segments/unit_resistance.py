@@ -126,7 +126,7 @@ class EndResistance:
         XP = [500, 1000, 2000]
         YP = [6.5, 8.0, 9.0]
         N_ast = float(np.interp(self.layer.soil.cohesion, XP, YP))
-
+    
         return  N_ast * self.layer.soil.cohesion
 
 

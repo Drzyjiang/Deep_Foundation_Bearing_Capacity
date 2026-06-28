@@ -1,4 +1,4 @@
-# class for shallow foundation
+# classes for shallow foundation
 import numpy as np
 
 from src.constants import constants

@@ -46,7 +46,7 @@ class Segment:
         return self.cross_section._perimeter * self.segment_length
         
         
-    def _side_resistance(self, fs = None):
+    def _side_resistance(self, fs: FactorOfSafetyDeepFoundation = None):
         '''
         To calculate side resistance
         
@@ -58,17 +58,20 @@ class Segment:
 
         # Apply factor of safety when needed
         if not fs is None:
-            side_resistance = side_resistance / self.fs.fs_deep_foundation_skin
+            side_resistance = side_resistance / fs.fs_deep_foundation_skin
 
         return side_resistance
         
-    def _end_resistance(self, fs = None):
+    def _end_resistance(self, fs: FactorOfSafetyDeepFoundation = None):
         '''
         To calculate end resistance.
         '''
 
-        end_resistance_unit = EndResistance(self.layer).end_resistance_unit_cohesionless()
+        end_resistance_unit = EndResistance(self.layer).end_resistance_unit()
         end_resistance = end_resistance_unit * self.cross_section._cross_section_area
+
+        if not fs is None:
+            end_resistance = end_resistance / fs.fs_deep_foundation_end
 
         return end_resistance
     
