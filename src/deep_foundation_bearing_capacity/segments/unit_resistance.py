@@ -102,7 +102,7 @@ class EndResistance:
         if self.layer.soil.soil_type_general == 1:
             return self.end_resistance_unit_cohesionless()
         elif self.layer.soil.soil_type_general == 2:
-            return     
+            return self.end_resistance_unit_cohesive() 
 
     def end_resistance_unit_cohesionless(self):
         '''
@@ -115,4 +115,18 @@ class EndResistance:
             raise ValueError("ERROR: cohesionless soil shall not have negative N60.")
 
         return  min(0.60 * self.layer.soil.n60, 30) / PSF2TSF
+    
+    def end_resistance_unit_cohesive(self):
+        '''
+        To calculate end unit resistance of cohesive layer
+        Notes: depth-related correction is not applied
+        Reference: FHWA Driller Shaft Manual 99, Eq.(11.2)
+        '''
+
+        XP = [500, 1000, 2000]
+        YP = [6.5, 8.0, 9.0]
+        N_ast = float(np.interp(self.layer.soil.cohesion, XP, YP))
+
+        return  N_ast * self.layer.soil.cohesion
+
 

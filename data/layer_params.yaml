@@ -1,9 +1,9 @@
 - top_depth: 0
   thickness: 10 # ft
   soil_index: 0 # defined in soil_params.yaml
-  ground_water_depth: 15.0 # ft
+  ground_water_depth: 50.0 # ft
   
 - top_depth: 10
   thickness: 5 # ft
   soil_index: 1
-  ground_water_depth: 15.0 # ft
+  ground_water_depth: 50.0 # ft
