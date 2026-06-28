@@ -2,6 +2,7 @@
 
 from deep_foundation_bearing_capacity.constants import constants
 from deep_foundation_bearing_capacity.cross_sections.cross_sections import CrossSection
+from deep_foundation_bearing_capacity.factor_of_safety.factor_of_safety import FactorOfSafetyDeepFoundation
 from deep_foundation_bearing_capacity.segments.unit_resistance import SideResistance
 
 
@@ -11,7 +12,8 @@ class Segment:
     but also layer and side resistance and end bearing
     
     '''
-    def __init__(self, cross_section: CrossSection, section_length: constants.SCALAR_TYPE, layer):
+    def __init__(self, cross_section: CrossSection, section_length: constants.SCALAR_TYPE, layer,
+                 fs:FactorOfSafetyDeepFoundation = None):
 
         # sanity check on section_length
         self._sanity_check_section_dimension(section_length)
@@ -23,11 +25,14 @@ class Segment:
         # layer
         self.layer = layer
 
+        # factor of safety
+        self.fs = fs
 
- 
+        # ultimate side resistance
+        self.ultimate_side_resistance = self._side_resistance(None)
 
-        # side resistance
-        #self.side_resistance = _calculate_side_resistance()
+        # allowable side resistance
+        self.allowable_side_resistance = self._side_resistance(self.fs)
 
     def _sanity_check_section_dimension(self, section_length)->bool:
         '''
@@ -49,7 +54,7 @@ class Segment:
         return self.cross_section._perimeter * self.section_length
         
         
-    def _side_resistance(self):
+    def _side_resistance(self, fs = None):
         '''
         To calculate side resistance
         
@@ -58,6 +63,10 @@ class Segment:
 
         side_resistance_unit = SideResistance(self.layer).side_resistance_unit()
         side_resistance = side_resistance_unit * self._side_surface_area
+
+        # Apply factor of safety when needed
+        if not fs is None:
+            side_resistance = side_resistance / self.fs.fs_deep_foundation_skin
 
         return side_resistance
         

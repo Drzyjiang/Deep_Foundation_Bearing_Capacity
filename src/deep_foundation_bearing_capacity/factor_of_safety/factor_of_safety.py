@@ -1,6 +1,6 @@
 # class for factor of safety
 
-from src.constants import constants
+from deep_foundation_bearing_capacity.constants import constants
 
 
 class FactorOfSafety:
@@ -26,28 +26,30 @@ class FactorOfSafety:
             result (bool): True or False
         '''
 
-        if isinstance(fs, constants.SCALAR_TYPES):
-            return True
+        if not isinstance(fs, constants.SCALAR_TYPES):
+            raise TypeError("ERROR: fs shall be type {constants.SCALAR_TYPES}.")
+        elif fs <= 0:
+            raise ValueError("ERROR: fs shall be greater than zero.")
         else:
-            raise TypeError("Input factor of safety shall be type ")
+            return True
 
 class FactorOfSafetyDeepFoundation (FactorOfSafety):
     '''
     Class for deep foundations
     
     '''
-    def __init__(self, fs:constants.SCALAR_TYPE, fs_end_bearing:constants.SCALAR_TYPE):
+    def __init__(self, factor_of_safety:constants.SCALAR_TYPE, fs_end_bearing:constants.SCALAR_TYPE):
         '''
         Args:
             fs (constants.SCALAR_TYPE): used for skin friction
             fs_end_bearing (constants.SCALAR_TYPE): used for end bearing
         '''
-        super().__init__(fs, fs_end_bearing)
+        super().__init__(factor_of_safety)
 
         # sanity check on fs_end bearing
         self._sanity_check_fs(fs_end_bearing)
 
         # factor of safety for deep foundation
-        self.fs_deep_foundation_skin = fs
+        self.fs_deep_foundation_skin = self.factor_of_safety
         self.fs_deep_foundation_end = fs_end_bearing
         
