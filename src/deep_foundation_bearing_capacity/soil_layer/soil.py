@@ -37,8 +37,8 @@ class Soil:
 
     @classmethod
     def from_dict(cls, data:dict):
-        return cls(unit_weight = data["unit_weight"], friction_angle = data["friction_angle"],
-                    cohesion = data["cohesion"], n60 = data["n60"])
+        return cls(unit_weight = float(data["unit_weight"]), friction_angle = float(data["friction_angle"]),
+                    cohesion = float(data["cohesion"]), n60 = data["n60"])
 
     def _sanity_check_unit_weight(self, unit_weight):
         '''

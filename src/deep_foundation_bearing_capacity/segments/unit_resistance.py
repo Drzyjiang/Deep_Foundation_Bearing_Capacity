@@ -1,5 +1,7 @@
 # unit resistance for deep foundations
-from deep_foundation_bearing_capacity.constants.constants import PSF2TSF
+import numpy as np
+
+from deep_foundation_bearing_capacity.constants.constants import ATM, PSF2TSF
 from deep_foundation_bearing_capacity.soil_layer.layer import Layer
 from deep_foundation_bearing_capacity.soil_layer.soil import Soil
 
@@ -20,13 +22,30 @@ class SideResistance:
         if self.layer.soil.soil_type_general == 1:
             return self.side_resistance_unit_cohesionless()
         elif self.layer.soil.soil_type_general == 2:
-            return 
+            return self.side_resistance_unit_cohesive()
+        else:
+            raise ValueError("ERROR: side_resistance_unit for current soil_type_general is yet to implement.")
 
+    def _calculate_alpha(self):
+        '''
+        To caclulate alpha (ratio of adhesion to undrained shear strength) for cohesive soil
+        Notes: depth-related correction is not applied here
 
+        Returns:
+            alpha (float)
+        '''
+
+        su_to_pa = self.layer.soil.cohesion / ATM
+        XP = [1.5, 2.5]
+        YP = [0.55, 0.45]
+
+        alpha = float(np.interp(su_to_pa, XP, YP))
+
+        return alpha
 
     def _calculate_beta(self):
         '''
-        To calculate beta.
+        To calculate beta for cohesionless soil
         Note: length is in unit of foot, NOT meter.
         '''
 
@@ -47,8 +66,6 @@ class SideResistance:
             side_resistance_cohesionless (constants.SCALR_TYPE): side resistance of coheionless soil in unit of psf
         '''
 
-        # references = [""]
-
         # sanity check
         if self.layer.soil.soil_type_general != 1:
             raise ValueError("ERROR: soil type is not cohesionless.")
@@ -56,6 +73,18 @@ class SideResistance:
         beta = self._calculate_beta() 
 
         return beta * self.layer.effective_stress_mid
+    
+    def side_resistance_unit_cohesive(self):
+        '''
+        To calculate side resistance for cohesive layer
+
+        Returns:
+             (constants.SCALR_TYPE): side resistance of coheionless soil in unit of psf
+        '''
+
+        alpha = self._calculate_alpha()
+
+        return alpha * self.layer.soil.cohesion
 
 class EndResistance:
     '''

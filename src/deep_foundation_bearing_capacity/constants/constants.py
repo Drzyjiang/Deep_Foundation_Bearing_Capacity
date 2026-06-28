@@ -29,6 +29,9 @@ NONZERO_OFFSET = 1E-14
 # unit weight of water in pcf
 UNIT_WEIGHT_WATER = 62.4
 
+# atmospheric pressure
+ATM = 2116.22
+
 # scalar data type
 SCALAR_TYPE = Union[int, float, np.integer, np.floating]
 SCALAR_TYPES = (int, float, np.integer, np.floating)
