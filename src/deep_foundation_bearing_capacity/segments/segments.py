@@ -11,6 +11,7 @@ class Segment:
     '''
     Segment accounts for not only cross section and section_length, 
     but also layer and side resistance and end bearing
+    One segment corresponds to only one layer.
     
     '''
     def __init__(self, cross_section: CrossSection, layer: Layer,
