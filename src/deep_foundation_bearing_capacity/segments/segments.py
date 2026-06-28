@@ -3,7 +3,7 @@
 from deep_foundation_bearing_capacity.constants import constants
 from deep_foundation_bearing_capacity.cross_sections.cross_sections import CrossSection
 from deep_foundation_bearing_capacity.factor_of_safety.factor_of_safety import FactorOfSafetyDeepFoundation
-from deep_foundation_bearing_capacity.segments.unit_resistance import SideResistance
+from deep_foundation_bearing_capacity.segments.unit_resistance import EndResistance, SideResistance
 
 
 class Segment:
@@ -28,11 +28,12 @@ class Segment:
         # factor of safety
         self.fs = fs
 
-        # ultimate side resistance
-        self.ultimate_side_resistance = self._side_resistance(None)
+        # side resistance
+        self.side_resistance = self._side_resistance(None)
 
-        # allowable side resistance
-        self.allowable_side_resistance = self._side_resistance(self.fs)
+        # end resistance
+        self.end_resistance = self._end_resistance(None)
+
 
     def _sanity_check_section_dimension(self, section_length)->bool:
         '''
@@ -70,3 +71,13 @@ class Segment:
 
         return side_resistance
         
+    def _end_resistance(self, fs = None):
+        '''
+        To calculate end resistance.
+        '''
+
+        end_resistance_unit = EndResistance(self.layer).end_resistance_unit_cohesionless()
+        end_resistance = end_resistance_unit * self.cross_section._cross_section_area
+
+        return end_resistance
+    

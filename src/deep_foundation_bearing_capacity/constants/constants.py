@@ -3,7 +3,8 @@ from typing import Union
 import numpy as np
 
 # convert psf to tsf by multiplying
-PSF2TSF = 0.000446
+#PSF2TSF = 0.000446
+PSF2TSF = 1.0/2000
 
 # Atomosphere perssure to tsf by multiplying
 PA2TSF =  0.9447 # 1 atm = 0.9447 tsf

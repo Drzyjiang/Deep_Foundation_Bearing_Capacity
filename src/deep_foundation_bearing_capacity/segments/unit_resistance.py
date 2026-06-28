@@ -1,4 +1,5 @@
 # unit resistance for deep foundations
+from deep_foundation_bearing_capacity.constants.constants import PSF2TSF
 from deep_foundation_bearing_capacity.soil_layer.layer import Layer
 from deep_foundation_bearing_capacity.soil_layer.soil import Soil
 
@@ -9,9 +10,6 @@ class SideResistance:
     '''
     def __init__(self, layer: Layer):
     
-        
-        # sanity check
-
         self.layer = layer
 
     def side_resistance_unit(self):
@@ -58,3 +56,34 @@ class SideResistance:
         beta = self._calculate_beta() 
 
         return beta * self.layer.effective_stress_mid
+
+class EndResistance:
+    '''
+    Class for end resistance of deep foundation
+    This shall not be applied to shallow foundation
+    '''
+    def __init__(self, layer: Layer):
+        self.layer = layer
+
+    def end_resistance_unit(self):
+        '''
+        Top wrapper for end resistance
+        '''
+
+        if self.layer.soil.soil_type_general == 1:
+            return self.end_resistance_unit_cohesionless()
+        elif self.layer.soil.soil_type_general == 2:
+            return     
+
+    def end_resistance_unit_cohesionless(self):
+        '''
+        To calculate end unit resistance of cohesionless layer 
+        Reference: FHWA Drilled Shaft Manual 99,  Eq.(11.4b)
+        '''
+
+        # Sanity check on layer.soil.n60
+        if self.layer.soil.n60 < 0:
+            raise ValueError("ERROR: cohesionless soil shall not have negative N60.")
+
+        return  min(0.60 * self.layer.soil.n60, 30) / PSF2TSF
+
