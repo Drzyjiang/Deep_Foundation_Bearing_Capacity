@@ -23,6 +23,7 @@ class Segment:
         # layer
         self.layer = layer
 
+
  
 
         # side resistance
@@ -39,7 +40,16 @@ class Segment:
         else:
             raise TypeError(f"ERROR: section_length shall be type {constants.SCALAR_TYPES}")
         
-    def  _calculate_side_resistance(self):
+    @property
+    def _side_surface_area(self):
+        '''
+        # calculate side surface area
+        
+        '''
+        return self.cross_section._cross_section_area * self.section_length
+        
+        
+    def  _side_resistance(self):
         '''
         To calculate side resistance
         

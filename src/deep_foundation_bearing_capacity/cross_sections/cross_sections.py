@@ -19,21 +19,11 @@ class CrossSection:
         
         '''
 
-        # calculate cross-section area
-        @property
-        @ABC
-        def _calculate_cross_section_area(self):
+    # calculate cross-section area
+    @property
+    @ABC
+    def _cross_section_area(self):
             ...
-
-        # calculate side surface area
-        @property
-        @ABC
-        def _calculate_side_surface_area(self):
-            ...
-
-
-
-
 
 
 class CircularSection(CrossSection):
@@ -48,17 +38,14 @@ class CircularSection(CrossSection):
         self.diameter = section_dimension
 
 
-    def _calculate_cross_section_area(self):
+    @property
+    def _cross_section_area(self):
         '''
         To calculate area of the cross-section
         '''
 
         return 0.25* np.pi *self.diameter*self.diameter
     
-    def _calculate_side_surface_area(self):
-        '''
-        To
-        '''
 
 class SquareSection(CrossSection):
     '''
@@ -71,8 +58,8 @@ class SquareSection(CrossSection):
         self._sanity_check_section_dimension(section_dimension)
         self.diameter = section_dimension
 
-
-    def _calculate_cross_section_area(self):
+    @property
+    def _cross_section_area(self):
         '''
         To calculate area of the cross-section
         '''
