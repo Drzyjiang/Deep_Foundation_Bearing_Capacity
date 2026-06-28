@@ -46,10 +46,10 @@ class Segment:
         # calculate side surface area
         
         '''
-        return self.cross_section._cross_section_area * self.section_length
+        return self.cross_section._perimeter * self.section_length
         
         
-    def  _side_resistance(self):
+    def _side_resistance(self):
         '''
         To calculate side resistance
         
@@ -57,5 +57,7 @@ class Segment:
         '''
 
         side_resistance_unit = SideResistance(self.layer).side_resistance_unit()
-        #side_resistance = side_resistance_unit * 
+        side_resistance = side_resistance_unit * self._side_surface_area
+
+        return side_resistance
         
