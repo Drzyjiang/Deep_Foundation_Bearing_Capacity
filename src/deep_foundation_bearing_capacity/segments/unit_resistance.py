@@ -1,17 +1,30 @@
 # unit resistance for deep foundations
-from soil_layer.layer import layer
+from deep_foundation_bearing_capacity.soil_layer.layer import Layer
+from deep_foundation_bearing_capacity.soil_layer.soil import Soil
 
 
 class SideResistance:
     '''
     To determine side resistance for deep foundations
     '''
-    def __init__(self, layer: layer):
+    def __init__(self, layer: Layer):
     
         
         # sanity check
 
         self.layer = layer
+
+    def side_resistance_unit(self):
+        '''
+        Top wrapper for side resistance
+        '''
+
+        if self.layer.soil.soil_type_general == 1:
+            return self.side_resistance_unit_cohesionless()
+        elif self.layer.soil.soil_type_general == 2:
+            return 
+
+
 
     def _calculate_beta(self):
         '''
@@ -28,7 +41,7 @@ class SideResistance:
         else:
             return (self.layer.soil.n60 / 15.0) * (1.5 - 0.135 * depth_mid**0.5)
 
-    def side_resistance_cohesionless(self):
+    def side_resistance_unit_cohesionless(self):
         '''
         To calculate side resistance for cohesionless layer
 

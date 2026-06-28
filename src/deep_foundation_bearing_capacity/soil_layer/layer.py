@@ -1,10 +1,10 @@
 # class for layer parameters
 
-from src.constants import constants
-from src.soil_layer.soil import soil
+from deep_foundation_bearing_capacity.constants import constants
+from deep_foundation_bearing_capacity.soil_layer.soil import soil
 
 
-class layer:
+class Layer:
     def __init__(self, soil: soil = None, ground_water_depth:float = 0, top_depth = None, thickness = None):
         '''
         To initialize layer parameters

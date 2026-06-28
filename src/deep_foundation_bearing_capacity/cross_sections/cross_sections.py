@@ -5,7 +5,7 @@ from abc import ABC
 import numpy as np
 
 #from soil_layer.layer import Layer
-from constants import constants
+from deep_foundation_bearing_capacity.constants import constants
 
 
 class CrossSection:
@@ -31,7 +31,7 @@ class CrossSection:
         def _calculate_side_surface_area(self):
             ...
 
-        #self.side_resistance = _calculate_side_resistance()
+
 
 
 

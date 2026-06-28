@@ -1,10 +1,10 @@
 # class for input soil parameters
 import numpy as np
 
-from src.constants import constants
+from deep_foundation_bearing_capacity.constants import constants
 
 
-class soil:
+class Soil:
     def __init__(self, unit_weight:float = 0, friction_angle:float = 0, cohesion:float = 0, n60: float=-1,
                  soil_type_advanced = None):
         '''
@@ -179,7 +179,6 @@ class soil:
         Type 0: mixed of cohesionless and cohesive. This case is RARE in calculation.
         Type 1: cohesionless only, sand.
         Type 2: cohesive only, clay.
-        Type 3: gravelly sand. Resevered for deep foundation beta
         
         '''
         if self.friction_angle !=0 and self.cohesion !=0:

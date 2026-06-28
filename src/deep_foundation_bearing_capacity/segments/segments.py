@@ -1,8 +1,8 @@
 # classes for segments
 
-from constants import constants
-from cross_sections.cross_sections import CrossSection
-from segments.unit_resistance import SideResistance
+from deep_foundation_bearing_capacity.constants import constants
+from deep_foundation_bearing_capacity.cross_sections.cross_sections import CrossSection
+from deep_foundation_bearing_capacity.segments.unit_resistance import SideResistance
 
 
 class Segment:
@@ -23,6 +23,8 @@ class Segment:
         # layer
         self.layer = layer
 
+ 
+
         # side resistance
         #self.side_resistance = _calculate_side_resistance()
 
@@ -36,3 +38,14 @@ class Segment:
             return True
         else:
             raise TypeError(f"ERROR: section_length shall be type {constants.SCALAR_TYPES}")
+        
+    def  _calculate_side_resistance(self):
+        '''
+        To calculate side resistance
+        
+        
+        '''
+
+        side_resistance_unit = SideResistance(self.layer).side_resistance_unit()
+        #side_resistance = side_resistance_unit * 
+        
