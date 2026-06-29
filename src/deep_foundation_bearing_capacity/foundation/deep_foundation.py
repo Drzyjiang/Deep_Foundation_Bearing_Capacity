@@ -11,10 +11,11 @@ class DeepFoundation:
             segments (Segment): list a of segments, in order of from top to bottom 
         '''
 
-        self._sanity_check_on_segments(segments)   
+        self._sanity_check_on_segments(segments)  
+        self._sanity_check_top_depth(top_depth) 
 
         self.segments = segments
-
+        self.top_depth = top_depth
     
 
 
@@ -43,18 +44,23 @@ class DeepFoundation:
         
         return True
     
-    def _side_resistance_correction(self):
+    def _correction_side_resistance(self):
         '''
         To correct side resistance of each segment 
         '''
 
-    def _side_resistance_correction_depth(self, segments: list[Segment]):
+    def _correction_side_resistance_correction(self, segments: list[Segment]):
         '''
         To correct side resistance due to depth
         '''    
 
         # Between the ground surface and 5 ft, alpha is set to zero
         # to account for seasonal moisture change
+        MOISTURE_CHANGE_DEPTH = 5.0
+
+        current_depth = segments[0].layer.thickness / 2.0
+
+        #for segments
 
 
     def _accumulative_side_resistance(self):
