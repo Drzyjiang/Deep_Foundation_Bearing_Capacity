@@ -14,15 +14,19 @@ class SideResistance:
     
         self.layer = layer
 
-    def side_resistance_unit(self):
+    def side_resistance_unit(self, alpha_override: float = None, beta_override:float = None):
         '''
         Top wrapper for side resistance
+
+        Args:
+            alpha_override (float): override alpha when calculate side resistance for cohesive layer
+            beta_override (float): override beta when calculate side resistance for cohesionless layer
         '''
 
         if self.layer.soil.soil_type_general == 1:
-            return self.side_resistance_unit_cohesionless()
+            return self.side_resistance_unit_cohesionless(beta_override)
         elif self.layer.soil.soil_type_general == 2:
-            return self.side_resistance_unit_cohesive()
+            return self.side_resistance_unit_cohesive(alpha_override)
         else:
             raise ValueError("ERROR: side_resistance_unit for current soil_type_general is yet to implement.")
 
@@ -58,31 +62,39 @@ class SideResistance:
         else:
             return (self.layer.soil.n60 / 15.0) * (1.5 - 0.135 * depth_mid**0.5)
 
-    def side_resistance_unit_cohesionless(self):
+    def side_resistance_unit_cohesionless(self, beta_override:float = None):
         '''
         To calculate side resistance for cohesionless layer
 
         Returns:
-            side_resistance_cohesionless (constants.SCALR_TYPE): side resistance of coheionless soil in unit of psf
+            side_resistance_cohesionless (constants.SCALR_TYPE): side resistance of coheionless 
+                                                                 soil in unit of psf
+            beta_override (float): override beta when calculate side resistance for cohesionless
+                                    layer
         '''
 
-        # sanity check
-        if self.layer.soil.soil_type_general != 1:
-            raise ValueError("ERROR: soil type is not cohesionless.")
-
-        beta = self._calculate_beta() 
+        if not beta_override is None:
+            beta = beta_override
+        else:
+            beta = self._calculate_beta() 
 
         return beta * self.layer.effective_stress_mid
     
-    def side_resistance_unit_cohesive(self):
+    def side_resistance_unit_cohesive(self, alpha_override:float = None):
         '''
         To calculate side resistance for cohesive layer
+
+        Args:
+            alpha_override (float): override alpha when calculate side resistance for cohesive layer
 
         Returns:
              (constants.SCALR_TYPE): side resistance of coheionless soil in unit of psf
         '''
 
-        alpha = self._calculate_alpha()
+        if not alpha_override is None:
+            alpha = alpha_override
+        else:
+            alpha = self._calculate_alpha()
 
         return alpha * self.layer.soil.cohesion
 

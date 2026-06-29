@@ -4,7 +4,7 @@ from deep_foundation_bearing_capacity.segments.segments import Segment
 
 
 class deep_foundation:
-    def __init__(self, segments: list[Segment], top_depth: float = 0):
+    def __init__(self, segments: list[Segment], top_depth: float = 0, resistance_correction:bool = True):
         '''
         Args:
             segments (Segment): list a of segments, in order of from top to bottom 
@@ -30,7 +30,19 @@ class deep_foundation:
             
         return True
     
-    
+    def _side_resistance_correction(self):
+        '''
+        To correct side resistance of each segment 
+        '''
+
+    def _side_resistance_correction_depth(self, segments: list[Segment]):
+        '''
+        To correct side resistance due to depth
+        '''    
+
+        # Between the ground surface and 5 ft, alpha is set to zero
+        # to account for seasonal moisture change
+        
 
     def _accumulative_side_resistance(self):
         '''
