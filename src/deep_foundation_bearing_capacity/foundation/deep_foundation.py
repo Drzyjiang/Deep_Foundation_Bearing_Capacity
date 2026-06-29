@@ -44,6 +44,24 @@ class DeepFoundation:
         
         return True
     
+    def _segment_mid_depth(self):
+        '''
+        To calculate mid depth of each segment
+        '''
+        segment_mid_depth = []
+        mid_depth = 0
+
+        for segment in self.segments:
+            # update mid_depth by increment upper half of thickness
+            mid_depth = mid_depth + segment.layer.thickness / 2.0
+
+            segment_mid_depth.append(mid_depth)
+
+            # update mid_depth by increment lower half of thickness
+            mid_depth = mid_depth + segment_mid_depth
+        
+        return segment_mid_depth
+    
     def _correction_side_resistance(self):
         '''
         To correct side resistance of each segment 
