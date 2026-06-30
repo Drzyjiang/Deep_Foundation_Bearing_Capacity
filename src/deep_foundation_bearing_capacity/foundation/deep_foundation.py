@@ -11,7 +11,7 @@ class DeepFoundation:
             segments (Segment): list a of segments, in order of from top to bottom 
         '''
 
-        self._sanity_check_on_segments(segments)  
+        self._sanity_check_segments(segments)  
         self._sanity_check_top_depth(top_depth) 
 
         self.segments = segments
@@ -58,7 +58,7 @@ class DeepFoundation:
             segment_mid_depth.append(mid_depth)
 
             # update mid_depth by increment lower half of thickness
-            mid_depth = mid_depth + segment_mid_depth
+            mid_depth = mid_depth + segment.layer.thickness / 2.0
         
         return segment_mid_depth
     
