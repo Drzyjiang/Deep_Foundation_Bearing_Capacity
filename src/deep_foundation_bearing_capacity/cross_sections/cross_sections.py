@@ -18,6 +18,8 @@ class CrossSection(ABC):
         '''
         self._sanity_check_section_dimension(section_dimension)
 
+        self.section_dimension = section_dimension
+
     def _sanity_check_section_dimension(self,section_dimension):
         '''
         Sanity check on section_dimension

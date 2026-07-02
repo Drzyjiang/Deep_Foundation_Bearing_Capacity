@@ -66,11 +66,13 @@ class SideResistance:
         '''
         To calculate side resistance for cohesionless layer
 
+        Args:
+            beta_override (float): override beta when calculate side resistance for cohesionless
+                                    layer
         Returns:
             side_resistance_cohesionless (constants.SCALR_TYPE): side resistance of coheionless 
                                                                  soil in unit of psf
-            beta_override (float): override beta when calculate side resistance for cohesionless
-                                    layer
+
         '''
 
         if not beta_override is None:

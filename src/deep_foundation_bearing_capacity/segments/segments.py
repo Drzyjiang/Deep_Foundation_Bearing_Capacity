@@ -29,12 +29,11 @@ class Segment:
         # factor of safety
         self.fs = fs
 
-        # side resistance
-        self.side_resistance = self._side_resistance(None)
+        # initialize side_resistance
+        self.side_resistance = self.calculate_side_resistance()
 
-        # end resistance
-        self.end_resistance = self._end_resistance(None)
-
+        # initialize end_resistance
+        self.end_resistance = self.calculate_end_resistance()
 
         
     @property
@@ -46,14 +45,20 @@ class Segment:
         return self.cross_section._perimeter * self.segment_length
         
         
-    def _side_resistance(self, fs: FactorOfSafetyDeepFoundation = None):
+    def calculate_side_resistance(self, fs: FactorOfSafetyDeepFoundation = None, 
+                         alpha_override = None, beta_override = None):
         '''
         To calculate side resistance
         
-        
+        Args:
+            fs (FactorOfSafetyDeepFoundation): factor of safety object
+            alpha_override (float): override the default used in calcualting 
         '''
 
-        side_resistance_unit = SideResistance(self.layer).side_resistance_unit()
+        # establish SideResistance Obj
+        side_resistance_obj = SideResistance(self.layer)
+
+        side_resistance_unit = side_resistance_obj.side_resistance_unit(alpha_override, beta_override)
         side_resistance = side_resistance_unit * self._side_surface_area
 
         # Apply factor of safety when needed
@@ -62,12 +67,14 @@ class Segment:
 
         return side_resistance
         
-    def _end_resistance(self, fs: FactorOfSafetyDeepFoundation = None):
+    def calculate_end_resistance(self, fs: FactorOfSafetyDeepFoundation = None):
         '''
         To calculate end resistance.
         '''
+        # estabhlish EndResistance Obj
+        end_resistance_obj = EndResistance(self.layer)
 
-        end_resistance_unit = EndResistance(self.layer).end_resistance_unit()
+        end_resistance_unit = end_resistance_obj.end_resistance_unit()
         end_resistance = end_resistance_unit * self.cross_section._cross_section_area
 
         if not fs is None:
