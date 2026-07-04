@@ -188,7 +188,16 @@ class Soil:
         else:
             return 2
         
-    
+    def display_properties(self, properties = ["unit_weight", "cohesion", "friction_angle", "n60"]):
+        '''
+        To display specified soil properties
+
+        Args:
+            properties (list[str]): strs that match soil properties in the class
+        '''
+
+        for property in properties:
+            print(f"{property} value is: {getattr(self, property)}")
   
 
 
