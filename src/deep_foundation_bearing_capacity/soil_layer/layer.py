@@ -5,17 +5,24 @@ from deep_foundation_bearing_capacity.soil_layer.soil import Soil
 
 
 class Layer:
-    def __init__(self, soil: Soil = None, ground_water_depth:float = 0, top_depth = None, thickness = None):
+    def __init__(self, layer_index: int, soil: Soil = None, ground_water_depth:float = 0, top_depth: float = None, thickness: float = None):
         '''
         To initialize layer parameters
 
         Args:
-            ground_water_depth (float): ground water depth in unit of float 
+            layer_index (int): a unique index for current layer
+            soil (Soil): soil object
+            ground_water_depth (float): ground water depth in unit of float
+            top_depth (float): depth of upper side of layer
+            thickness (float): thickness of layer
         '''
 
+        self._sanity_check_layer_index(layer_index)
         self._sanity_check_ground_water_depth(ground_water_depth)
         self._sanity_check_top_depth(top_depth)
         self._sanity_check_thickness(thickness)
+
+        self.layer_index = layer_index
 
         # ground water table
         self.ground_water_depth = ground_water_depth
@@ -32,8 +39,15 @@ class Layer:
         self.effective_stress_mid = self._calculate_effective_stress(self.top_depth + 0.5 * self.thickness)
 
 
-        
+    def _sanity_check_layer_index(self, layer_index):
+        '''
+        To perform sanity check on layer_index
+        '''
 
+        if not isinstance(layer_index, int):
+            raise TypeError("layer_index shall be type int.")
+        else:
+            return True
 
     def _sanity_check_ground_water_depth(self, ground_water_depth):
         '''
@@ -84,4 +98,13 @@ class Layer:
         else:
             return (self.ground_water_depth * self.soil.unit_weight +
                     (depth_target - self.ground_water_depth) *(self.soil.unit_weight - constants.UNIT_WEIGHT_WATER))
-        
+    
+    def display_properties(self, properties = ["layer_index", "ground_water_depth", "top_depth", "thickness", "effective_stress_mid"]):
+        '''
+        To display layer properties
+        '''
+
+        for property in properties:
+            print(f"{property} is: {getattr(self, property)}")
+
+

@@ -1,59 +1,71 @@
-- top_depth: 0
+- layer_index: 0
+  top_depth: 0
   thickness: 10 # ft
   soil_index: 0 # defined in soil_params.yaml
   ground_water_depth: 15.0 # ft
   
-- top_depth: 10
+- layer_index: 1
+  top_depth: 10
   thickness: 5 # ft
   soil_index: 1
   ground_water_depth: 15.0 # ft
 
-- top_depth: 15
+- layer_index: 2
+  top_depth: 15
   thickness: 10 # ft
   soil_index: 2
   ground_water_depth: 15.0 # ft
 
-- top_depth: 25
+- layer_index: 3
+  top_depth: 25
   thickness: 10 # ft
   soil_index: 3
   ground_water_depth: 15.0 # ft
 
-- top_depth: 35
+- layer_index: 4
+  top_depth: 35
   thickness: 10 # ft
   soil_index: 4
   ground_water_depth: 15.0 # ft
 
-- top_depth: 45
+- layer_index: 5
+  top_depth: 45
   thickness: 10 # ft
   soil_index: 5
   ground_water_depth: 15.0 # ft
 
-- top_depth: 55
+- layer_index: 6
+  top_depth: 55
   thickness: 10 # ft
   soil_index: 6
   ground_water_depth: 15.0 # ft
 
-- top_depth: 65
+- layer_index: 7
+  top_depth: 65
   thickness: 10 # ft
   soil_index: 7
   ground_water_depth: 15.0 # ft
 
-- top_depth: 75
+- layer_index: 8
+  top_depth: 75
   thickness: 10 # ft
   soil_index: 8
   ground_water_depth: 15.0 # ft
 
-- top_depth: 85
+- layer_index: 9
+  top_depth: 85
   thickness: 10 # ft
   soil_index: 9
   ground_water_depth: 15.0 # ft
 
-- top_depth: 95
+- layer_index: 10
+  top_depth: 95
   thickness: 10 # ft
   soil_index: 10
   ground_water_depth: 15.0 # ft
 
-- top_depth: 105
+- layer_index: 11
+  top_depth: 105
   thickness: 10 # ft
   soil_index: 11
   ground_water_depth: 15.0 # ft
