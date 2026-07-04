@@ -5,7 +5,7 @@ from deep_foundation_bearing_capacity.constants import constants
 
 
 class Soil:
-    def __init__(self, unit_weight:float = 0, friction_angle:float = 0, cohesion:float = 0, n60: float=-1,
+    def __init__(self, soil_index, unit_weight:float = 0, friction_angle:float = 0, cohesion:float = 0, n60: float=-1,
                  soil_type_advanced = None):
         '''
         To initialize soil parameters
@@ -24,10 +24,12 @@ class Soil:
         self._sanity_check_n60(n60)
         self._sanity_check_soil_type_advanced(soil_type_advanced)
 
+        self.soil_index = soil_index
         self.unit_weight = unit_weight
         self.friction_angle = friction_angle
         self.cohesion = cohesion
         self.n60 = n60
+
 
         # Soil type general (int)
         self.soil_type_general = self._determine_soil_type()
@@ -37,7 +39,7 @@ class Soil:
 
     @classmethod
     def from_dict(cls, data:dict):
-        return cls(unit_weight = float(data["unit_weight"]), friction_angle = float(data["friction_angle"]),
+        return cls(soil_index = int(data["soil_index"]), unit_weight = float(data["unit_weight"]), friction_angle = float(data["friction_angle"]),
                     cohesion = float(data["cohesion"]), n60 = data["n60"])
 
     def _sanity_check_unit_weight(self, unit_weight):
@@ -188,7 +190,7 @@ class Soil:
         else:
             return 2
         
-    def display_properties(self, properties = ["unit_weight", "cohesion", "friction_angle", "n60"]):
+    def display_properties(self, properties = ["soil_index", "unit_weight", "cohesion", "friction_angle", "n60"]):
         '''
         To display specified soil properties
 
