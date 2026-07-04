@@ -1,5 +1,5 @@
 - unit_weight: 120 # pcf
-  friction_angle: 30 # degree
+  friction_angle: 0 # degree
   cohesion: 0 # psf
   n60: 5
 
@@ -7,3 +7,53 @@
   friction_angle: 0
   cohesion: 500
   n60: 6
+
+- unit_weight: 115
+  friction_angle: 0
+  cohesion: 0
+  n60: 10
+
+- unit_weight: 115
+  friction_angle: 0
+  cohesion: 2000
+  n60: 6
+
+- unit_weight: 130
+  friction_angle: 0
+  cohesion: 0
+  n60: 19
+
+- unit_weight: 130
+  friction_angle: 0
+  cohesion: 4000
+  n60: 19
+
+- unit_weight: 130
+  friction_angle: 0
+  cohesion: 0
+  n60: 26
+
+- unit_weight: 130
+  friction_angle: 0
+  cohesion: 0.2
+  n60: 26  
+
+- unit_weight: 130
+  friction_angle: 0
+  cohesion: 0
+  n60: 20
+
+- unit_weight: 130
+  friction_angle: 0
+  cohesion: 8000
+  n60: 20
+
+- unit_weight: 115
+  friction_angle: 0
+  cohesion: 0
+  n60: 30      
+
+- unit_weight: 120
+  friction_angle: 0
+  cohesion: 1000
+  n60: 0    

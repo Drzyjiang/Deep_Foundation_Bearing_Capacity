@@ -6,10 +6,12 @@ from deep_foundation_bearing_capacity.segments.segments import Segment
 
 
 class DeepFoundation:
-    def __init__(self, segments: list[Segment], top_depth: SCALAR_TYPE = 0, resistance_correction:bool = True):
+    def __init__(self, segments: list[Segment], top_depth: SCALAR_TYPE = 0, resistance_corrections=None):
         '''
         Args:
             segments (Segment): list a of segments, in order of from top to bottom 
+            top_depth (SCALAR_TYPE): upper depth of the first segment
+            resistance_corrections (list[]): list of SideResistanceCorrection Obj and/or EndResistanceCorrection Obj
         '''
 
         self._sanity_check_segments(segments)  
@@ -18,11 +20,8 @@ class DeepFoundation:
         self.segments = segments
         self.top_depth = top_depth
 
-        self.resistance_correction = resistance_correction
+        self.resistance_corrections = resistance_corrections or []
 
-        # apply correction
-        if resistance_correction:
-            self._correction_side_resistance()
 
     def _sanity_check_segments(self, segments: list[Segment])->bool:
         '''
@@ -92,8 +91,8 @@ class DeepFoundation:
 
         return segment_top_depth
     
-    @cached_property
-    def _calculate_segments_side_resistance(self, corrections = None)->list[float]:
+    #@cached_property
+    def calculate_segments_side_resistance(self)->list[float]:
         '''
         To calculate side resistance of each segment
 
@@ -110,19 +109,31 @@ class DeepFoundation:
         segment_bottom_depth_values = self._segment_bottom_depth()
         segment_top_depth_values = self._segment_top_depth()
 
-        for correction in corrections:
+        for correction in self.resistance_corrections:
             segment_side_resistances = correction.apply_all(segment_side_resistances,
                                                             segment_bottom_depth_values,
                                                             segment_top_depth_values
                                                             )
-
+     
         return segment_side_resistances
 
 
-    def _accumulative_side_resistance(self):
+    def calculate_segments_side_resistances_accumulative(self)->list[float]:
         '''
-        To calcualte accumulative side resistance
+        To calcualte moving accumulative side resistances
+
+        Returns:
+            (list[float]): accumulative side resistance starting from top
         '''
+        
+        accumulative = 0
+        segments_side_resistances_accumulative = []
+
+        for segment_side_resistance in self.calculate_segments_side_resistance():
+            accumulative = accumulative + segment_side_resistance
+            segments_side_resistances_accumulative.append(accumulative)
+
+        return segments_side_resistances_accumulative
 
 class SideResistanceCorrections:
     '''

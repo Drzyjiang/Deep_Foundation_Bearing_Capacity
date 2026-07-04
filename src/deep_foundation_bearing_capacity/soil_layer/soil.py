@@ -175,19 +175,20 @@ class Soil:
     def _determine_soil_type(self)->int:
         '''
         To determine soil 
-        Type -1: error
-        Type 0: mixed of cohesionless and cohesive. This case is RARE in calculation.
-        Type 1: cohesionless only, sand.
-        Type 2: cohesive only, clay.
+        Type -1 (cohesion == 0 and friction_angle == 0): error
+        Type 0 (cohesion !=0 and friction_angle !=0): mixed of cohesionless and cohesive. This case is RARE in calculation.
+        Type 1 (cohesion == 0): cohesionless only, sand.
+        Type 2 (cohesion != 0): cohesive only, clay.
         
         '''
         if self.friction_angle !=0 and self.cohesion !=0:
             return 0
-        elif self.friction_angle !=0:
+        elif self.cohesion ==0 :
             return 1
-        elif self.cohesion !=0:
-            return 2
         else:
-            return -1
+            return 2
+        
+    
+  
 
 
