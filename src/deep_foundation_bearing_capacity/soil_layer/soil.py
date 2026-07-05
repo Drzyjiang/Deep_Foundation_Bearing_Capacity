@@ -6,22 +6,30 @@ from deep_foundation_bearing_capacity.constants import constants
 
 class Soil:
     def __init__(self, soil_index, unit_weight:float = 0, friction_angle:float = 0, cohesion:float = 0, n60: float=-1,
-                 soil_type_advanced = None):
+                 soil_type_advanced: str = None):
         '''
         To initialize soil parameters
 
         Args:
             unit_weight: soil unit weight in unit of pound per cubic foot
-            friction_angle: soil effective friction in unit of degree.
+            friction_angle (float): soil effective friction in unit of degree.
                                     For clay (cohesive), use zero
-            cohesion: soil cohesion in unit of pound per square foot 
-        
+            cohesion (float): soil cohesion in unit of pound per square foot 
+            soil_type_advanced (str): advanced soil type description
         '''
         
         self._sanity_check_unit_weight(unit_weight)
         self._sanity_check_friction_angle(friction_angle)
         self._sanity_check_cohesion(cohesion)
         self._sanity_check_n60(n60)
+
+        '''
+        soil_type_advanced_dict:
+            gs: gravelly sand
+            igm_cohesionless: cohesionless intermediate geomaterial
+            igm_cohesive: cohesive intermediate geomaterial
+        '''
+        self.soil_type_advanced_dict = ["gs", "igm_coheionless", "igm_cohesive"]
         self._sanity_check_soil_type_advanced(soil_type_advanced)
 
         self.soil_index = soil_index
@@ -121,23 +129,21 @@ class Soil:
         
         return True
     
-    def _sanity_check_soil_type_advanced(self, soil_type_advanced):
+    def _sanity_check_soil_type_advanced(self, soil_type_advanced:str):
         '''
         Sanity check on soil_type_advanced
-        Valid list:
-            gs: gravelly sand
-            igm: intermediate geomaterial
         '''
-        soil_type_advanced_dict = ["gs", "igm_coheionless", "igm_cohesive"]
-
+ 
         if soil_type_advanced is None:
             return True
 
         if not isinstance(soil_type_advanced, str):
             raise TypeError("Error: soil_type_advanced shall be str.")
 
-        if soil_type_advanced not in soil_type_advanced_dict:
+        if soil_type_advanced not in self.soil_type_advanced_dict:
             raise ValueError("ERROR: input soil_type_advanced is undefined.")
+        
+        return True
     
     def modify_unit_weight(self, unit_weight_new):
         '''

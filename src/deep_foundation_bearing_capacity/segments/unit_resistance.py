@@ -62,12 +62,25 @@ class SideResistance:
 
         depth_mid = self.layer.top_depth + 0.5 * self.layer.thickness
 
-      
+        beta = 0
         if self.layer.soil.n60 >= 15:
             # note: when depth is in unit of foot, use coefficient of 0.135, not 0.245
-            return 1.5 - 0.135 * depth_mid**0.5
+            beta =  1.5 - 0.135 * depth_mid**0.5
         else:
-            return (self.layer.soil.n60 / 15.0) * (1.5 - 0.135 * depth_mid**0.5)
+            beta = (self.layer.soil.n60 / 15.0) * (1.5 - 0.135 * depth_mid**0.5)
+
+        # minimum beta is 0.25
+        beta = max(beta, 0.25)
+
+        # correction by soil type:
+        # sand: capped at 1.20
+        # gravelly sand or gravel: capped at 1.80
+        if self.layer.soil.soil_type_advanced == "gs":
+            beta = min(beta, 1.80)
+        elif self.layer.soil.soil_type_general == 1:
+            beta = min(beta, 1.80)
+        
+        return beta
 
     def side_resistance_unit_cohesionless(self, effective_stress: float, beta_override:float = None):
         '''
