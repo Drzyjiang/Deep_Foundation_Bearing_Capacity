@@ -1,7 +1,7 @@
 # Classes for deep foundations
 from functools import cached_property
 
-from deep_foundation_bearing_capacity.constants.constants import SCALAR_TYPE
+from deep_foundation_bearing_capacity.constants.constants import SCALAR_TYPE, UNIT_WEIGHT_WATER
 from deep_foundation_bearing_capacity.segments.segments import Segment
 
 
@@ -10,7 +10,9 @@ class DeepFoundation:
         '''
         Args:
             segments (Segment): list a of segments, in order of from top to bottom 
-            top_depth (SCALAR_TYPE): upper depth of the first segment
+                                note that segments can have different segment.layer.ground_water_depth,
+                                to account for potential artesian  
+            top_depth (SCALAR_TYPE): upper depth of the first segment. This overrides segments[0].top_depth
             resistance_corrections (list[]): list of SideResistanceCorrection Obj and/or EndResistanceCorrection Obj
         '''
 
@@ -47,49 +49,87 @@ class DeepFoundation:
         
         return True
     
-    def _segment_mid_depth(self):
+    def _segment_mid_depths(self):
         '''
         To calculate mid depth of each segment
         '''
-        segment_mid_depth = []
+        segment_mid_depths = []
         mid_depth = 0
 
         for segment in self.segments:
             # update mid_depth by increment upper half of thickness
             mid_depth = mid_depth + segment.layer.thickness / 2.0
 
-            segment_mid_depth.append(mid_depth)
+            segment_mid_depths.append(mid_depth)
 
             # update mid_depth by increment lower half of thickness
             mid_depth = mid_depth + segment.layer.thickness / 2.0
         
-        return segment_mid_depth
+        return segment_mid_depths
     
-    def _segment_bottom_depth(self):
+    def _segment_bottom_depths(self):
         '''
         To calculate bottom depth of each segment
         '''
-        segment_bottom_depth = []
+        segment_bottom_depths = []
         bottom_depth = 0
 
         for segment in self.segments:
             bottom_depth = bottom_depth + segment.layer.thickness
-            segment_bottom_depth.append(bottom_depth)
+            segment_bottom_depths.append(bottom_depth)
 
-        return segment_bottom_depth
+        return segment_bottom_depths
     
-    def _segment_top_depth(self):
+    def _segment_top_depths(self):
         '''
         To calculate top depth of each segment
         '''
-        segment_top_depth = []
+        segment_top_depths = []
         top_depth = 0
 
         for segment in self.segments:
-            segment_top_depth.append(top_depth)
+            segment_top_depths.append(top_depth)
             top_depth = top_depth + segment.layer.thickness
 
-        return segment_top_depth
+        return segment_top_depths
+    
+    def calculate_segments_total_stresses(self):
+        '''
+        To calculate total stresses at the mid depth of each segment
+        '''
+        segment_total_stress = 0
+        segment_total_stresses = []
+
+        for segment in self.segments:
+            segment_total_stress = segment_total_stress + (
+                                    segment.layer.thickness/2.0 * segment.layer.soil.unit_weight) 
+            segment_total_stresses.append(segment_total_stress)
+            segment_total_stress = segment_total_stress + (
+                                    segment.layer.thickness/2.0 * segment.layer.soil.unit_weight)
+
+        return segment_total_stresses
+    
+    def calculate_segments_effective_stresses(self):
+        '''
+        To calculate effective stresses at the mid depth of each segment
+        '''
+
+        segment_effective_stresses = []
+        segment_effective_stress = 0
+
+        segment_top_depths = self._segment_top_depths()
+        segment_mid_depths = self._segment_mid_depths()
+        
+        segment_total_stresses = self.calculate_segments_total_stresses()
+
+        for segment, segment_total_stress, segment_mid_depth in zip(
+            self.segments, segment_total_stresses, segment_mid_depths):
+
+            water_weight = UNIT_WEIGHT_WATER * (max(0, segment_mid_depth - segment.layer.ground_water_depth))
+            segment_effective_stress = segment_total_stress - water_weight
+            segment_effective_stresses.append(segment_effective_stress)
+        
+        return segment_effective_stresses
     
     #@cached_property
     def calculate_segments_side_resistance(self)->list[float]:
@@ -106,8 +146,8 @@ class DeepFoundation:
             segment_side_resistances.append(segment.calculate_side_resistance())
         
         # apply correction
-        segment_bottom_depth_values = self._segment_bottom_depth()
-        segment_top_depth_values = self._segment_top_depth()
+        segment_bottom_depth_values = self._segment_bottom_depths()
+        segment_top_depth_values = self._segment_top_depths()
 
         for correction in self.resistance_corrections:
             segment_side_resistances = correction.apply_all(segment_side_resistances,

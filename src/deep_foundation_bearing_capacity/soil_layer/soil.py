@@ -199,7 +199,7 @@ class Soil:
         '''
 
         for property in properties:
-            print(f"{property} value is: {getattr(self, property)}")
+            print(f"{property} is: {getattr(self, property)}")
   
 
 

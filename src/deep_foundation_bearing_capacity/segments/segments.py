@@ -16,7 +16,9 @@ class Segment:
     '''
     def __init__(self, cross_section: CrossSection, layer: Layer,
                  fs:FactorOfSafetyDeepFoundation = None):
-
+        '''
+        
+        '''
         # segment length is layer's thickness
         self.segment_length = layer.thickness
 
