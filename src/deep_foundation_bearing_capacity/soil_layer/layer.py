@@ -78,7 +78,7 @@ class Layer:
 
 
     
-    def display_properties(self, properties = ["layer_index", "ground_water_depth", "top_depth", "thickness", "effective_stress_mid"]):
+    def display_properties(self, properties = ["layer_index", "ground_water_depth", "top_depth", "thickness"]):
         '''
         To display layer properties
         '''

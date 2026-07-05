@@ -1,70 +1,70 @@
-- soil_index: 1
+- soil_index: 0
   unit_weight: 120 # pcf
   friction_angle: 0 # degree
   cohesion: 0 # psf
   n60: 5
 
-- soil_index: 2
+- soil_index: 1
   unit_weight: 120 
   friction_angle: 0
   cohesion: 500
   n60: 6
 
-- soil_index: 3
+- soil_index: 2
   unit_weight: 115
   friction_angle: 0
   cohesion: 0
   n60: 10
 
-- soil_index: 4
+- soil_index: 3
   unit_weight: 115
   friction_angle: 0
   cohesion: 2000
   n60: 6
 
-- soil_index: 5
+- soil_index: 4
   unit_weight: 130
   friction_angle: 0
   cohesion: 0
   n60: 19
 
-- soil_index: 6
+- soil_index: 5
   unit_weight: 130
   friction_angle: 0
   cohesion: 4000
   n60: 19
 
-- soil_index: 7
+- soil_index: 6
   unit_weight: 130
   friction_angle: 0
   cohesion: 0
   n60: 26
 
-- soil_index: 8
+- soil_index: 7
   unit_weight: 130
   friction_angle: 0
   cohesion: 0.2
   n60: 26  
 
-- soil_index: 9
+- soil_index: 8
   unit_weight: 130
   friction_angle: 0
   cohesion: 0
   n60: 20
 
-- soil_index: 10
+- soil_index: 9
   unit_weight: 130
   friction_angle: 0
   cohesion: 8000
   n60: 20
 
-- soil_index: 11
+- soil_index: 10
   unit_weight: 115
   friction_angle: 0
   cohesion: 0
   n60: 30      
 
-- soil_index: 12
+- soil_index: 11
   unit_weight: 120
   friction_angle: 0
   cohesion: 1000
