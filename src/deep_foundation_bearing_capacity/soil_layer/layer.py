@@ -35,10 +35,6 @@ class Layer:
         self.thickness = thickness
 
 
-        # calculate effective vertical stress at mid point
-        self.effective_stress_mid = self._calculate_effective_stress(self.top_depth + 0.5 * self.thickness)
-
-
     def _sanity_check_layer_index(self, layer_index):
         '''
         To perform sanity check on layer_index
@@ -80,24 +76,7 @@ class Layer:
     
         return True
 
-    def _calculate_effective_stress(self, depth_target):
-        '''
-        To calculate vertical effective stress at a given depth of the layer
 
-        Args:
-            depth_target (constants.SCALAR_TYPE): depth at which effective stress to be calcualted
-
-        Returns:
-            effective vertical stress: in unit of psf
-        '''
-
-        depth_target = self.top_depth + 0.5 * self.thickness
-
-        if depth_target <= self.ground_water_depth:
-            return depth_target * self.soil.unit_weight
-        else:
-            return (self.ground_water_depth * self.soil.unit_weight +
-                    (depth_target - self.ground_water_depth) *(self.soil.unit_weight - constants.UNIT_WEIGHT_WATER))
     
     def display_properties(self, properties = ["layer_index", "ground_water_depth", "top_depth", "thickness", "effective_stress_mid"]):
         '''
