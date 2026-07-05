@@ -60,7 +60,7 @@
 
 - soil_index: 10
   unit_weight: 115
-  friction_angle: 0
+  friction_angle: 30
   cohesion: 0
   n60: 30      
 

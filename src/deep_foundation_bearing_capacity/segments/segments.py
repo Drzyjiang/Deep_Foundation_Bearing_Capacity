@@ -31,8 +31,6 @@ class Segment:
         # factor of safety
         self.fs = fs
 
-        # initialize side_resistance
-        self.side_resistance = self.calculate_side_resistance()
 
         # initialize end_resistance
         self.end_resistance = self.calculate_end_resistance()
@@ -47,12 +45,13 @@ class Segment:
         return self.cross_section._perimeter * self.segment_length
         
         
-    def calculate_side_resistance(self, fs: FactorOfSafetyDeepFoundation = None, 
+    def calculate_side_resistance(self, effective_stress: float, fs: FactorOfSafetyDeepFoundation = None, 
                          alpha_override = None, beta_override = None):
         '''
         To calculate side resistance
         
         Args:
+            effective_stress (float): effective stress in unit of psf
             fs (FactorOfSafetyDeepFoundation): factor of safety object
             alpha_override (float): override the default used in calcualting 
         '''
@@ -60,7 +59,7 @@ class Segment:
         # establish SideResistance Obj
         side_resistance_obj = SideResistance(self.layer)
 
-        side_resistance_unit = side_resistance_obj.side_resistance_unit(alpha_override, beta_override)
+        side_resistance_unit = side_resistance_obj.side_resistance_unit(effective_stress, alpha_override, beta_override)
         side_resistance = side_resistance_unit * self._side_surface_area
 
         # Apply factor of safety when needed

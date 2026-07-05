@@ -14,17 +14,24 @@ class SideResistance:
     
         self.layer = layer
 
-    def side_resistance_unit(self, alpha_override: float = None, beta_override:float = None):
+    def side_resistance_unit(self, effective_stress: float, alpha_override: float = None, beta_override:float = None):
         '''
         Top wrapper for side resistance
 
         Args:
+            effective_stress (float): effective stress in unit of psf
             alpha_override (float): override alpha when calculate side resistance for cohesive layer
             beta_override (float): override beta when calculate side resistance for cohesionless layer
+
         '''
 
+        # sanity check on effective_stress
+        # negative effective stress is currently not applicable
+        if effective_stress < 0:
+            raise ValueError("ERROR: negative effective stress is currently not applicable.")
+
         if self.layer.soil.soil_type_general == 1:
-            return self.side_resistance_unit_cohesionless(beta_override)
+            return self.side_resistance_unit_cohesionless(effective_stress, beta_override)
         elif self.layer.soil.soil_type_general == 2:
             return self.side_resistance_unit_cohesive(alpha_override)
         else:
@@ -62,11 +69,12 @@ class SideResistance:
         else:
             return (self.layer.soil.n60 / 15.0) * (1.5 - 0.135 * depth_mid**0.5)
 
-    def side_resistance_unit_cohesionless(self, beta_override:float = None):
+    def side_resistance_unit_cohesionless(self, effective_stress: float, beta_override:float = None):
         '''
         To calculate side resistance for cohesionless layer
 
         Args:
+            effective_stress (float): effective stress 
             beta_override (float): override beta when calculate side resistance for cohesionless
                                     layer
         Returns:
@@ -80,7 +88,7 @@ class SideResistance:
         else:
             beta = self._calculate_beta() 
 
-        return beta * self.layer.effective_stress_mid
+        return beta * effective_stress
     
     def side_resistance_unit_cohesive(self, alpha_override:float = None):
         '''

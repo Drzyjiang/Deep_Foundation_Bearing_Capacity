@@ -25,6 +25,7 @@ class DeepFoundation:
         self.resistance_corrections = resistance_corrections or []
 
 
+
     def _sanity_check_segments(self, segments: list[Segment])->bool:
         '''
         Sanity check on segments
@@ -93,7 +94,7 @@ class DeepFoundation:
 
         return segment_top_depths
     
-    def calculate_segments_total_stresses(self):
+    def calculate_segment_total_stresses(self):
         '''
         To calculate total stresses at the mid depth of each segment
         '''
@@ -109,7 +110,8 @@ class DeepFoundation:
 
         return segment_total_stresses
     
-    def calculate_segments_effective_stresses(self):
+    @cached_property
+    def calculate_segment_effective_stresses(self):
         '''
         To calculate effective stresses at the mid depth of each segment
         '''
@@ -117,10 +119,9 @@ class DeepFoundation:
         segment_effective_stresses = []
         segment_effective_stress = 0
 
-        segment_top_depths = self._segment_top_depths()
         segment_mid_depths = self._segment_mid_depths()
         
-        segment_total_stresses = self.calculate_segments_total_stresses()
+        segment_total_stresses = self.calculate_segment_total_stresses()
 
         for segment, segment_total_stress, segment_mid_depth in zip(
             self.segments, segment_total_stresses, segment_mid_depths):
@@ -132,7 +133,7 @@ class DeepFoundation:
         return segment_effective_stresses
     
     #@cached_property
-    def calculate_segments_side_resistance(self)->list[float]:
+    def calculate_segment_side_resistances(self)->list[float]:
         '''
         To calculate side resistance of each segment
 
@@ -142,8 +143,8 @@ class DeepFoundation:
         # collect all default side resistance
         segment_side_resistances = []
 
-        for segment in self.segments:
-            segment_side_resistances.append(segment.calculate_side_resistance())
+        for segment, effective_stress in zip(self.segments, self.calculate_segment_effective_stresses):
+            segment_side_resistances.append(segment.calculate_side_resistance(effective_stress))
         
         # apply correction
         segment_bottom_depth_values = self._segment_bottom_depths()
@@ -158,7 +159,7 @@ class DeepFoundation:
         return segment_side_resistances
 
 
-    def calculate_segments_side_resistances_accumulative(self)->list[float]:
+    def calculate_segment_side_resistances_accumulative(self)->list[float]:
         '''
         To calcualte moving accumulative side resistances
 
