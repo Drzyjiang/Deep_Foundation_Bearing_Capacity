@@ -6,6 +6,9 @@ import numpy as np
 #PSF2TSF = 0.000446
 PSF2TSF = 1.0/2000
 
+# pound per square inch to pound per square foot by multiplying
+PSI2PSF = 144.0
+
 # Atomosphere perssure to tsf by multiplying
 PA2TSF =  0.9447 # 1 atm = 0.9447 tsf
 

@@ -43,7 +43,7 @@
 - soil_index: 7
   unit_weight: 130
   friction_angle: 0
-  cohesion: 0.2
+  cohesion: 200
   n60: 26  
 
 - soil_index: 8

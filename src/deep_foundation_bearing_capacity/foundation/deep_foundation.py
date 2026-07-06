@@ -170,7 +170,7 @@ class DeepFoundation:
         accumulative = 0
         segments_side_resistances_accumulative = []
 
-        for segment_side_resistance in self.calculate_segments_side_resistance():
+        for segment_side_resistance in self.calculate_segment_side_resistances():
             accumulative = accumulative + segment_side_resistance
             segments_side_resistances_accumulative.append(accumulative)
 
