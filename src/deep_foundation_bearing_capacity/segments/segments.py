@@ -56,7 +56,8 @@ class Segment:
         if self.foundation_material is None:
             return -1
         else:
-            return self.cross_section.cross_section_area * self.foundation_material.unit_weight
+            return self.foundation_material.unit_weight * (self.cross_section.cross_section_area
+                                                            * self.segment_length) 
 
         
         

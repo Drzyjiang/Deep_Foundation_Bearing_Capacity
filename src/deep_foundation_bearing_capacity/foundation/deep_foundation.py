@@ -22,8 +22,30 @@ class DeepFoundation:
         self.segments = segments
         self.top_depth = top_depth
 
+        # correction to side resistance and end resistance
         self.resistance_corrections = resistance_corrections or []
 
+        
+    @property
+    def total_weight(self):
+        '''
+        calculate deep foundation self weight in unit of pound
+        '''
+
+        return self.calculate_segment_weights_accumulative()[-1]
+    
+    def calculate_segment_weights_accumulative(self)->list[float]:
+        '''
+        To calculate accumulative self_weight of segments.
+        '''
+        segment_weights_accumulative = []
+        segment_weight_accumulative = 0
+
+        for segment in self.segments:
+            segment_weight_accumulative = segment_weight_accumulative + segment.self_weight
+            segment_weights_accumulative.append(segment_weight_accumulative)
+        
+        return segment_weights_accumulative
 
 
     def _sanity_check_segments(self, segments: list[Segment])->bool:
