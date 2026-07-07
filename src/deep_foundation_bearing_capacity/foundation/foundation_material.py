@@ -3,7 +3,12 @@ from abc import abstractmethod
 
 import numpy as np
 
-from deep_foundation_bearing_capacity.constants.constants import PSI2PSF, SCALAR_TYPE
+from deep_foundation_bearing_capacity.constants.constants import (
+    ELASTIC_MODULUS_CONCRETE,
+    PSI2PSF,
+    SCALAR_TYPE,
+    YIELD_STRENGTH_CONCRETE,
+)
 
 
 class FoundationMaterial:
@@ -17,8 +22,8 @@ class FoundationMaterial:
             elastic modulus (float): elastic modulus in unit of psf
         '''
 
-        self._sanity_check_unit_weight(self, unit_weight)
-        self._sanity_check_elastic_modulus(self, elastic_modulus)
+        self._sanity_check_unit_weight(unit_weight)
+        self._sanity_check_elastic_modulus(elastic_modulus)
 
         self.unit_weight = unit_weight
         self.elastic_modulus = elastic_modulus
@@ -40,9 +45,10 @@ class FoundationMaterial:
         if elastic_modulus <= 0:
             raise ValueError("ERROR: elastic_modulus shall be a positive value.")
 
-class FoundationConcrete(foundation_material):
-    def __init__(self, unit_weight:float, elastic_modulus:float, yield_strength: float):
-        super().__init__(self, unit_weight, elastic_modulus)
+class FoundationConcrete(FoundationMaterial):
+    def __init__(self, unit_weight:float = 150, elastic_modulus:float = ELASTIC_MODULUS_CONCRETE, 
+                 yield_strength: float = YIELD_STRENGTH_CONCRETE):
+        super().__init__(unit_weight, elastic_modulus)
 
         self._sanity_check_elastic_modulus(elastic_modulus)
         self._sanity_check_yield_strength(yield_strength)
@@ -56,10 +62,10 @@ class FoundationConcrete(foundation_material):
         '''
         elastic_modulus_lower_bound_percentage = 0.7
         elastic_modulus_upper_bound_percentage = 10.0
-        elastic_modulus_typical = 57000 * np.sqrt(4000) * PSI2PSF
+        
 
-        if elastic_modulus < (elastic_modulus_lower_bound_percentage * elastic_modulus_typical) or ( 
-           elastic_modulus > (elastic_modulus_upper_bound_percentage * elastic_modulus_typical)):
+        if elastic_modulus < (elastic_modulus_lower_bound_percentage * ELASTIC_MODULUS_CONCRETE) or ( 
+           elastic_modulus > (elastic_modulus_upper_bound_percentage * ELASTIC_MODULUS_CONCRETE)):
             raise ValueError("ERROR: concrete elastic_modulus is out of normal range.")
         
         return True

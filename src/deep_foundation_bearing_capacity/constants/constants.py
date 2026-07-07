@@ -45,3 +45,9 @@ ARRAY_TYPES = (np.ndarray,)
 
 # numeric types
 NUMERIC_TYPES = SCALAR_TYPES + ARRAY_TYPES
+
+# concrete typical elastic modulus in unit of psf
+ELASTIC_MODULUS_CONCRETE = 57000 * np.sqrt(4000) * PSI2PSF
+
+# concrete typical yield strength in unit of psf
+YIELD_STRENGTH_CONCRETE = 4000.0 * 144

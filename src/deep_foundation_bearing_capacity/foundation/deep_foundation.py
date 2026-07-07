@@ -58,13 +58,13 @@ class DeepFoundation:
         mid_depth = 0
 
         for segment in self.segments:
-            # update mid_depth by increment upper half of thickness
-            mid_depth = mid_depth + segment.layer.thickness / 2.0
+            # update mid_depth by increment upper half of segment length
+            mid_depth = mid_depth + segment.segment_length / 2.0
 
             segment_mid_depths.append(mid_depth)
 
-            # update mid_depth by increment lower half of thickness
-            mid_depth = mid_depth + segment.layer.thickness / 2.0
+            # update mid_depth by increment lower half of segment length
+            mid_depth = mid_depth + segment.segment_length  / 2.0
         
         return segment_mid_depths
     
@@ -76,7 +76,7 @@ class DeepFoundation:
         bottom_depth = 0
 
         for segment in self.segments:
-            bottom_depth = bottom_depth + segment.layer.thickness
+            bottom_depth = bottom_depth + segment.segment_length 
             segment_bottom_depths.append(bottom_depth)
 
         return segment_bottom_depths
@@ -90,7 +90,7 @@ class DeepFoundation:
 
         for segment in self.segments:
             segment_top_depths.append(top_depth)
-            top_depth = top_depth + segment.layer.thickness
+            top_depth = top_depth + segment.segment_length 
 
         return segment_top_depths
     
@@ -103,10 +103,10 @@ class DeepFoundation:
 
         for segment in self.segments:
             segment_total_stress = segment_total_stress + (
-                                    segment.layer.thickness/2.0 * segment.layer.soil.unit_weight) 
+                                    segment.segment_length /2.0 * segment.layer.soil.unit_weight) 
             segment_total_stresses.append(segment_total_stress)
             segment_total_stress = segment_total_stress + (
-                                    segment.layer.thickness/2.0 * segment.layer.soil.unit_weight)
+                                    segment.segment_length /2.0 * segment.layer.soil.unit_weight)
 
         return segment_total_stresses
     
@@ -157,6 +157,18 @@ class DeepFoundation:
                                                             )
      
         return segment_side_resistances
+    
+    def calculate_segment_end_resistances(self)->list[float]:
+        '''
+        To caclulate segment end resistances in unit of psf
+        '''
+        segment_end_resistances = []
+        for segment in self.segments:
+            segment_end_resistance = segment.calculate_end_resistance()
+            segment_end_resistances.append(segment_end_resistance)
+
+        return segment_end_resistances
+
 
 
     def calculate_segment_side_resistances_accumulative(self)->list[float]:
@@ -168,13 +180,24 @@ class DeepFoundation:
         '''
         
         accumulative = 0
-        segments_side_resistances_accumulative = []
+        segment_side_resistances_accumulative = []
 
         for segment_side_resistance in self.calculate_segment_side_resistances():
             accumulative = accumulative + segment_side_resistance
-            segments_side_resistances_accumulative.append(accumulative)
+            segment_side_resistances_accumulative.append(accumulative)
 
-        return segments_side_resistances_accumulative
+        return segment_side_resistances_accumulative
+    
+    def calculate_compression_resistances_accumulative(self):
+        '''
+        To calculate accumulative compression resistance
+        '''
+
+        segment_side_resistances_accumlative = self.calculate_segment_side_resistances_accumulative()
+        segment_end_resistances = self.calculate_segment_end_resistances()
+
+        return [a + b for 
+                a, b in zip(segment_side_resistances_accumlative, segment_end_resistances)]
 
 class SideResistanceCorrections:
     '''

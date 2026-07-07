@@ -35,13 +35,13 @@ class CrossSection(ABC):
     # calculate cross-section area
     @property
     @abstractmethod
-    def _cross_section_area(self):
+    def cross_section_area(self):
         ...
     
     # calculate perimeter
     @property
     @abstractmethod
-    def _perimeter(self):
+    def perimeter(self):
         ...
 
 
@@ -57,7 +57,7 @@ class CircularSection(CrossSection):
 
 
     @property
-    def _cross_section_area(self):
+    def cross_section_area(self):
         '''
         To calculate area of the cross-section
         '''
@@ -65,7 +65,7 @@ class CircularSection(CrossSection):
         return 0.25* np.pi *self.diameter*self.diameter
     
     @property
-    def _perimeter(self):
+    def perimeter(self):
         '''
         To calculate perimeter of cross section
         '''
@@ -84,7 +84,7 @@ class SquareSection(CrossSection):
         self.length = section_dimension
 
     @property
-    def _cross_section_area(self):
+    def cross_section_area(self):
         '''
         To calculate area of the cross-section
         '''
@@ -92,7 +92,7 @@ class SquareSection(CrossSection):
         return self.length*self.length
 
     @property
-    def _perimeter(self):
+    def perimeter(self):
         '''
         To calculate perimeter of cross section
         '''
