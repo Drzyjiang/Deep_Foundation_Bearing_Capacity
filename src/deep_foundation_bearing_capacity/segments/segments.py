@@ -15,8 +15,8 @@ class Segment:
     One segment corresponds to only one layer and one cross_section.
     
     '''
-    def __init__(self, cross_section: CrossSection, layer: Layer, foundation_material:FoundationMaterial = None, 
-                 fs:FactorOfSafetyDeepFoundation = None):
+    def __init__(self, cross_section: CrossSection, layer: Layer, foundation_material:FoundationMaterial = None
+                 ):
         '''
         
         '''
@@ -29,9 +29,7 @@ class Segment:
         # layer
         self.layer = layer
 
-        # factor of safety
-        self.fs = fs
-
+ 
         self.foundation_material = foundation_material
 
         # initialize end_resistance
@@ -62,29 +60,30 @@ class Segment:
         
         
         
-    def calculate_side_resistance(self, effective_stress: float, fs: FactorOfSafetyDeepFoundation = None, 
-                         alpha_override = None, beta_override = None):
+    def calculate_side_resistance(self, effective_stress: float, fs: float = 1.0, 
+                         alpha_override = None, beta_override = None, uplift:bool = False):
         '''
         To calculate side resistance.
         Note: this is not unit resistance.
         
         Args:
             effective_stress (float): effective stress in unit of psf
-            fs (FactorOfSafetyDeepFoundation): factor of safety object
+            fs (float): factor of safety for side resistance
             alpha_override (float): override the default used in calcualting 
         '''
 
         # establish SideResistance Obj
         side_resistance_obj = SideResistance(self.layer)
 
-        side_resistance_unit = side_resistance_obj.side_resistance_unit(effective_stress, alpha_override, beta_override)
+        side_resistance_unit = side_resistance_obj.side_resistance_unit(effective_stress, alpha_override, beta_override, uplift)
         side_resistance = side_resistance_unit * self.side_surface_area
 
         # Apply factor of safety when needed
-        if not fs is None:
-            side_resistance = side_resistance / fs.fs_deep_foundation_skin
+        side_resistance = side_resistance / fs
 
         return side_resistance
+    
+
         
     def calculate_end_resistance(self, fs: FactorOfSafetyDeepFoundation = None):
         '''

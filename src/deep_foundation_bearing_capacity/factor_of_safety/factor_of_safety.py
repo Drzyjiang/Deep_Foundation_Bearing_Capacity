@@ -5,7 +5,7 @@ from deep_foundation_bearing_capacity.constants import constants
 
 class FactorOfSafety:
     '''
-    Class for factor of safety of general foundations
+    Class for factor of safety of general foundations, including shallow and deep foundations
     
     '''
     def __init__(self, factor_of_safety):
@@ -38,7 +38,7 @@ class FactorOfSafetyDeepFoundation (FactorOfSafety):
     Class for deep foundations
     
     '''
-    def __init__(self, factor_of_safety:constants.SCALAR_TYPE, fs_end_bearing:constants.SCALAR_TYPE):
+    def __init__(self, factor_of_safety:constants.SCALAR_TYPE, fs_end_bearing:constants.SCALAR_TYPE = None):
         '''
         Args:
             fs (constants.SCALAR_TYPE): used for skin friction
@@ -47,9 +47,14 @@ class FactorOfSafetyDeepFoundation (FactorOfSafety):
         super().__init__(factor_of_safety)
 
         # sanity check on fs_end bearing
-        self._sanity_check_fs(fs_end_bearing)
+        if fs_end_bearing is None:
+            fs_end_bearing = self.factor_of_safety
+        else:
+            self._sanity_check_fs(fs_end_bearing)
 
         # factor of safety for deep foundation
         self.fs_deep_foundation_skin = self.factor_of_safety
         self.fs_deep_foundation_end = fs_end_bearing
+
+
         
