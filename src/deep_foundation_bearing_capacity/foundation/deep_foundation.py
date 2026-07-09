@@ -1,6 +1,8 @@
 # Classes for deep foundations
 from functools import cached_property
 
+import matplotlib.pyplot as plt
+
 from deep_foundation_bearing_capacity.constants.constants import SCALAR_TYPE, UNIT_WEIGHT_WATER
 from deep_foundation_bearing_capacity.factor_of_safety.factor_of_safety import FactorOfSafetyDeepFoundation
 from deep_foundation_bearing_capacity.segments.segments import Segment
@@ -186,13 +188,19 @@ class DeepFoundation:
      
         return segment_side_resistances
     
-    def calculate_segment_end_resistances(self)->list[float]:
+    def calculate_segment_end_resistances(self, fs:float = 1.0)->list[float]:
         '''
         To caclulate segment end resistances in unit of psf
+
+        Args:
+            fs (float): factor of safety for end resistance
         '''
         segment_end_resistances = []
         for segment in self.segments:
             segment_end_resistance = segment.calculate_end_resistance()
+            # apply factor of safety
+            segment_end_resistance = segment_end_resistance / fs
+
             segment_end_resistances.append(segment_end_resistance)
 
         return segment_end_resistances
@@ -234,7 +242,7 @@ class DeepFoundation:
         '''
 
         segment_side_resistances_accumlative = self.calculate_segment_side_resistances_accumulative(fs = fs)
-        segment_end_resistances = self.calculate_segment_end_resistances()
+        segment_end_resistances = self.calculate_segment_end_resistances(fs =fs)
 
         return [a + b for 
                 a, b in zip(segment_side_resistances_accumlative, segment_end_resistances)]
@@ -259,6 +267,48 @@ class DeepFoundation:
         uplift_resitances_accumulative = [a+b for a, b in zip(segment_side_resistances_accumulative,
                                                                          segment_weights_accumulative)]
         return uplift_resitances_accumulative
+    
+    def visualize_compression_resistances_accumulative(self, fs:float = 1.0, style = "piecewise"):
+        '''
+        Visualize accumulative compression resistance 
+
+        Args:
+            fs (float): factor of safety for side resistance and end resistance
+            style (str): select plot style from ["piecewise", "mid"]
+                        "piecewise": 
+        '''
+        style_options = ["piecewise", "mid"]
+        # sanity check on style arg
+        if not style in style_options:
+            raise ValueError(f"ERROR: sytle shall be selected from {style_options}")
+        
+
+
+        compression_resistances_accumulative = self.calculate_compression_resistances_accumulative()
+
+
+    def visualize_compression_resistances_accumulative_piecewise(self):
+        '''
+        To visualize accumulative compression resistance in piecewise style
+        
+        '''
+        compression_resistances_accumulative = self.calculate_compression_resistances_accumulative()
+        segment_top_depths = self._segment_top_depths()
+        segment_bottom_depths = self._segment_bottom_depths()
+
+        # form ys by alternating segment_top_depths and segment_bottom_depths
+        ys = [y for pair in zip(segment_top_depths, segment_bottom_depths) for y in pair]
+
+        # form xs by shallow copy
+        xs = [x for x in compression_resistances_accumulative for _ in range(2)]
+
+        plt.plot([x/1000.0 for x in xs], ys)
+        plt.xlabel("Accumulative compression resistance [kip]")
+        plt.gca().invert_yaxis()
+        plt.ylabel("Depth [ft]")
+        plt.grid(True)
+        
+
 
 class SideResistanceCorrections:
     '''
