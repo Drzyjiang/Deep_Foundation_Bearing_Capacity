@@ -270,6 +270,18 @@ class DeepFoundation:
                                                                          segment_weights_accumulative)]
         return uplift_resitances_accumulative
     
+    def segments_structural_capacity_compression(self):
+        '''
+        To calculate structural compression capacity of all segments
+        '''
+
+        segments_structural_capacity = []
+        for segment in self.segments:
+            segments_structural_capacity.append(segment.structural_compression_capacity())
+        
+        return segments_structural_capacity
+
+
     def visualize_resistances_accumulative(self, fs:float = 1.0, target = "compression", style = "piecewise"):
         '''
         Visualize accumulative compression or uplift resistance 

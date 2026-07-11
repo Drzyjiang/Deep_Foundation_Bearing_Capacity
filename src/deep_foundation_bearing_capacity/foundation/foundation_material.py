@@ -53,6 +53,7 @@ class FoundationConcrete(FoundationMaterial):
         self._sanity_check_elastic_modulus(elastic_modulus)
         self._sanity_check_yield_strength(yield_strength)
 
+        # concrete yield strength in unit of psf
         self.yield_strength = yield_strength
 
     def _sanity_check_elastic_modulus(self, elastic_modulus:float)->bool:

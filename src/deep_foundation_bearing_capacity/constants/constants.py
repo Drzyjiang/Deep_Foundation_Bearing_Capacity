@@ -51,3 +51,7 @@ ELASTIC_MODULUS_CONCRETE = 57000 * np.sqrt(4000) * PSI2PSF
 
 # concrete typical yield strength in unit of psf
 YIELD_STRENGTH_CONCRETE = 4000.0 * 144
+
+# ASD deep foundation concrete in compression reduction factor
+# Reference: International Building Code 2024 Section 1810.3.2.6
+REDUCTION_ASD_CONCRETE_COMPRESSION = 0.33

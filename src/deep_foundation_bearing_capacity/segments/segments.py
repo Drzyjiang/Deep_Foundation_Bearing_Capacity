@@ -1,9 +1,10 @@
 # classes for segments
 
 from deep_foundation_bearing_capacity.constants import constants
+from deep_foundation_bearing_capacity.constants.constants import REDUCTION_ASD_CONCRETE_COMPRESSION
 from deep_foundation_bearing_capacity.cross_sections.cross_sections import CrossSection
 from deep_foundation_bearing_capacity.factor_of_safety.factor_of_safety import FactorOfSafetyDeepFoundation
-from deep_foundation_bearing_capacity.foundation.foundation_material import FoundationMaterial
+from deep_foundation_bearing_capacity.foundation.foundation_material import FoundationConcrete, FoundationMaterial
 from deep_foundation_bearing_capacity.segments.unit_resistance import EndResistance, SideResistance
 from deep_foundation_bearing_capacity.soil_layer.layer import Layer
 
@@ -15,8 +16,8 @@ class Segment:
     One segment corresponds to only one layer and one cross_section.
     
     '''
-    def __init__(self, cross_section: CrossSection, layer: Layer, foundation_material:FoundationMaterial = None
-                 ):
+    def __init__(self, cross_section: CrossSection, layer: Layer, 
+                 foundation_material:FoundationMaterial = None):
         '''
         
         '''
@@ -116,3 +117,23 @@ class Segment:
 
         return end_resistance
     
+    def structural_compression_capacity(self):
+        '''
+        To caclulate structural compression capacity
+        '''
+
+        # sanity check
+        if isinstance(self.foundation_material, FoundationConcrete):
+            # TODO
+            return self.structural_compression_capacity_concrete()
+        else:
+            raise ValueError("Current FoundationMaterial type is not implemented yet.")
+    
+    def structural_compression_capacity_concrete(self):
+        '''
+        To calculate structural compression capacity for pure concrete cross-section
+        Note: by allowable stress design (ASD)
+        '''
+        #
+        return REDUCTION_ASD_CONCRETE_COMPRESSION * (
+            self.cross_section.cross_section_area * self.foundation_material.yield_strength)
