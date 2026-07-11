@@ -1,6 +1,7 @@
 # Classes for deep foundations
 from functools import cached_property
 
+import matplotlib
 import matplotlib.pyplot as plt
 
 from deep_foundation_bearing_capacity.constants.constants import SCALAR_TYPE, UNIT_WEIGHT_WATER
@@ -31,25 +32,26 @@ class DeepFoundation:
 
         
     @property
-    def total_weight(self):
+    def effective_weight(self):
         '''
-        calculate deep foundation self weight in unit of pound
+        calculate deep foundation effective self weight in unit of pound
         '''
 
-        return self.calculate_segment_weights_accumulative()[-1]
+        return self.calculate_segment_weights_effective_accumulative()[-1]
     
-    def calculate_segment_weights_accumulative(self)->list[float]:
+    def calculate_segment_weights_effective_accumulative(self)->list[float]:
         '''
-        To calculate accumulative self_weight of segments.
+        To calculate accumulative effective self_weight of segments.
         '''
-        segment_weights_accumulative = []
-        segment_weight_accumulative = 0
+        segment_weights_effective_accumulative = []
+        segment_weight_effective_accumulative = 0
 
         for segment in self.segments:
-            segment_weight_accumulative = segment_weight_accumulative + segment.self_weight
-            segment_weights_accumulative.append(segment_weight_accumulative)
+            segment_weight_effective_accumulative = (segment_weight_effective_accumulative +
+                                                      segment.self_weight_effective)
+            segment_weights_effective_accumulative.append(segment_weight_effective_accumulative)
         
-        return segment_weights_accumulative
+        return segment_weights_effective_accumulative
 
 
     def _sanity_check_segments(self, segments: list[Segment])->bool:
@@ -262,37 +264,66 @@ class DeepFoundation:
         
         
         segment_side_resistances_accumulative = self.calculate_segment_side_resistances_accumulative(uplift = True)
-        segment_weights_accumulative = self.calculate_segment_weights_accumulative()
+        segment_weights_accumulative = self.calculate_segment_weights_effective_accumulative()
 
         uplift_resitances_accumulative = [a+b for a, b in zip(segment_side_resistances_accumulative,
                                                                          segment_weights_accumulative)]
         return uplift_resitances_accumulative
     
-    def visualize_compression_resistances_accumulative(self, fs:float = 1.0, style = "piecewise"):
+    def visualize_resistances_accumulative(self, fs:float = 1.0, target = "compression", style = "piecewise"):
         '''
-        Visualize accumulative compression resistance 
+        Visualize accumulative compression or uplift resistance 
 
         Args:
             fs (float): factor of safety for side resistance and end resistance
+            target (str): either "compression" or "uplift"
             style (str): select plot style from ["piecewise", "mid"]
                         "piecewise": 
         '''
         style_options = ["piecewise", "mid"]
         # sanity check on style arg
-        if not style in style_options:
+        if style not in style_options:
             raise ValueError(f"ERROR: sytle shall be selected from {style_options}")
         
+        # sanity_check on target
+        if target != "compression" and target != "uplift":
+            raise ValueError(f"ERROR: target shall be either 'compression' or 'uplift'.")
 
+        if target == "compression":
+            resistances_accumulative = self.calculate_compression_resistances_accumulative()
+        elif target == "uplift":
+            resistances_accumulative = self.calculate_uplift_resistances_accumulative()
+        
+        fig, ax = plt.subplots()
 
-        compression_resistances_accumulative = self.calculate_compression_resistances_accumulative()
+        if style == "piecewise":
+            self._visualize_resistances_accumulative_piecewise(ax, target, resistances_accumulative)
+        elif style == "mid":
+            self._visualize_resistance_accumulative_mid(ax, target, resistances_accumulative)
+        else:
+            raise ValueError(f"ERROR: style {style} is undefined.")
 
+        plt.close(fig)
 
-    def visualize_compression_resistances_accumulative_piecewise(self):
+        return fig
+
+    
+    def _visualize_resistances_accumulative_piecewise(self, 
+                                                      ax: matplotlib.axes.Axes, target: str, 
+                                                      resistances_accumulative:list[float])->(
+                                                       matplotlib.figure.Figure):
         '''
         To visualize accumulative compression resistance in piecewise style
-        
+
+        Args:
+            ax (matplotlib.axes.Axes): ax handle
+            target (str): either "compression" or "uplift"
+            resistances_accumulative (list[float]): accumulative resistances of each segment
+
+        Returns:
+            fig (matplotlib.figure.Figure)
         '''
-        compression_resistances_accumulative = self.calculate_compression_resistances_accumulative()
+        
         segment_top_depths = self._segment_top_depths()
         segment_bottom_depths = self._segment_bottom_depths()
 
@@ -300,15 +331,44 @@ class DeepFoundation:
         ys = [y for pair in zip(segment_top_depths, segment_bottom_depths) for y in pair]
 
         # form xs by shallow copy
-        xs = [x for x in compression_resistances_accumulative for _ in range(2)]
-
-        plt.plot([x/1000.0 for x in xs], ys)
-        plt.xlabel("Accumulative compression resistance [kip]")
-        plt.gca().invert_yaxis()
-        plt.ylabel("Depth [ft]")
-        plt.grid(True)
+        xs = [x/1000.0 for x in resistances_accumulative for _ in range(2)]
         
+        ax.plot(xs, ys)
+        ax.set_xlabel(f"Accumulative {target} resistance [kip]")
+        ax.invert_yaxis()
+        ax.set_ylabel("Depth [ft]")
+        ax.grid(True)
+      
+        for xi, yi in zip(xs, ys):
+            ax.annotate(text = f"{xi:.0f}", xy=(xi, yi), textcoords = "offset points", xytext = (5,5), fontsize = 8)
+       
+    
+    def _visualize_resistance_accumulative_mid(self, ax: matplotlib.axes.Axes, 
+                                               target: str, resistance_accumulative)->(
+                                                   matplotlib.figure.Figure
+                                               ):
+        '''
+        To visualize accumulative resistance at mid of each segment.
+        Note that even though resistance at shown at mid of segment, side resistance of 
+        lower half segment is already included.
 
+        Args:
+            ax (matplotlib.axes.Axes): ax handle
+            target (str): either "compression" or "uplift"
+            resistances_accumulative (list[float]): accumulative resistances of each segment
+        '''
+        ys = self._segment_mid_depths()
+        xs = [x/1000.0 for x in resistance_accumulative]
+
+        ax.plot(xs, ys)
+        ax.set_xlabel(f"Accumulative {target} resistance [kip]")
+        ax.invert_yaxis()
+        ax.set_ylabel("Depth [ft]")
+        ax.grid(True)
+
+        for xi, yi in zip(xs, ys):
+            ax.annotate(text =f"{xi:.0f}", xy=(xi, yi), textcoords="offset points",xytext = (5,5), fontsize = 8)
+        
 
 class SideResistanceCorrections:
     '''

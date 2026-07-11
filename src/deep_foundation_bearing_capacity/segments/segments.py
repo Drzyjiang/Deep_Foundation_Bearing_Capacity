@@ -44,11 +44,11 @@ class Segment:
         '''
         return self.cross_section.perimeter * self.segment_length
     
-    # self_weight
+    
     @property
-    def self_weight(self)->float:
+    def self_weight_total(self)->float:
         '''
-        To calculate segment self weight in unit of pcf
+        To calculate segment self total weight in unit of pcf
         '''
 
         if self.foundation_material is None:
@@ -57,7 +57,22 @@ class Segment:
             return self.foundation_material.unit_weight * (self.cross_section.cross_section_area
                                                             * self.segment_length) 
 
-        
+    @property
+    def self_weight_effective(self)->float:
+        '''
+        To calculate segment self effective weight in unit of pcf
+        '''
+
+        if self.foundation_material is None:
+            return -1
+        else:
+            dry_thickness = min(max(self.layer.ground_water_depth - self.layer.top_depth, 0), self.layer.thickness)
+            saturated_thickness = min(max(self.layer.top_depth+self.layer.thickness -
+                                           self.layer.ground_water_depth, 0), self.layer.thickness)
+            
+            return self.cross_section.cross_section_area * (self.foundation_material.unit_weight
+                    * dry_thickness + (self.foundation_material.unit_weight - 
+                    constants.UNIT_WEIGHT_WATER) * saturated_thickness)         
         
         
     def calculate_side_resistance(self, effective_stress: float, fs: float = 1.0, 
