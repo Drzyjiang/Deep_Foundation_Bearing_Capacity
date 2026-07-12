@@ -29,9 +29,10 @@ class Soil:
             igm_cohesionless: cohesionless intermediate geomaterial
             igm_cohesive: cohesive intermediate geomaterial
         '''
+        
         self.soil_type_advanced_dict = ["gs", "igm_coheionless", "igm_cohesive"]
         self._sanity_check_soil_type_advanced(soil_type_advanced)
-
+ 
         self.soil_index = soil_index
         self.unit_weight = unit_weight
         self.friction_angle = friction_angle
@@ -47,8 +48,11 @@ class Soil:
 
     @classmethod
     def from_dict(cls, data:dict):
-        return cls(soil_index = int(data["soil_index"]), unit_weight = float(data["unit_weight"]), friction_angle = float(data["friction_angle"]),
-                    cohesion = float(data["cohesion"]), n60 = data["n60"])
+        return cls(soil_index = int(data["soil_index"]), unit_weight = float(data["unit_weight"]), 
+                   friction_angle = float(data["friction_angle"]),
+                   cohesion = float(data["cohesion"]), 
+                   n60 = data["n60"],
+                   soil_type_advanced = data["soil_type_advanced"])
 
     def _sanity_check_unit_weight(self, unit_weight):
         '''

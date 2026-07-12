@@ -3,6 +3,10 @@ from typing import Union
 import numpy as np
 
 # convert psf to tsf by multiplying
+
+# foot to meter
+FT2M = 0.3048
+
 #PSF2TSF = 0.000446
 PSF2TSF = 1.0/2000
 

@@ -1,7 +1,7 @@
 # unit resistance for deep foundations
 import numpy as np
 
-from deep_foundation_bearing_capacity.constants.constants import ATM, PSF2TSF
+from deep_foundation_bearing_capacity.constants.constants import ATM, FT2M, PSF2TSF
 from deep_foundation_bearing_capacity.soil_layer.layer import Layer
 from deep_foundation_bearing_capacity.soil_layer.soil import Soil
 
@@ -39,6 +39,12 @@ class SideResistance:
         if not beta_override is None and (beta_override <0.25 or beta_override > 1.80):
             raise ValueError("ERROR: typical beta_override shall be between 0.25 and 1.80.")
 
+        # judge by soil_type_advanced
+        if self.layer.soil.soil_type_advanced == "gs":
+            return self.side_resistance_unit_cohesionless(effective_stress, beta_override, uplift)
+
+
+        # judge by soil_type_general
         if self.layer.soil.soil_type_general == 1:
             return self.side_resistance_unit_cohesionless(effective_stress, beta_override, uplift)
         elif self.layer.soil.soil_type_general == 2:
@@ -65,7 +71,7 @@ class SideResistance:
 
     def _calculate_beta(self):
         '''
-        To calculate beta for cohesionless soil
+        To calculate beta for cohesionless soil or gravelly sand/gravels
         Note: length is in unit of foot, NOT meter.
         '''
 
@@ -73,10 +79,15 @@ class SideResistance:
 
         beta = 0
         if self.layer.soil.n60 >= 15:
-            # note: when depth is in unit of foot, use coefficient of 0.135, not 0.245
-            beta =  1.5 - 0.135 * depth_mid**0.5
+            if self.layer.soil.soil_type_advanced == "gs":
+                beta = 2.0 - 0.15 * (depth_mid * FT2M)**0.75
+            elif self.layer.soil.soil_type_general == 1: # sand
+                # note: when depth is in unit of foot, use coefficient of 0.135, not 0.245
+                beta =  1.5 - 0.135 * depth_mid**0.5
+
         else:
             beta = (self.layer.soil.n60 / 15.0) * (1.5 - 0.135 * depth_mid**0.5)
+  
 
         # minimum beta is 0.25
         beta = max(beta, 0.25)
@@ -88,7 +99,7 @@ class SideResistance:
             beta = min(beta, 1.80)
         elif self.layer.soil.soil_type_general == 1:
             beta = min(beta, 1.20)
-        
+        print(beta)
         return beta
 
     def side_resistance_unit_cohesionless(self, effective_stress: float, beta_override:float = None, uplift:bool = False):
