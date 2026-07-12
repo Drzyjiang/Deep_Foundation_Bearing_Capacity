@@ -36,7 +36,7 @@ NONZERO_OFFSET = 1E-14
 # unit weight of water in pcf
 UNIT_WEIGHT_WATER = 62.4
 
-# atmospheric pressure
+# atmospheric pressure in psf
 ATM = 2116.22
 
 # scalar data type

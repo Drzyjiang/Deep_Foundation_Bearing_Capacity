@@ -1,7 +1,7 @@
 # unit resistance for deep foundations
 import numpy as np
 
-from deep_foundation_bearing_capacity.constants.constants import ATM, FT2M, PSF2TSF
+from deep_foundation_bearing_capacity.constants.constants import ATM, FT2M, PSF2TSF, SCALAR_TYPE
 from deep_foundation_bearing_capacity.soil_layer.layer import Layer
 from deep_foundation_bearing_capacity.soil_layer.soil import Soil
 
@@ -42,7 +42,9 @@ class SideResistance:
         # judge by soil_type_advanced
         if self.layer.soil.soil_type_advanced == "gs":
             return self.side_resistance_unit_cohesionless(effective_stress, beta_override, uplift)
-
+        elif self.layer.soil.soil_type_advanced == "igm_cohesive":
+            # TODO
+            pass
 
         # judge by soil_type_general
         if self.layer.soil.soil_type_general == 1:
@@ -78,29 +80,48 @@ class SideResistance:
         depth_mid = self.layer.top_depth + 0.5 * self.layer.thickness
 
         beta = 0
-        if self.layer.soil.n60 >= 15:
-            if self.layer.soil.soil_type_advanced == "gs":
+
+        # determine based on soil_type_advanced
+        if self.layer.soil.soil_type_advanced == "gs":
+            if self.layer.soil.n60 >= 15:
                 beta = 2.0 - 0.15 * (depth_mid * FT2M)**0.75
-            elif self.layer.soil.soil_type_general == 1: # sand
+            else:
+                beta = (self.layer.soil.n60 / 15.0) * (1.5 - 0.135 * depth_mid**0.5)
+
+            # minimum beta is 0.25
+            beta = max(beta, 0.25)
+
+            # maximum beta is 1.80 for gs
+            beta = min(beta, 1.80)
+
+        # determine based on soil_type_general
+        if self.layer.soil.soil_type_general == 1: # sand
+            if self.layer.soil.n60 >= 15:
                 # note: when depth is in unit of foot, use coefficient of 0.135, not 0.245
                 beta =  1.5 - 0.135 * depth_mid**0.5
-
-        else:
-            beta = (self.layer.soil.n60 / 15.0) * (1.5 - 0.135 * depth_mid**0.5)
+            else:
+                beta = (self.layer.soil.n60 / 15.0) * (1.5 - 0.135 * depth_mid**0.5)
   
+            # minimum beta is 0.25
+            beta = max(beta, 0.25)
 
-        # minimum beta is 0.25
-        beta = max(beta, 0.25)
-
-        # correction by soil type:
-        # sand: capped at 1.20
-        # gravelly sand or gravel: capped at 1.80
-        if self.layer.soil.soil_type_advanced == "gs":
-            beta = min(beta, 1.80)
-        elif self.layer.soil.soil_type_general == 1:
+            # maximum beta is 1.20 for gravelly sand or gravel
             beta = min(beta, 1.20)
-        print(beta)
+  
         return beta
+    
+    def _calculate_phi_prime(self, effective_stress:float)->SCALAR_TYPE:
+        '''
+        To estimate effective friction angle
+        Reference: FHWA Drilled shaft manual 99, Equation 11.27
+
+        Return:
+            deg (SCALAR_TYPE): friction angle in unit of deg
+        '''
+        deg = np.degrees(np.atan( (self.layer.soil.n60/ (12.3 + 20.3 * effective_stress/ATM))**0.34 ))
+        deg = min(deg, 45)
+
+        return deg
 
     def side_resistance_unit_cohesionless(self, effective_stress: float, beta_override:float = None, uplift:bool = False):
         '''
