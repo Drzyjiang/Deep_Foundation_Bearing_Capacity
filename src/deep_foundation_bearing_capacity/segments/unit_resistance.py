@@ -42,9 +42,9 @@ class SideResistance:
         # judge by soil_type_advanced
         if self.layer.soil.soil_type_advanced == "gs":
             return self.side_resistance_unit_cohesionless(effective_stress, beta_override, uplift)
-        elif self.layer.soil.soil_type_advanced == "igm_cohesive":
+        elif self.layer.soil.soil_type_advanced == "igm_cohesionless":
             # TODO
-            pass
+            return self.side_resistance_unit_cohesionless(effective_stress, beta_override, uplift)
 
         # judge by soil_type_general
         if self.layer.soil.soil_type_general == 1:
@@ -71,10 +71,13 @@ class SideResistance:
 
         return alpha
 
-    def _calculate_beta(self):
+    def _calculate_beta(self, effective_stress: SCALAR_TYPE)->SCALAR_TYPE:
         '''
         To calculate beta for cohesionless soil or gravelly sand/gravels
         Note: length is in unit of foot, NOT meter.
+
+        Args:
+            effective_stress (SCALAR_TYPE): 
         '''
 
         depth_mid = self.layer.top_depth + 0.5 * self.layer.thickness
@@ -91,8 +94,10 @@ class SideResistance:
             # minimum beta is 0.25
             beta = max(beta, 0.25)
 
-            # maximum beta is 1.80 for gs
+            # maximum beta is 1.80 for gravelly sand or gravels
             beta = min(beta, 1.80)
+        elif self.layer.soil.soil_type_advanced == "igm_cohesionless":
+            return self._calculate_ko(effective_stress) * np.tan(np.radians(self._calculate_phi_prime(effective_stress)))
 
         # determine based on soil_type_general
         if self.layer.soil.soil_type_general == 1: # sand
@@ -105,12 +110,12 @@ class SideResistance:
             # minimum beta is 0.25
             beta = max(beta, 0.25)
 
-            # maximum beta is 1.20 for gravelly sand or gravel
+            # maximum beta is 1.20 for sand
             beta = min(beta, 1.20)
   
         return beta
     
-    def _calculate_phi_prime(self, effective_stress:float)->SCALAR_TYPE:
+    def _calculate_phi_prime(self, effective_stress:SCALAR_TYPE)->SCALAR_TYPE:
         '''
         To estimate effective friction angle
         Reference: FHWA Drilled shaft manual 99, Equation 11.27
@@ -122,6 +127,15 @@ class SideResistance:
         deg = min(deg, 45)
 
         return deg
+    
+    def _calculate_ko(self, effective_stress: SCALAR_TYPE):
+        '''
+        To calcualte earth pressure coefficient 
+        '''
+        phi_prime_rad = np.radians(self._calculate_phi_prime(effective_stress))
+        ko = (1 - np.sin(phi_prime_rad)) * (0.2*ATM*self.layer.soil.n60 / effective_stress)**(np.sin(phi_prime_rad))
+
+        return ko
 
     def side_resistance_unit_cohesionless(self, effective_stress: float, beta_override:float = None, uplift:bool = False):
         '''
@@ -141,7 +155,7 @@ class SideResistance:
         if not beta_override is None:
             beta = beta_override
         else:
-            beta = self._calculate_beta() 
+            beta = self._calculate_beta(effective_stress) 
 
         side_resistance_cohesionless = beta * effective_stress
 

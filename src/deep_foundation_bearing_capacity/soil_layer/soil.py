@@ -30,7 +30,7 @@ class Soil:
             igm_cohesive: cohesive intermediate geomaterial
         '''
         
-        self.soil_type_advanced_dict = ["gs", "igm_coheionless", "igm_cohesive"]
+        self.soil_type_advanced_dict = ["gs", "igm_cohesionless", "igm_cohesive"]
         self._sanity_check_soil_type_advanced(soil_type_advanced)
  
         self.soil_index = soil_index
