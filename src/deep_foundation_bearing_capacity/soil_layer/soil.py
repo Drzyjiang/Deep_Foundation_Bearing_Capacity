@@ -31,7 +31,7 @@ class Soil:
         '''
         
         self.soil_type_advanced_dict = ["gs", "igm_cohesionless", "igm_cohesive"]
-        self._sanity_check_soil_type_advanced(soil_type_advanced)
+        self._sanity_check_soil_type_advanced(soil_type_advanced, n60)
  
         self.soil_index = soil_index
         self.unit_weight = unit_weight
@@ -133,7 +133,7 @@ class Soil:
         
         return True
     
-    def _sanity_check_soil_type_advanced(self, soil_type_advanced:str):
+    def _sanity_check_soil_type_advanced(self, soil_type_advanced:str, n60 = None):
         '''
         Sanity check on soil_type_advanced
         '''
@@ -146,6 +146,9 @@ class Soil:
 
         if soil_type_advanced not in self.soil_type_advanced_dict:
             raise ValueError("ERROR: input soil_type_advanced is undefined.")
+        
+        if soil_type_advanced == "igm_cohesionless" and n60 is not None and n60 <50:
+            raise ValueError("ERROR: cohesionless igm should have N60 greater than 50.")
         
         return True
     
