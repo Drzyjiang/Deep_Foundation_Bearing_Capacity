@@ -2,23 +2,26 @@
 import numpy as np
 
 from deep_foundation_bearing_capacity.constants import constants
+from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomaterial
 
 
-class Soil:
-    def __init__(self, soil_index, unit_weight:float = 0, friction_angle:float = 0, cohesion:float = 0, n60: float=-1,
+class Soil(Geomaterial):
+    def __init__(self, soil_index, unit_weight: float = 0, elastic_modulus: float = 0,
+                  friction_angle:float = 0, cohesion:float = 0, n60: float=-1,
                  soil_type_advanced: str = None):
         '''
         To initialize soil parameters
 
         Args:
-            unit_weight: soil unit weight in unit of pound per cubic foot
+            
             friction_angle (float): soil effective friction in unit of degree.
                                     For clay (cohesive), use zero
             cohesion (float): soil cohesion in unit of pound per square foot 
             soil_type_advanced (str): advanced soil type description
         '''
         
-        self._sanity_check_unit_weight(unit_weight)
+        super().__init__(unit_weight, elastic_modulus)
+        
         self._sanity_check_friction_angle(friction_angle)
         self._sanity_check_cohesion(cohesion)
         self._sanity_check_n60(n60)
@@ -54,20 +57,7 @@ class Soil:
                    n60 = data["n60"],
                    soil_type_advanced = data["soil_type_advanced"])
 
-    def _sanity_check_unit_weight(self, unit_weight):
-        '''
-        To perform sanity check on unit weight
-        '''
 
-        if not isinstance(unit_weight, constants.NUMERIC_TYPES):
-            raise TypeError("unit_weight data type shall be float, int, np.ndarray, np.generic.")
-        
-        # sanity check on soil unit weight
-
-        if np.min(np.asarray(unit_weight)) < constants.UNIT_WEIGHT_WATER:
-            raise ValueError("ERROR: soil unit weight is unlikely smaller than water unit weight.")
-
-        return True
 
     def _sanity_check_friction_angle(self, friction_angle):
         '''
@@ -147,8 +137,8 @@ class Soil:
         if soil_type_advanced not in self.soil_type_advanced_dict:
             raise ValueError("ERROR: input soil_type_advanced is undefined.")
         
-        if soil_type_advanced == "igm_cohesionless" and n60 is not None and n60 <50:
-            raise ValueError("ERROR: cohesionless igm should have N60 greater than 50.")
+        #if soil_type_advanced == "igm_cohesionless" and n60 is not None and n60 <50:
+        #    raise ValueError("ERROR: cohesionless igm should have N60 greater than 50.")
         
         return True
     

@@ -1,17 +1,17 @@
 # class for layer parameters
 
 from deep_foundation_bearing_capacity.constants import constants
-from deep_foundation_bearing_capacity.soil_layer.soil import Soil
+from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomaterial
 
 
 class Layer:
-    def __init__(self, layer_index: int, soil: Soil = None, ground_water_depth:float = 0, top_depth: float = None, thickness: float = None):
+    def __init__(self, layer_index: int, geomaterial: Geomaterial = None, ground_water_depth:float = 0, top_depth: float = None, thickness: float = None):
         '''
         To initialize layer parameters
 
         Args:
             layer_index (int): a unique index for current layer
-            soil (Soil): soil object
+            geomaterial (Geomaterial): geomaterial object
             ground_water_depth (float): ground water depth in unit of float
             top_depth (float): depth of upper side of layer
             thickness (float): thickness of layer
@@ -26,7 +26,7 @@ class Layer:
 
         # ground water table
         self.ground_water_depth = ground_water_depth
-        self.soil = soil
+        self.geomaterial = geomaterial
 
         # depth of top of the layer
         self.top_depth = top_depth

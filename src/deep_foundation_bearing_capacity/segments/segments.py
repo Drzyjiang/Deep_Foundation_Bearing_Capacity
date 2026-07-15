@@ -5,8 +5,8 @@ from deep_foundation_bearing_capacity.constants.constants import REDUCTION_ASD_C
 from deep_foundation_bearing_capacity.cross_sections.cross_sections import CrossSection
 from deep_foundation_bearing_capacity.factor_of_safety.factor_of_safety import FactorOfSafetyDeepFoundation
 from deep_foundation_bearing_capacity.foundation.foundation_material import FoundationConcrete, FoundationMaterial
+from deep_foundation_bearing_capacity.geomaterials.layer import Layer
 from deep_foundation_bearing_capacity.segments.unit_resistance import EndResistance, SideResistance
-from deep_foundation_bearing_capacity.soil_layer.layer import Layer
 
 
 class Segment:
@@ -30,8 +30,14 @@ class Segment:
         # layer
         self.layer = layer
 
- 
+        # foundation material
         self.foundation_material = foundation_material
+
+        # establish SideResistance Obj
+        self.side_resistance_obj = SideResistance.for_material(self.layer)
+
+        # estabhlish EndResistance Obj
+        self.end_resistance_obj = EndResistance(self.layer)
 
         # initialize end_resistance
         self.end_resistance = self.calculate_end_resistance()
@@ -88,10 +94,8 @@ class Segment:
             alpha_override (float): override the default used in calcualting 
         '''
 
-        # establish SideResistance Obj
-        side_resistance_obj = SideResistance(self.layer)
 
-        side_resistance_unit = side_resistance_obj.side_resistance_unit(effective_stress, alpha_override, beta_override, uplift)
+        side_resistance_unit = self.side_resistance_obj.side_resistance_unit(effective_stress, alpha_override, beta_override, uplift)
         side_resistance = side_resistance_unit * self.side_surface_area
 
         # Apply factor of safety when needed
@@ -106,10 +110,9 @@ class Segment:
         To calculate end resistance.
         Note: this is not unit resistance.
         '''
-        # estabhlish EndResistance Obj
-        end_resistance_obj = EndResistance(self.layer)
 
-        end_resistance_unit = end_resistance_obj.end_resistance_unit()
+
+        end_resistance_unit = self.end_resistance_obj.end_resistance_unit()
         end_resistance = end_resistance_unit * self.cross_section.cross_section_area
 
         if not fs is None:

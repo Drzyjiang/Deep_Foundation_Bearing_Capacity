@@ -134,10 +134,10 @@ class DeepFoundation:
 
         for segment in self.segments:
             segment_total_stress = segment_total_stress + (
-                                    segment.segment_length /2.0 * segment.layer.soil.unit_weight) 
+                                    segment.segment_length /2.0 * segment.layer.geomaterial.unit_weight) 
             segment_total_stresses.append(segment_total_stress)
             segment_total_stress = segment_total_stress + (
-                                    segment.segment_length /2.0 * segment.layer.soil.unit_weight)
+                                    segment.segment_length /2.0 * segment.layer.geomaterial.unit_weight)
 
         return segment_total_stresses
     
