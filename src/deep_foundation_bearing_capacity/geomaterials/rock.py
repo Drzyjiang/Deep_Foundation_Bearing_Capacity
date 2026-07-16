@@ -5,7 +5,7 @@ from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomateria
 
 class Rock(Geomaterial):
     def __init__(self, qu: float = None, rqd: float = None, rock_type:str = None,
-                 rock_quality: str = None):
+                 rock_quality: str = None, rock_type_advanced: str = None):
         '''
         A class for (competent) rock material.
 
@@ -26,10 +26,27 @@ class Rock(Geomaterial):
             rock_quality (str): one from ["Excellent", "Very good", "Good", "Fair", "Poor", 
                                      "Very poor"]
 
+            rock_type_advanced (str): one from ["igm_cohesive"]
         '''
         self.rock_type_options = ["A", "B", "C", "D", "E"]
         self.rock_quality_options = ["Excellent", "Very good", "Good", "Fair", "Poor", 
                                      "Very poor"]
+        self.rock_type_advanced_options = ["igm_cohesive"]
+
+        # sanity check on qu
+        self._sanity_check_qu(qu)
+
+        # sanity check on rqd
+        self._sanity_check_rqd(rqd)
+
+        # sanity check on rock type
+        self._sanity_check_rock_type(rock_type)
+
+        # sanity_check on rock_quality
+        self._sanity_check_rock_quality(rock_quality)
+
+        # sanity_check on rock_type_advanced
+        self._sanity_check_rock_type_advanced(rock_type_advanced)
 
         # unconfined compression strength in unit of psf
         self.qu = qu
@@ -82,3 +99,13 @@ class Rock(Geomaterial):
             raise ValueError(f"ERROR: rock_quality shall be one from {self.rock_quality_options}")
         else:
             return True
+
+    def _sanity_check_rock_type_advanced(self, rock_type_advanced:str)->bool:
+        '''
+        To perform sanity check on rock_type_advanced
+        '''
+
+        if rock_type_advanced not in self.rock_type_advanced_options:
+            raise ValueError(f"ERROR: rock_type_advanced shall be one from {rock_type_advanced}")
+        
+        return True

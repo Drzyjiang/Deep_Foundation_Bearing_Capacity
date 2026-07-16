@@ -25,8 +25,6 @@ class SideResistance:
         
         raise TypeError(f"ERROR: layer.geomaterial {layer.geomaterial} is not supported.")
     
-
-
         
 
 class RockSideResistance:
