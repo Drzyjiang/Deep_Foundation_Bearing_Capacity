@@ -103,8 +103,25 @@ class RockSideResistance:
         '''
         To calculate joint-effect factor that accounts for the effect of open joints that
         are either filled or not.
+        Reference: FHWA Drilled Shaft Manual 99 Table 11.4
         '''
-        pass
+
+        # sanity check
+        if self.layer.geomaterial.rqd < 20:
+            raise ValueError("ERROR: FHWA cannot recommend phi for cohesive IGM with RQD less than 20.")
+        
+        yp = None
+
+        if self.layer.geomaterial.joint == "closed":
+            yp = [0.45, 0.50, 0.60, 0.85, 1.00]
+        elif self.layer.geomaterial.joint == "open":
+            yp = [0.45, 0.50, 0.55, 0.55, 0.85]
+
+        xp = [20.0, 30.0, 50.0, 70.0, 100.0]
+        print(yp)
+        print(self.layer.geomaterial.rqd)
+        return np.interp(self.layer.geomaterial.rqd, xp, yp)
+        
 
     def side_resistance_unit_igm_cohesive(self):
         '''

@@ -14,7 +14,7 @@ class Rock(Geomaterial):
         Args:
             rock_index (int): unique material identifier
             qu (float): unconfined compressive strength in unit of psf
-            rqd (float): rock quality designation, no unit, between [0,1]
+            rqd (float): rock quality designation, no unit, between [0,100]
             rock_type (str): one from ["A", "B", "C", "D", "E"]
                             Reference: FHWA Drilled Shaft Manual Table 11.2
                             A: Carbonate rocks with well-developed crystal cleavage (e.g., 
@@ -124,6 +124,8 @@ class Rock(Geomaterial):
         '''
         if(rqd is not None and rqd < 0):
             raise ValueError("ERROR: rock RQD shall be a non-negative value.")
+        elif rqd > 100:
+            raise ValueError("ERROR: rock RQD shall be less than 100.")
         else:
             return True
         
@@ -165,8 +167,8 @@ class Rock(Geomaterial):
         To perform sanity check on joint
         '''
 
-        if joint is not None and joint != "open" and joint != "close":
-            raise ValueError("ERROR: joint shall be either 'open' or 'close'")
+        if joint is not None and joint != "open" and joint != "closed":
+            raise ValueError("ERROR: joint shall be either 'open' or 'closed'")
         
         return True
     
