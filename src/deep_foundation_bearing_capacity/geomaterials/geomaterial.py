@@ -1,5 +1,7 @@
 # Classes for geomaterials
 
+from abc import ABC, abstractmethod
+
 import numpy as np
 
 from deep_foundation_bearing_capacity.constants import constants
@@ -17,6 +19,10 @@ class Geomaterial:
         
         # TODO
         # self._sanity_check_elastic_modulus(elastic_modulus)
+
+        self.unit_weight = unit_weight
+        self.elsatic_modulus = elastic_modulus
+        
 
 
     def _sanity_check_unit_weight(self, unit_weight):
@@ -38,5 +44,15 @@ class Geomaterial:
     def _sanity_check_elastic_modulus(elastic_modulus):
         '''
         To perform sanity check on elastic modulus
+        '''
+        pass
+
+    @abstractmethod
+    def display_properties(self, properties:list[str]):
+        '''
+        To display specified geomaterial properties
+
+        Args:
+            properties (list[str]): strs that match geomaterial properties in that class
         '''
         pass

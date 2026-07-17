@@ -1,7 +1,10 @@
 # unit resistance for deep foundations
+import csv
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 from deep_foundation_bearing_capacity.constants.constants import ATM, FT2M, PSF2TSF, SCALAR_TYPE
 from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomaterial
@@ -9,6 +12,7 @@ from deep_foundation_bearing_capacity.geomaterials.layer import Layer
 from deep_foundation_bearing_capacity.geomaterials.rock import Rock
 from deep_foundation_bearing_capacity.geomaterials.soil import Soil
 
+FILE_DIR = Path(__file__).parent
 
 class SideResistance:
     '''
@@ -31,9 +35,83 @@ class RockSideResistance:
     '''
     To determine rock side resistance for deep foundations
     '''
-    def __init__(self):
+    def __init__(self, layer):
+        self.layer = layer
+
+    def side_resistance_unit(self):
+        '''
+        Top wrapper for rock side resistance
+        '''
         pass
 
+    def _calculate_alpha(self, sigma_n = None ):
+        '''
+        To calculate alpha (empirical factor for cohesive igm, not for cohesive soil)
+        Reference: FHWA Driller Shaft manual 99 Figure 11.5
+        '''
+        # sigma_n is pressure exerted by fluid concrete at the middle of layer
+        if sigma_n is None:
+            sigma_n = (self.layer.top_depth + self.layer.thickness * 0.5) * self.layer.geomaterial.density
+
+        def find_closest(lst:list[float], target:float):
+            '''
+            find the index of closest value to a target in a list 
+            
+            Args:
+                lst (list[float]): sorted list in ascending order
+                                    len(lst) >= 2
+            '''
+            idx1, idx2 = sorted(range(len(lst), key = lambda i: abs(lst[i] - target)))[:2]
+
+            if target <= lst[0] or target >= lst[-1]: # target is beyond lower and upper bounds of lst
+                idx2 = idx1
+
+            return idx1, idx2
+
+        sigma_n_pa_ratio = sigma_n / ATM
+
+        idx1, idx2 = find_closest(range(1,8), sigma_n_pa_ratio)
+
+        # load digitized curve
+        # first co
+        alpha_curve_names = {0: (1, FILE_DIR/"cohesive_igm/alpha_sigman_pa_1.csv"), 
+                             1: (2, FILE_DIR/"cohesive_igm/alpha_sigman_pa_2.csv"),
+                             2: (3, FILE_DIR/"cohesive_igm/alpha_sigman_pa_3.csv"),
+                             3: (4, FILE_DIR/"cohesive_igm/alpha_sigman_pa_4.csv"),
+                             4: (5, FILE_DIR/"cohesive_igm/alpha_sigman_pa_5.csv"),
+                             5: (6, FILE_DIR/"cohesive_igm/alpha_sigman_pa_6.csv"),
+                             6: (7, FILE_DIR/"cohesive_igm/alpha_sigman_pa_7.csv"),
+                             }
+
+        alpha_values = []
+    
+        for idx in [idx1, idx2]:
+            xp = []
+            yp = []
+            df = pd.read_csv(alpha_curve_names[idx][1])
+
+            # interpolate by qu
+            alpha_values.append(np.interp(self.layer.geomaterial.qu, df.iloc[:,0], df.iloc[:,1]))
+        
+        # interpolate by sigma_n_pa_ratio
+
+        return np.interp(sigma_n_pa_ratio, [alpha_curve_names[idx1][1], alpha_curve_names[idx2][1]], alpha_values)
+
+    def _calculate_phi(self):
+        '''
+        To calculate joint-effect factor that accounts for the effect of open joints that
+        are either filled or not.
+        '''
+        pass
+
+    def side_resistance_unit_igm_cohesive(self):
+        '''
+        To calculate side resistance of cohesive IGM
+        '''
+
+        alpha = self._calculate_alpha()
+        phi = self._calculate_phi()
+        return alpha * phi * self.layer.geomaterial.qu
 
 class SoilSideResistance:
     '''

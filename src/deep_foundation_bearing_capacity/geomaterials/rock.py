@@ -4,14 +4,17 @@ from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomateria
 
 
 class Rock(Geomaterial):
-    def __init__(self, qu: float = None, rqd: float = None, rock_type:str = None,
-                 rock_quality: str = None, rock_type_advanced: str = None):
+    def __init__(self, rock_index, unit_weight: float = 0, elastic_modulus: float = 0,
+                 friction_angle: float = None, qu: float = None, rqd: float = None, 
+                 rock_type:str = None, rock_quality: str = None, rock_type_advanced: str = None, 
+                 joint: str = None):
         '''
         A class for (competent) rock material.
 
         Args:
+            rock_index (int): unique material identifier
             qu (float): unconfined compressive strength in unit of psf
-            rqd (float):
+            rqd (float): rock quality designation, no unit, between [0,1]
             rock_type (str): one from ["A", "B", "C", "D", "E"]
                             Reference: FHWA Drilled Shaft Manual Table 11.2
                             A: Carbonate rocks with well-developed crystal cleavage (e.g., 
@@ -27,7 +30,13 @@ class Rock(Geomaterial):
                                      "Very poor"]
 
             rock_type_advanced (str): one from ["igm_cohesive"]
+
+            rock_friction_angle (float): rock friction angle
+
+            joint (str): either "closed" or "open"
         '''
+        super().__init__(unit_weight, elastic_modulus)
+
         self.rock_type_options = ["A", "B", "C", "D", "E"]
         self.rock_quality_options = ["Excellent", "Very good", "Good", "Fair", "Poor", 
                                      "Very poor"]
@@ -48,6 +57,15 @@ class Rock(Geomaterial):
         # sanity_check on rock_type_advanced
         self._sanity_check_rock_type_advanced(rock_type_advanced)
 
+        # sanity_check on joint
+        self._sanity_check_joint(joint)
+
+        # rock index
+        self.rock_index = rock_index
+
+        # rock friction angle
+        self.friction_angle = friction_angle
+
         # unconfined compression strength in unit of psf
         self.qu = qu
 
@@ -59,6 +77,28 @@ class Rock(Geomaterial):
 
         # rock quality
         self.rock_quality = rock_quality
+
+        # rock_type_advanced
+        self.rock_type_advanced = rock_type_advanced
+
+        # joint
+        self.joint = joint
+
+    @classmethod
+    def from_dict(cls, data:dict):
+        '''
+        Initialize class using dict
+        '''
+        return cls(rock_index = int(data.get("rock_index")),
+                   rqd = float(data.get("rqd")),
+                   unit_weight = float(data.get("unit_weight")),
+                   friction_angle = float(data.get("friction_angle")),
+                   qu = float(data.get("qu")),
+                   rock_type = str(data.get("rock_type")),
+                   rock_quality = str(data.get("rock_quality")),
+                   joint = str(data.get("joint"))
+                   )
+
 
     def _sanity_check_qu(self, qu:float)->bool:
         '''
@@ -73,7 +113,7 @@ class Rock(Geomaterial):
         '''
         To perform sanity check on rock quality designation
         '''
-        if(rqd < 0):
+        if(rqd is not None and rqd < 0):
             raise ValueError("ERROR: rock RQD shall be a non-negative value.")
         else:
             return True
@@ -84,7 +124,7 @@ class Rock(Geomaterial):
         '''
         
 
-        if rock_type not in self.rock_type_options:
+        if rock_type is not None and rock_type not in self.rock_type_options:
             raise ValueError(f"ERROR: rock_type shall be one from {self.rock_type_options}.")
         else:
             return True
@@ -95,7 +135,7 @@ class Rock(Geomaterial):
         '''
         rock_quality_options = ["Excellent", "Very good", "Good", "Fair", "Poor", "Very poor"]
 
-        if rock_quality not in self.rock_quality_options:
+        if rock_quality is not None and rock_quality not in self.rock_quality_options:
             raise ValueError(f"ERROR: rock_quality shall be one from {self.rock_quality_options}")
         else:
             return True
@@ -105,7 +145,29 @@ class Rock(Geomaterial):
         To perform sanity check on rock_type_advanced
         '''
 
-        if rock_type_advanced not in self.rock_type_advanced_options:
+        if rock_type_advanced is not None and rock_type_advanced not in self.rock_type_advanced_options:
             raise ValueError(f"ERROR: rock_type_advanced shall be one from {rock_type_advanced}")
         
         return True
+    
+    def _sanity_check_joint(self, joint:str)->bool:
+        '''
+        To perform sanity check on joint
+        '''
+
+        if joint is not None and joint != "open" and joint != "close":
+            raise ValueError("ERROR: joint shall be either 'open' or 'close'")
+        
+        return True
+    
+    def display_properties(self, properties = ["rock_index", "unit_weight", "friction_angle", "qu", "rqd", "rock_type",
+                                               "rock_quality", "rock_type_advanced", "joint"]):
+        '''
+        To display specified soil properties
+
+        Args:
+            properties (list[str]): strs that match rock properties in the class
+        '''
+
+        for property in properties:
+            print(f"{property} is: {getattr(self, property)}")

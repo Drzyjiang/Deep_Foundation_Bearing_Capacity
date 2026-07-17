@@ -6,14 +6,16 @@ from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomateria
 
 
 class Soil(Geomaterial):
-    def __init__(self, soil_index, unit_weight: float = 0, elastic_modulus: float = 0,
+    def __init__(self, soil_index:int, unit_weight: float = 0, elastic_modulus: float = 0,
                   friction_angle:float = 0, cohesion:float = 0, n60: float=-1,
                  soil_type_advanced: str = None):
         '''
         To initialize soil parameters
 
         Args:
-            
+            soil_index (int): unique material index
+            unit_weight (float): unit weight in unit of pcf
+            elastic_modulus (float): elastic modulus in unit of psf
             friction_angle (float): soil effective friction in unit of degree.
                                     For clay (cohesive), use zero
             cohesion (float): soil cohesion in unit of pound per square foot 
@@ -51,11 +53,12 @@ class Soil(Geomaterial):
 
     @classmethod
     def from_dict(cls, data:dict):
-        return cls(soil_index = int(data["soil_index"]), unit_weight = float(data["unit_weight"]), 
-                   friction_angle = float(data["friction_angle"]),
-                   cohesion = float(data["cohesion"]), 
-                   n60 = data["n60"],
-                   soil_type_advanced = data["soil_type_advanced"])
+        return cls(soil_index = int(data.get("soil_index")), 
+                   unit_weight = float(data.get("unit_weight")), 
+                   friction_angle = float(data.get("friction_angle")),
+                   cohesion = float(data.get("cohesion")), 
+                   n60 = data.get("n60"),
+                   soil_type_advanced = data.get("soil_type_advanced"))
 
 
 

@@ -10,6 +10,9 @@ FT2M = 0.3048
 #PSF2TSF = 0.000446
 PSF2TSF = 1.0/2000
 
+# pound per square foot to MPa
+PSF2MPA = 4.788
+
 # pound per square inch to pound per square foot by multiplying
 PSI2PSF = 144.0
 
