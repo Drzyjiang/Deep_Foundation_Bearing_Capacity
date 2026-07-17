@@ -1,0 +1,15 @@
+- layer_index: 0
+  top_depth: 0
+  thickness: 10 # ft
+  ground_water_depth: 15.0 # ft
+  
+- layer_index: 1
+  top_depth: 10
+  thickness: 5 # ft
+  ground_water_depth: 15.0 # ft
+
+- layer_index: 2
+  top_depth: 15
+  thickness: 10 # ft
+  ground_water_depth: 15.0 # ft
+

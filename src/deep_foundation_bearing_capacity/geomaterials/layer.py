@@ -34,6 +34,18 @@ class Layer:
         # thickness of the layer
         self.thickness = thickness
 
+    @classmethod
+    def from_dict(cls, data:dict):
+        '''
+        Initialize by dict
+        '''
+        return cls(layer_index = data.get("layer_index"),
+                   ground_water_depth = data.get("ground_water_depth"),
+                   top_depth = data.get("top_depth"),
+                   thickness = data.get("thickness")
+                   )
+
+
 
     def _sanity_check_layer_index(self, layer_index):
         '''
@@ -78,12 +90,19 @@ class Layer:
 
 
     
-    def display_properties(self, properties = ["layer_index", "ground_water_depth", "top_depth", "thickness"]):
+    def display_properties(self, properties = ["layer_index", "ground_water_depth", "top_depth", "thickness"], 
+                           display_geomaterial:bool = False):
         '''
         To display layer properties
+        
+        Args:
+            properties (list[str]): layer property to diplay
+            print_geomaterial (bool): whether to plot geomaterial properties
         '''
 
         for property in properties:
             print(f"{property} is: {getattr(self, property)}")
 
+        if display_geomaterial:
+            self.geomaterial.display_properties()
 
