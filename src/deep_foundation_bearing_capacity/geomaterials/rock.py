@@ -43,7 +43,7 @@ class Rock(Geomaterial):
         self.rock_type_advanced_options = ["igm_cohesive"]
 
         # sanity check on qu
-        self._sanity_check_qu(qu)
+        self._sanity_check_qu(qu, rock_type_advanced)
 
         # sanity check on rqd
         self._sanity_check_rqd(rqd)
@@ -100,12 +100,21 @@ class Rock(Geomaterial):
                    )
 
 
-    def _sanity_check_qu(self, qu:float)->bool:
+    def _sanity_check_qu(self, qu:float, rock_type_advanced:str)->bool:
         '''
         To perform sanity check on qu
+
+        Args:
+            qu (float): rock unconfined compressive strength in psf
+            rock_type_advanced (str): descriptor
         '''
         if(qu <= 0):
             raise ValueError("ERROR: rock qu shall be a positive value.")
+        elif rock_type_advanced == "igm_cohesive":
+            if qu <10e4:
+                raise ValueError("ERROR: cohesive IGM shall have qu no less than 10,000 psf")
+            elif qu > 10e5:
+                raise ValueError("ERROR: cohesive IGM typically has qu less than 100,000 psf")
         else:
             return True
     
@@ -147,6 +156,7 @@ class Rock(Geomaterial):
 
         if rock_type_advanced is not None and rock_type_advanced not in self.rock_type_advanced_options:
             raise ValueError(f"ERROR: rock_type_advanced shall be one from {rock_type_advanced}")
+        
         
         return True
     

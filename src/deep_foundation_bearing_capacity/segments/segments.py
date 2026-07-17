@@ -37,10 +37,10 @@ class Segment:
         self.side_resistance_obj = SideResistance.for_material(self.layer)
 
         # estabhlish EndResistance Obj
-        self.end_resistance_obj = EndResistance(self.layer)
+        self.end_resistance_obj = EndResistance.for_material(self.layer)
 
         # initialize end_resistance
-        self.end_resistance = self.calculate_end_resistance()
+        #self.end_resistance = self.calculate_end_resistance()
 
         
     @property

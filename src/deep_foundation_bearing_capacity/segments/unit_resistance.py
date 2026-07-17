@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from deep_foundation_bearing_capacity.constants.constants import ATM, FT2M, PSF2TSF, SCALAR_TYPE
+from deep_foundation_bearing_capacity.constants.constants import ATM, FT2M, PSF2MPA, PSF2TSF, SCALAR_TYPE
 from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomaterial
 from deep_foundation_bearing_capacity.geomaterials.layer import Layer
 from deep_foundation_bearing_capacity.geomaterials.rock import Rock
@@ -51,7 +51,7 @@ class RockSideResistance:
         '''
         # sigma_n is pressure exerted by fluid concrete at the middle of layer
         if sigma_n is None:
-            sigma_n = (self.layer.top_depth + self.layer.thickness * 0.5) * self.layer.geomaterial.density
+            sigma_n = (self.layer.top_depth + self.layer.thickness * 0.5) * self.layer.geomaterial.unit_weight
 
         def find_closest(lst:list[float], target:float):
             '''
@@ -61,7 +61,7 @@ class RockSideResistance:
                 lst (list[float]): sorted list in ascending order
                                     len(lst) >= 2
             '''
-            idx1, idx2 = sorted(range(len(lst), key = lambda i: abs(lst[i] - target)))[:2]
+            idx1, idx2 = sorted(list(range(len(lst))), key = lambda i: abs(lst[i] - target))[:2]
 
             if target <= lst[0] or target >= lst[-1]: # target is beyond lower and upper bounds of lst
                 idx2 = idx1
@@ -70,7 +70,7 @@ class RockSideResistance:
 
         sigma_n_pa_ratio = sigma_n / ATM
 
-        idx1, idx2 = find_closest(range(1,8), sigma_n_pa_ratio)
+        idx1, idx2 = find_closest(list(range(1,8)), sigma_n_pa_ratio)
 
         # load digitized curve
         # first co
@@ -84,19 +84,21 @@ class RockSideResistance:
                              }
 
         alpha_values = []
-    
+
         for idx in [idx1, idx2]:
             xp = []
             yp = []
             df = pd.read_csv(alpha_curve_names[idx][1])
-
+         
             # interpolate by qu
-            alpha_values.append(np.interp(self.layer.geomaterial.qu, df.iloc[:,0], df.iloc[:,1]))
+            alpha_values.append(np.interp(self.layer.geomaterial.qu * PSF2MPA, df.iloc[:,0], df.iloc[:,1]))
+      
+        # Use Fig 11.5 to get alpha through interpolating by sigma_n_pa_ratio
+        alpha = np.interp(sigma_n_pa_ratio, [alpha_curve_names[idx1][0], alpha_curve_names[idx2][0]], alpha_values)
+        alpha = alpha * np.tan(np.radians(self.layer.geomaterial.friction_angle)) / np.tan(np.radians(30))
+
+        return alpha
         
-        # interpolate by sigma_n_pa_ratio
-
-        return np.interp(sigma_n_pa_ratio, [alpha_curve_names[idx1][1], alpha_curve_names[idx2][1]], alpha_values)
-
     def _calculate_phi(self):
         '''
         To calculate joint-effect factor that accounts for the effect of open joints that
@@ -310,9 +312,32 @@ class SoilSideResistance:
         else:
             return 1.0
 
+
 class EndResistance:
     '''
-    Class for end resistance of deep foundation
+    Abtract class for SoilEndResistance and RockEndResistance
+    '''
+    
+    @classmethod
+    def for_material(cls, layer:Layer)->"SideResistance":
+    
+        if isinstance(layer.geomaterial, Soil):
+            return SoilEndResistance(layer)
+        elif isinstance(layer.geomaterial, Rock):
+            return RockEndResistance(layer)
+        
+        raise TypeError(f"ERROR: layer.geomaterial {layer.geomaterial} is not supported.")
+    
+class RockEndResistance:
+    def __init__(self, layer: Layer):
+        self.layer = layer
+
+    def end_resistance_unit(self):
+        pass
+
+class SoilEndResistance:
+    '''
+    Class for soil end resistance of deep foundation
     This shall not be applied to shallow foundation
     '''
     def __init__(self, layer: Layer):
