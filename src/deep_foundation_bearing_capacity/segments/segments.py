@@ -6,7 +6,11 @@ from deep_foundation_bearing_capacity.cross_sections.cross_sections import Cross
 from deep_foundation_bearing_capacity.factor_of_safety.factor_of_safety import FactorOfSafetyDeepFoundation
 from deep_foundation_bearing_capacity.foundation.foundation_material import FoundationConcrete, FoundationMaterial
 from deep_foundation_bearing_capacity.geomaterials.layer import Layer
-from deep_foundation_bearing_capacity.segments.unit_resistance import EndResistance, SideResistance
+from deep_foundation_bearing_capacity.segments.unit_resistance import (
+    EndResistance,
+    EndResistanceContext,
+    SideResistance,
+)
 
 
 class Segment:
@@ -39,8 +43,8 @@ class Segment:
         # estabhlish EndResistance Obj
         self.end_resistance_obj = EndResistance.for_material(self.layer)
 
-        # initialize end_resistance
-        #self.end_resistance = self.calculate_end_resistance()
+        # establish EndReistanceContext
+        self.end_resistance_context = EndResistanceContext(layer = self.layer, socket_width_ratio = 1.0)
 
         
     @property
@@ -110,9 +114,7 @@ class Segment:
         To calculate end resistance.
         Note: this is not unit resistance.
         '''
-
-
-        end_resistance_unit = self.end_resistance_obj.end_resistance_unit()
+        end_resistance_unit = self.end_resistance_obj.end_resistance_unit(self.end_resistance_context)
         end_resistance = end_resistance_unit * self.cross_section.cross_section_area
 
         if not fs is None:

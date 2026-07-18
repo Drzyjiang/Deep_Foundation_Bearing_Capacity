@@ -1,6 +1,7 @@
 # unit resistance for deep foundations
 import csv
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -354,7 +355,6 @@ class EndResistance:
     '''
     Abtract class for SoilEndResistance and RockEndResistance
     '''
-    
     @classmethod
     def for_material(cls, layer:Layer)->"SideResistance":
         '''
@@ -366,7 +366,28 @@ class EndResistance:
             return RockEndResistance(layer)
         raise TypeError(f"ERROR: layer.geomaterial {layer.geomaterial} is not supported.")
     
-class RockEndResistance:
+    @abstractmethod
+    def end_resistance_unit(self, context):
+        '''
+        Interface of unit end resistance
+        '''
+        pass
+
+@dataclass
+class EndResistanceContext:
+    """
+    All parameters for SoilEndResistance and RockEndResistance
+    """
+    # shared
+    layer: Layer
+
+    # parameters for rock
+    socket_width_ratio: float
+
+    # parameters for soil
+
+    
+class RockEndResistance(EndResistance):
     def __init__(self, layer: Layer, socket_width_ratio: float = 1.0):
         '''
         Args:
@@ -379,9 +400,12 @@ class RockEndResistance:
         self.layer = layer
         self.socket_width_ratio = socket_width_ratio
 
-    def end_resistance_unit(self):
+    def end_resistance_unit(self, end_resistance_context):
         '''
         Top wrapper for rock unit end resistance
+
+        Args:
+            end_resistance_context (): parameters for both SoilEndResistance and RockEndResistance
         '''
         if self.layer.geomaterial.rock_type_advanced == "igm_cohesive":
             return self.end_resistance_unit_igm_coheisve()
@@ -440,7 +464,7 @@ class RockEndResistance:
         return rock_quality_m_dict.get(self.layer.geomaterial.rock_quality).get(
             self.layer.geomaterial.rock_type)
 
-class SoilEndResistance:
+class SoilEndResistance(EndResistance):
     '''
     Class for soil end resistance of deep foundation
     This shall not be applied to shallow foundation
@@ -448,9 +472,12 @@ class SoilEndResistance:
     def __init__(self, layer: Layer):
         self.layer = layer
 
-    def end_resistance_unit(self):
+    def end_resistance_unit(self, end_resistance_context):
         '''
         Top wrapper for end resistance
+
+        Args:
+            end_resistance_content: parameters for both SoilEndResistance and RockEndResistance
         '''
 
         if self.layer.geomaterial.soil_type_general == 1:
