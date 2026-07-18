@@ -6,7 +6,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from deep_foundation_bearing_capacity.constants.constants import ATM, FT2M, PSF2MPA, PSF2TSF, SCALAR_TYPE
+from deep_foundation_bearing_capacity.constants.constants import (
+    ATM,
+    FT2M,
+    PSF2MPA,
+    PSF2TSF,
+    SCALAR_TYPE,
+    YIELD_STRENGTH_CONCRETE,
+)
 from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomaterial
 from deep_foundation_bearing_capacity.geomaterials.layer import Layer
 from deep_foundation_bearing_capacity.geomaterials.rock import Rock
@@ -46,7 +53,7 @@ class RockSideResistance:
         if self.layer.geomaterial.rock_type_advanced == "igm_cohesive":
             return self.side_resistance_unit_igm_cohesive()
         else:
-            raise ValueError("ERROR: Current rock type is not implemented yet.")
+            raise self.side_resistance_unit_rock()
 
     def _calculate_alpha(self, sigma_n = None ):
         '''
@@ -135,6 +142,15 @@ class RockSideResistance:
         phi = self._calculate_phi()
 
         return alpha * phi * self.layer.geomaterial.qu
+    
+    def side_resistance_unit_rock(self):
+        '''
+        To calculate side resistance of rock
+        Assume smooth rock socket
+        '''
+        qu = min(self.layer.geomaterial.qu, YIELD_STRENGTH_CONCRETE)
+        return 0.65 * ATM * (qu/ATM)**0.5
+
 
 class SoilSideResistance:
     '''
@@ -384,7 +400,6 @@ class RockEndResistance:
         Calculate unit end resistance for rock
         Reference: FHWA Drilled Shaft Manual 99 Eq.(11.5) through (11.7)
         '''
-
         if self.socket_width_ratio >= 1.5 and self.layer.geomaterial.rqd == 100: # FHWA 99 Eq.(11.5)
             return self.layer.geomaterial.qu * 2.5
         elif self.layer.geomaterial.joint == "closed" and self.layer.geomaterial.rqd >= 70: # FHWA 99 (Eq. 11.6)

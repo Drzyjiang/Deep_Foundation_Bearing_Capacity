@@ -96,7 +96,7 @@ class Rock(Geomaterial):
                    qu = float(data.get("qu")),
                    rock_type = str(data.get("rock_type")),
                    rock_quality = str(data.get("rock_quality")),
-                   rock_type_advanced = str(data.get("rock_type_advanced")),
+                   rock_type_advanced = data.get("rock_type_advanced"),
                    joint = str(data.get("joint"))
                    )
 
@@ -134,7 +134,8 @@ class Rock(Geomaterial):
         '''
         To perform sanity check on rock_type
         '''
-        
+        if isinstance(rock_type, str) and rock_type == "None":
+            raise TypeError("ERROR: rock_type_advanced cannot be 'None'")
 
         if rock_type is not None and rock_type not in self.rock_type_options:
             raise ValueError(f"ERROR: rock_type shall be one from {self.rock_type_options}.")
@@ -147,6 +148,9 @@ class Rock(Geomaterial):
         '''
         rock_quality_options = ["Excellent", "Very good", "Good", "Fair", "Poor", "Very poor"]
 
+        if isinstance(rock_quality, str) and rock_quality == "None":
+            raise TypeError("ERROR: rock_type_advanced cannot be 'None'")
+
         if rock_quality is not None and rock_quality not in self.rock_quality_options:
             raise ValueError(f"ERROR: rock_quality shall be one from {self.rock_quality_options}")
         else:
@@ -156,10 +160,11 @@ class Rock(Geomaterial):
         '''
         To perform sanity check on rock_type_advanced
         '''
-
-        if rock_type_advanced is not None and rock_type_advanced not in self.rock_type_advanced_options:
-            raise ValueError(f"ERROR: rock_type_advanced shall be one from {self.rock_type_advanced_options}")
+        if isinstance(rock_type_advanced, str) and rock_type_advanced == "None":
+            raise TypeError("ERROR: rock_type_advanced cannot be 'None'")
         
+        if (rock_type_advanced is not None) and (rock_type_advanced not in self.rock_type_advanced_options):
+            raise ValueError(f"ERROR: rock_type_advanced shall be one from {self.rock_type_advanced_options}")
         
         return True
     

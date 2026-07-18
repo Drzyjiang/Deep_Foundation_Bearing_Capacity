@@ -2,17 +2,17 @@
   unit_weight: 150 # pcf
   friction_angle: 30 # degree
   qu: 10000 # psf
-  rqd: 90
+  rqd: 100
   rock_type: A
   rock_quality: "Good"
-  rock_type_advanced: igm_cohesive
+  rock_type_advanced: NULL
   joint: "closed"
 
 - rock_index: 1
   unit_weight: 150 # pcf
   friction_angle: 27 # degree
   qu: 10000 # psf
-  rqd: 90
+  rqd: 100
   rock_type: A
   rock_quality: "Good"
   rock_type_advanced: igm_cohesive
