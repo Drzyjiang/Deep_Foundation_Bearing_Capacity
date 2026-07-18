@@ -40,7 +40,7 @@ class Rock(Geomaterial):
         self.rock_type_options = ["A", "B", "C", "D", "E"]
         self.rock_quality_options = ["Excellent", "Very good", "Good", "Fair", "Poor", 
                                      "Very poor"]
-        self.rock_type_advanced_options = ["igm_cohesive"]
+        self.rock_type_advanced_options = ["igm_cohesive", None]
 
         # sanity check on qu
         self._sanity_check_qu(qu, rock_type_advanced)
@@ -96,6 +96,7 @@ class Rock(Geomaterial):
                    qu = float(data.get("qu")),
                    rock_type = str(data.get("rock_type")),
                    rock_quality = str(data.get("rock_quality")),
+                   rock_type_advanced = str(data.get("rock_type_advanced")),
                    joint = str(data.get("joint"))
                    )
 
@@ -111,9 +112,9 @@ class Rock(Geomaterial):
         if(qu <= 0):
             raise ValueError("ERROR: rock qu shall be a positive value.")
         elif rock_type_advanced == "igm_cohesive":
-            if qu <10e4:
+            if qu <1e4:
                 raise ValueError("ERROR: cohesive IGM shall have qu no less than 10,000 psf")
-            elif qu > 10e5:
+            elif qu > 1e5:
                 raise ValueError("ERROR: cohesive IGM typically has qu less than 100,000 psf")
         else:
             return True
@@ -157,7 +158,7 @@ class Rock(Geomaterial):
         '''
 
         if rock_type_advanced is not None and rock_type_advanced not in self.rock_type_advanced_options:
-            raise ValueError(f"ERROR: rock_type_advanced shall be one from {rock_type_advanced}")
+            raise ValueError(f"ERROR: rock_type_advanced shall be one from {self.rock_type_advanced_options}")
         
         
         return True

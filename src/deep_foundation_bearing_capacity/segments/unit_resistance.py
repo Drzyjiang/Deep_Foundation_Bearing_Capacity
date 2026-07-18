@@ -21,7 +21,7 @@ class SideResistance:
     
     @classmethod
     def for_material(cls, layer:Layer)->"SideResistance":
-    
+     
         if isinstance(layer.geomaterial, Soil):
             return SoilSideResistance(layer)
         elif isinstance(layer.geomaterial, Rock):
@@ -42,7 +42,11 @@ class RockSideResistance:
         '''
         Top wrapper for rock side resistance
         '''
-        pass
+
+        if self.layer.geomaterial.rock_type_advanced == "igm_cohesive":
+            return self.side_resistance_unit_igm_cohesive()
+        else:
+            raise ValueError("ERROR: Current rock type is not implemented yet.")
 
     def _calculate_alpha(self, sigma_n = None ):
         '''
@@ -110,6 +114,7 @@ class RockSideResistance:
         if self.layer.geomaterial.rqd < 20:
             raise ValueError("ERROR: FHWA cannot recommend phi for cohesive IGM with RQD less than 20.")
         
+        xp = [20.0, 30.0, 50.0, 70.0, 100.0]
         yp = None
 
         if self.layer.geomaterial.joint == "closed":
@@ -117,19 +122,18 @@ class RockSideResistance:
         elif self.layer.geomaterial.joint == "open":
             yp = [0.45, 0.50, 0.55, 0.55, 0.85]
 
-        xp = [20.0, 30.0, 50.0, 70.0, 100.0]
-        print(yp)
-        print(self.layer.geomaterial.rqd)
         return np.interp(self.layer.geomaterial.rqd, xp, yp)
         
 
     def side_resistance_unit_igm_cohesive(self):
         '''
-        To calculate side resistance of cohesive IGM
+        To calculate side resistance of cohesive IGM in unit of psf
+        Reference: FHWA Drilled Shaft Manual 99 Eq.(11.21)
+                   not Eq.(B.39)
         '''
-
         alpha = self._calculate_alpha()
         phi = self._calculate_phi()
+
         return alpha * phi * self.layer.geomaterial.qu
 
 class SoilSideResistance:
@@ -337,20 +341,89 @@ class EndResistance:
     
     @classmethod
     def for_material(cls, layer:Layer)->"SideResistance":
-    
+        '''
+        
+        '''
         if isinstance(layer.geomaterial, Soil):
             return SoilEndResistance(layer)
         elif isinstance(layer.geomaterial, Rock):
             return RockEndResistance(layer)
-        
         raise TypeError(f"ERROR: layer.geomaterial {layer.geomaterial} is not supported.")
     
 class RockEndResistance:
-    def __init__(self, layer: Layer):
+    def __init__(self, layer: Layer, socket_width_ratio: float = 1.0):
+        '''
+        Args:
+            layer (Layer): layer
+            socket_width_ratio (float): socket length to foundation width/diamater ratio
+        '''
+        if socket_width_ratio < 0.0:
+            raise ValueError("ERROR: socket-to-width ratio shall be a non-negative value.")
+
         self.layer = layer
+        self.socket_width_ratio = socket_width_ratio
 
     def end_resistance_unit(self):
-        pass
+        '''
+        Top wrapper for rock unit end resistance
+        '''
+        if self.layer.geomaterial.rock_type_advanced == "igm_cohesive":
+            return self.end_resistance_unit_igm_coheisve()
+        else:
+            return self.end_resistance_unit_rock()
+    
+    def end_resistance_unit_igm_coheisve(self):
+        '''
+        Calculate unit end resistance for cohesive IGM.
+        The value is the same as rock
+        '''
+        return self.end_resistance_unit_rock()
+
+    def end_resistance_unit_rock(self):
+        '''
+        Calculate unit end resistance for rock
+        Reference: FHWA Drilled Shaft Manual 99 Eq.(11.5) through (11.7)
+        '''
+
+        if self.socket_width_ratio >= 1.5 and self.layer.geomaterial.rqd == 100: # FHWA 99 Eq.(11.5)
+            return self.layer.geomaterial.qu * 2.5
+        elif self.layer.geomaterial.joint == "closed" and self.layer.geomaterial.rqd >= 70: # FHWA 99 (Eq. 11.6)
+            return 4.83 * (self.layer.geomaterial.qu * PSF2MPA)**0.51 / PSF2MPA
+        else: # FHWA 99 (Eq.11.7)
+            s = self.get_s()
+            m = self.get_m()
+            return (s**0.5 + (m*s**0.5+s)**0.5) * self.layer.geomaterial.qu
+
+    def get_s(self):
+        '''
+        Derive rock mass quality parameter s
+        Reference: FHWA Drilled Shaft Manual 99 Table 11.2    
+        '''
+        rock_quality_s_dict = {"Excellent": 1.0,
+                               "Very good": 0.1,
+                               "Good": 4e-2,
+                               "Fair": 1e-4,
+                               "Poor": 1e-5,
+                                "Very poor": 0
+                                }
+
+        return rock_quality_s_dict.get(self.layer.geomaterial.rock_quality)
+    
+    def get_m(self):
+        '''
+        Derive rock mass quality parameter m
+        Reference: FHWA Drilled Shaft Manual 99 Table 11.2
+        '''
+        rock_quality_m_dict = {}
+        rock_quality_m_dict["Excellent"] = {"A": 7.0, "B": 10.0, "C": 15.0, "D": 17.0, "E": 25.0}
+        rock_quality_m_dict["Very good"] = {"A": 3.5, "B": 5.0,  "C": 7.5,  "D": 8.5,  "E": 12.5}
+        rock_quality_m_dict["Good"]      = {"A": 0.7, "B": 1.0,  "C": 1.5,  "D": 1.7,  "E": 2.5}
+        rock_quality_m_dict["Fair"]      = {"A": 0.14,"B": 0.2,  "C": 0.3,  "D": 0.34, "E": 0.5}
+        rock_quality_m_dict["Poor"]      = {"A": 0.04,"B": 0.05, "C": 0.08, "D": 0.09, "E": 0.13}
+        rock_quality_m_dict["Very poor"] = {"A": 0.007,"B":0.01, "C": 0.015,"D": 0.017,"E": 0.025}
+
+        return rock_quality_m_dict.get(self.layer.geomaterial.rock_quality).get(
+            self.layer.geomaterial.rock_type)
 
 class SoilEndResistance:
     '''
@@ -375,7 +448,6 @@ class SoilEndResistance:
         To calculate end unit resistance of cohesionless layer 
         Reference: FHWA Drilled Shaft Manual 99,  Eq.(11.4b)
         '''
-
         # Sanity check on layer.geomaterial.n60
         if self.layer.geomaterial.n60 < 0:
             raise ValueError("ERROR: cohesionless soil shall not have negative N60.")
@@ -388,7 +460,9 @@ class SoilEndResistance:
         Notes: depth-related correction is not applied
         Reference: FHWA Driller Shaft Manual 99, Eq.(11.2)
         '''
-
+        # data points faciliating interpolation
+        # XP: undrained shear strength in psf
+        # YP: N* in psf
         XP = [500, 1000, 2000]
         YP = [6.5, 8.0, 9.0]
         N_ast = float(np.interp(self.layer.geomaterial.cohesion, XP, YP))
