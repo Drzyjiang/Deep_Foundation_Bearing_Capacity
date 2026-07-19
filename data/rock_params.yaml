@@ -4,7 +4,7 @@
   qu: 10000 # psf
   rqd: 100
   rock_type: A
-  rock_quality: "Good"
+  rock_quality: "Excellent"
   rock_type_advanced: NULL
   joint: "closed"
 
@@ -14,7 +14,7 @@
   qu: 10000 # psf
   rqd: 100
   rock_type: A
-  rock_quality: "Good"
+  rock_quality: "Excellent"
   rock_type_advanced: igm_cohesive
   joint: "closed"
 
@@ -24,7 +24,7 @@
   qu: 10000 # psf
   rqd: 90
   rock_type: A
-  rock_quality: "Good"
+  rock_quality: "Very good"
   rock_type_advanced: igm_cohesive
   joint: "closed"
 

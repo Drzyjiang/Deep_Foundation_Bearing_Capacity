@@ -75,15 +75,21 @@ class RockSideResistance(SideResistance):
     def __init__(self, layer):
         super().__init__(layer)
 
-    def side_resistance_unit(self, side_resistance_unit:SideResistanceContext):
+    def side_resistance_unit(self, side_resistance_context:SideResistanceContext):
         '''
         Top wrapper for rock side resistance
         '''
-
+        side_resistance_unit = None
         if self.layer.geomaterial.rock_type_advanced == "igm_cohesive":
-            return self.side_resistance_unit_igm_cohesive(SideResistanceContext)
+            side_resistance_unit = self.side_resistance_unit_igm_cohesive(side_resistance_context)
         else:
-            return self.side_resistance_unit_rock(SideResistanceContext)
+            side_resistance_unit = self.side_resistance_unit_rock(side_resistance_context)
+        
+         # Apply uplift reduction
+        if side_resistance_context.uplift:
+            side_resistance_unit = side_resistance_unit * self._uplift_resistance_reduction()
+
+        return side_resistance_unit
 
     def _calculate_alpha(self, sigma_n = None ):
         '''
@@ -135,7 +141,8 @@ class RockSideResistance(SideResistance):
             alpha_values.append(np.interp(self.layer.geomaterial.qu * PSF2MPA, df.iloc[:,0], df.iloc[:,1]))
       
         # Use Fig 11.5 to get alpha through interpolating by sigma_n_pa_ratio
-        alpha = np.interp(sigma_n_pa_ratio, [alpha_curve_names[idx1][0], alpha_curve_names[idx2][0]], alpha_values)
+        # use log(sigma_n_pa_ratio) instead of sigma_n_pa_ratio
+        alpha = np.interp(np.log(sigma_n_pa_ratio), [np.log(alpha_curve_names[idx1][0]), alpha_curve_names[idx2][0]], alpha_values)
         alpha = alpha * np.tan(np.radians(self.layer.geomaterial.friction_angle)) / np.tan(np.radians(30))
 
         return alpha
@@ -177,16 +184,25 @@ class RockSideResistance(SideResistance):
 
         return alpha * phi * self.layer.geomaterial.qu
     
-    def side_resistance_unit_rock(self, side_resistance_context: SideResistanceContext):
+    def side_resistance_unit_rock(self, side_resistance_context: SideResistanceContext, uplift:bool = False):
         '''
-        To calculate side resistance of rock
+        Top wrapper of side resistance of rock
         Assume smooth rock socket
 
         Args:
             side_resistance_context (SideResistanceContext): context parameters for side resistance
+            uplift (bool): whether side resistance is for uplift
         '''
         qu = min(self.layer.geomaterial.qu, YIELD_STRENGTH_CONCRETE)
         return 0.65 * ATM * (qu/ATM)**0.5
+    
+    def _uplift_resistance_reduction(self)->float:
+        '''
+        To derive reduction for uplift side resistance for rock.
+        Reference: FHWA Drilled Shaft Manual 99 Eq.(11.30)
+        rock, cohesive IGM: 1.00
+        '''
+        return 1.0
 
 
 class SoilSideResistance(SideResistance):
@@ -199,7 +215,7 @@ class SoilSideResistance(SideResistance):
     def side_resistance_unit(self, side_resistance_context: SideResistanceContext):
         '''
         Top wrapper for side resistance
-
+            side_resistance_context (SideResistanceContext): all parameters for side resistance calculation
         '''
         # sanity check on effective_stress
         # negative effective stress is currently not applicable
