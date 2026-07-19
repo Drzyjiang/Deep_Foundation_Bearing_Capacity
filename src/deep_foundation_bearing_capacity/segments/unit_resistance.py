@@ -15,6 +15,7 @@ from deep_foundation_bearing_capacity.constants.constants import (
     SCALAR_TYPE,
     YIELD_STRENGTH_CONCRETE,
 )
+from deep_foundation_bearing_capacity.factor_of_safety.factor_of_safety import FactorOfSafetyDeepFoundation
 from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomaterial
 from deep_foundation_bearing_capacity.geomaterials.layer import Layer
 from deep_foundation_bearing_capacity.geomaterials.rock import Rock
@@ -22,10 +23,33 @@ from deep_foundation_bearing_capacity.geomaterials.soil import Soil
 
 FILE_DIR = Path(__file__).parent
 
+@dataclass
+class SideResistanceContext:
+    """
+    Input Parameters shared by RockSideResistance and SoilSideResistance
+    """
+    # Used by RockSideResistance
+    
+    # Used by SoilSideReistance
+    # effective stress in unit of psf
+    effective_stress: float
+
+    # whether side resistance is for uplift
+    uplift:float = False
+
+    # override alpha when calculate side resistance for cohesive layer
+    alpha_override: float = None
+
+    # override beta when calculate side resistance for cohesionless layer
+    beta_override:float = None
+
+
 class SideResistance:
     '''
     Abtract class for SoilSideResistance and RockSideResistance
     '''
+    def __init__(self, layer):
+        self.layer = layer
     
     @classmethod
     def for_material(cls, layer:Layer)->"SideResistance":
@@ -37,24 +61,29 @@ class SideResistance:
         
         raise TypeError(f"ERROR: layer.geomaterial {layer.geomaterial} is not supported.")
     
-        
+    @abstractmethod
+    def side_resistance_unit(self, side_resistance_context: SideResistanceContext):
+        """
+        Interface for unit side resistance
+        """
+        pass
 
-class RockSideResistance:
+class RockSideResistance(SideResistance):
     '''
     To determine rock side resistance for deep foundations
     '''
     def __init__(self, layer):
-        self.layer = layer
+        super().__init__(layer)
 
-    def side_resistance_unit(self):
+    def side_resistance_unit(self, side_resistance_unit:SideResistanceContext):
         '''
         Top wrapper for rock side resistance
         '''
 
         if self.layer.geomaterial.rock_type_advanced == "igm_cohesive":
-            return self.side_resistance_unit_igm_cohesive()
+            return self.side_resistance_unit_igm_cohesive(SideResistanceContext)
         else:
-            raise self.side_resistance_unit_rock()
+            return self.side_resistance_unit_rock(SideResistanceContext)
 
     def _calculate_alpha(self, sigma_n = None ):
         '''
@@ -133,70 +162,78 @@ class RockSideResistance:
         return np.interp(self.layer.geomaterial.rqd, xp, yp)
         
 
-    def side_resistance_unit_igm_cohesive(self):
+    def side_resistance_unit_igm_cohesive(self, side_reistance_context: SideResistanceContext):
         '''
         To calculate side resistance of cohesive IGM in unit of psf
         Reference: FHWA Drilled Shaft Manual 99 Eq.(11.21)
                    not Eq.(B.39)
+
+        Args:
+            side_resistance_context (SideResistanceContext):
+            
         '''
         alpha = self._calculate_alpha()
         phi = self._calculate_phi()
 
         return alpha * phi * self.layer.geomaterial.qu
     
-    def side_resistance_unit_rock(self):
+    def side_resistance_unit_rock(self, side_resistance_context: SideResistanceContext):
         '''
         To calculate side resistance of rock
         Assume smooth rock socket
+
+        Args:
+            side_resistance_context (SideResistanceContext): context parameters for side resistance
         '''
         qu = min(self.layer.geomaterial.qu, YIELD_STRENGTH_CONCRETE)
         return 0.65 * ATM * (qu/ATM)**0.5
 
 
-class SoilSideResistance:
+class SoilSideResistance(SideResistance):
     '''
     To determine soil side resistance for deep foundations
     '''
     def __init__(self, layer: Layer):
-        self.layer = layer
-    
+        super().__init__(layer)
 
-    def side_resistance_unit(self, effective_stress: float, alpha_override: float = None, 
-                             beta_override:float = None, uplift = False):
+    def side_resistance_unit(self, side_resistance_context: SideResistanceContext):
         '''
         Top wrapper for side resistance
 
-        Args:
-            effective_stress (float): effective stress in unit of psf
-            alpha_override (float): override alpha when calculate side resistance for cohesive layer
-            beta_override (float): override beta when calculate side resistance for cohesionless layer
-            uplift (bool): whether side resistance is for uplift
         '''
-
         # sanity check on effective_stress
         # negative effective stress is currently not applicable
-        if effective_stress < 0:
+        if side_resistance_context.effective_stress < 0:
             raise ValueError("ERROR: negative effective stress is currently not applicable.")
         
         # sanity check on alpha_override
-        if not alpha_override is None and (alpha_override < 0.45 or alpha_override > 0.55):
+        if not side_resistance_context.alpha_override is None and (
+            side_resistance_context.alpha_override < 0.45 or side_resistance_context.alpha_override > 0.55):
             raise ValueError("ERROR: typical alpha_override shall be between 0.45 and 0.55.")
         
         # sanity check on beta_override
-        if not beta_override is None and (beta_override <0.25 or beta_override > 1.80):
+        if not side_resistance_context.beta_override is None and (
+            side_resistance_context.beta_override <0.25 or side_resistance_context.beta_override > 1.80):
             raise ValueError("ERROR: typical beta_override shall be between 0.25 and 1.80.")
 
         # judge by soil_type_advanced
         if self.layer.geomaterial.soil_type_advanced == "gs":
-            return self.side_resistance_unit_cohesionless(effective_stress, beta_override, uplift)
+            return self.side_resistance_unit_cohesionless(side_resistance_context.effective_stress,
+                                                          side_resistance_context.beta_override,
+                                                          side_resistance_context.uplift)
         elif self.layer.geomaterial.soil_type_advanced == "igm_cohesionless":
-            return self.side_resistance_unit_cohesionless(effective_stress, beta_override, uplift)
+            return self.side_resistance_unit_cohesionless(side_resistance_context.effective_stress,
+                                                          side_resistance_context.beta_override,
+                                                          side_resistance_context.uplift)
 
         # judge by soil_type_general
         if self.layer.geomaterial.soil_type_general == 1:
-            return self.side_resistance_unit_cohesionless(effective_stress, beta_override, uplift)
+            return self.side_resistance_unit_cohesionless(side_resistance_context.effective_stress,
+                                                          side_resistance_context.beta_override,
+                                                          side_resistance_context.uplift)
         elif self.layer.geomaterial.soil_type_general == 2:
-            return self.side_resistance_unit_cohesive(alpha_override, uplift)
+            return self.side_resistance_unit_cohesive(side_resistance_context.alpha_override,
+                                                      side_resistance_context.uplift)
         else:
             raise ValueError("ERROR: side_resistance_unit for current soil_type_general is yet to implement.")
 
@@ -378,11 +415,8 @@ class EndResistanceContext:
     """
     All parameters for SoilEndResistance and RockEndResistance
     """
-    # shared
-    layer: Layer
-
     # parameters for rock
-    socket_width_ratio: float
+    socket_width_ratio: float = 1.0
 
     # parameters for soil
 

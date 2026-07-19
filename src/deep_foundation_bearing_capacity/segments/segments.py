@@ -10,6 +10,7 @@ from deep_foundation_bearing_capacity.segments.unit_resistance import (
     EndResistance,
     EndResistanceContext,
     SideResistance,
+    SideResistanceContext,
 )
 
 
@@ -42,9 +43,6 @@ class Segment:
 
         # estabhlish EndResistance Obj
         self.end_resistance_obj = EndResistance.for_material(self.layer)
-
-        # establish EndReistanceContext
-        self.end_resistance_context = EndResistanceContext(layer = self.layer, socket_width_ratio = 1.0)
 
         
     @property
@@ -86,39 +84,29 @@ class Segment:
                     constants.UNIT_WEIGHT_WATER) * saturated_thickness)         
         
         
-    def calculate_side_resistance(self, effective_stress: float, fs: float = 1.0, 
-                         alpha_override = None, beta_override = None, uplift:bool = False):
+    def calculate_side_resistance(self, side_resistance_context: SideResistanceContext):
         '''
         To calculate side resistance.
         Note: this is not unit resistance.
         
         Args:
-            effective_stress (float): effective stress in unit of psf
-            fs (float): factor of safety for side resistance
-            alpha_override (float): override the default used in calcualting 
+            side_resistance_context (SideResistanceContext)
         '''
 
-
-        side_resistance_unit = self.side_resistance_obj.side_resistance_unit(effective_stress, alpha_override, beta_override, uplift)
+        side_resistance_unit = self.side_resistance_obj.side_resistance_unit(side_resistance_context)
         side_resistance = side_resistance_unit * self.side_surface_area
-
-        # Apply factor of safety when needed
-        side_resistance = side_resistance / fs
 
         return side_resistance
     
 
         
-    def calculate_end_resistance(self, fs: FactorOfSafetyDeepFoundation = None):
+    def calculate_end_resistance(self, end_resistance_context: EndResistanceContext):
         '''
         To calculate end resistance.
         Note: this is not unit resistance.
         '''
-        end_resistance_unit = self.end_resistance_obj.end_resistance_unit(self.end_resistance_context)
+        end_resistance_unit = self.end_resistance_obj.end_resistance_unit(end_resistance_context)
         end_resistance = end_resistance_unit * self.cross_section.cross_section_area
-
-        if not fs is None:
-            end_resistance = end_resistance / fs.fs_deep_foundation_end
 
         return end_resistance
     

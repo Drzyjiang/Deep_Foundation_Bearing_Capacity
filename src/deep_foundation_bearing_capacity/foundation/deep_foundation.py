@@ -7,11 +7,12 @@ import matplotlib.pyplot as plt
 from deep_foundation_bearing_capacity.constants.constants import SCALAR_TYPE, UNIT_WEIGHT_WATER
 from deep_foundation_bearing_capacity.factor_of_safety.factor_of_safety import FactorOfSafetyDeepFoundation
 from deep_foundation_bearing_capacity.segments.segments import Segment
+from deep_foundation_bearing_capacity.segments.unit_resistance import EndResistanceContext, SideResistanceContext
 
 
 class DeepFoundation:
     def __init__(self, segments: list[Segment], top_depth: SCALAR_TYPE = 0, 
-                 resistance_corrections=None):
+                 resistance_corrections=None, fs: FactorOfSafetyDeepFoundation = None):
         '''
         Args:
             segments (Segment): list a of segments, in order of from top to bottom 
@@ -19,8 +20,9 @@ class DeepFoundation:
                                 to account for potential artesian  
             top_depth (SCALAR_TYPE): upper depth of the first segment. This overrides segments[0].top_depth
             resistance_corrections (list[]): list of SideResistanceCorrection Obj and/or EndResistanceCorrection Obj
+            fs (FactorOfSafetyDeepFoundation): factor of safety
         '''
-
+        
         self._sanity_check_segments(segments)  
         self._sanity_check_top_depth(top_depth) 
 
@@ -29,6 +31,11 @@ class DeepFoundation:
 
         # correction to side resistance and end resistance
         self.resistance_corrections = resistance_corrections or []
+
+        # factor of safety
+        self.fs = fs
+
+
 
         
     @property
@@ -164,24 +171,33 @@ class DeepFoundation:
         return segment_effective_stresses
     
     #@cached_property
-    def calculate_segment_side_resistances(self, fs: float = 1.0, uplift:bool = False)->list[float]:
+    def calculate_segment_side_resistances(self, uplift: bool = False)->list[float]:
         '''
         To calculate side resistance of each segment
 
         Args:
-            fs (FactorOfSafetyDeepFoundation): factor of safety for deep foundations
-            uplift (bool): False for compression; True for uplift
+            uplift (bool): whether side resistance is for uplift
         '''
         # collect all default side resistance
         segment_side_resistances = []
 
         for segment, effective_stress in zip(self.segments, self.calculate_segment_effective_stresses):
-            segment_side_resistances.append(segment.calculate_side_resistance(effective_stress, fs=fs, uplift=uplift))
+            side_resistance_context = SideResistanceContext(
+                effective_stress = effective_stress,
+                uplift = uplift
+            )
+            segment_side_resistances.append(segment.calculate_side_resistance(side_resistance_context))
+
+        # apply factor of safety
+        if uplift == False:
+            fs = self.fs.fs_deep_foundation_skin_compression
+        else:
+            fs = self.fs.fs_deep_foundation_skin_uplift
+        segment_side_resistances = [x / fs for x in segment_side_resistances]
         
         # apply correction
         segment_bottom_depth_values = self._segment_bottom_depths()
         segment_top_depth_values = self._segment_top_depths()
-
         for correction in self.resistance_corrections:
             segment_side_resistances = correction.apply_all(segment_side_resistances,
                                                             segment_bottom_depth_values,
@@ -190,26 +206,26 @@ class DeepFoundation:
      
         return segment_side_resistances
     
-    def calculate_segment_end_resistances(self, fs:float = 1.0)->list[float]:
+    def calculate_segment_end_resistances(self)->list[float]:
         '''
         To caclulate segment end resistances in unit of psf
 
         Args:
             fs (float): factor of safety for end resistance
         '''
+        # calculate unfactored resistances
         segment_end_resistances = []
         for segment in self.segments:
-            segment_end_resistance = segment.calculate_end_resistance()
-            # apply factor of safety
-            segment_end_resistance = segment_end_resistance / fs
-
+            end_resistance_context = EndResistanceContext()
+            segment_end_resistance = segment.calculate_end_resistance(end_resistance_context)
             segment_end_resistances.append(segment_end_resistance)
+
+        # apply factor of safety
+        segment_end_resistances = [x/ self.fs.fs_deep_foundation_end for x in segment_end_resistances]
 
         return segment_end_resistances
 
-
-
-    def calculate_segment_side_resistances_accumulative(self, fs:float = 1.0, uplift:bool = False)->list[float]:
+    def calculate_segment_side_resistances_accumulative(self, uplift:bool = False)->list[float]:
         '''
         To calcualte moving accumulative side resistances
 
@@ -224,13 +240,13 @@ class DeepFoundation:
         accumulative = 0
         segment_side_resistances_accumulative = []
 
-        for segment_side_resistance in self.calculate_segment_side_resistances(fs = fs, uplift = uplift):
+        for segment_side_resistance in self.calculate_segment_side_resistances( uplift = uplift):
             accumulative = accumulative + segment_side_resistance
             segment_side_resistances_accumulative.append(accumulative)
 
         return segment_side_resistances_accumulative
     
-    def calculate_compression_resistances_accumulative(self, fs:float = 1.0)->list[float]:
+    def calculate_compression_resistances_accumulative(self)->list[float]:
         '''
         To calculate accumulative compression resistance.
         Note: each entire segment is included, not just half segment
@@ -243,8 +259,8 @@ class DeepFoundation:
 
         '''
 
-        segment_side_resistances_accumlative = self.calculate_segment_side_resistances_accumulative(fs = fs)
-        segment_end_resistances = self.calculate_segment_end_resistances(fs =fs)
+        segment_side_resistances_accumlative = self.calculate_segment_side_resistances_accumulative(uplift = False)
+        segment_end_resistances = self.calculate_segment_end_resistances()
 
         return [a + b for 
                 a, b in zip(segment_side_resistances_accumlative, segment_end_resistances)]
