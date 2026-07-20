@@ -477,11 +477,12 @@ class RockEndResistance(EndResistance):
         if self.socket_width_ratio >= 1.5 and self.layer.geomaterial.rqd == 100: # FHWA 99 Eq.(11.5)
             return self.layer.geomaterial.qu * 2.5
         elif self.layer.geomaterial.joint == "closed" and self.layer.geomaterial.rqd >= 70: # FHWA 99 (Eq. 11.6)
+            print(4.83 * (self.layer.geomaterial.qu * PSF2MPA)**0.51 / PSF2MPA)
             return 4.83 * (self.layer.geomaterial.qu * PSF2MPA)**0.51 / PSF2MPA
         else: # FHWA 99 (Eq.11.7)
             s = self.get_s()
             m = self.get_m()
-            return (s**0.5 + (m*s**0.5+s)**0.5) * self.layer.geomaterial.qu
+            return (s**0.5 + (m*(s**0.5)+s)**0.5) * self.layer.geomaterial.qu
 
     def get_s(self):
         '''
