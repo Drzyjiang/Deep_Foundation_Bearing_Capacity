@@ -126,11 +126,13 @@ class Soil(Geomaterial):
         '''
 
         # sanity check on n60
-
+        if n60 is None:
+            return True
+        
         if not isinstance(n60, constants.NUMERIC_TYPES):
             raise TypeError("n60 data type shall be float, int, np.ndarray, np.generic.")
         
-        if n60 is not None and np.min(np.asarray(n60)) < 0:
+        if np.min(np.asarray(n60)) < 0:
             raise ValueError("ERROR: n60 shall be zero or greater.")
 
         return True

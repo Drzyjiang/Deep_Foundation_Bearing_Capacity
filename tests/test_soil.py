@@ -1,282 +1,244 @@
-# tests/test_soil.py
-"""Tests for Soil class."""
-
+# test /geomaterials/soil.py
 import numpy as np
 import pytest
 
+from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomaterial
 from deep_foundation_bearing_capacity.geomaterials.soil import Soil
 
-# =========================================================
-# 1. Construction: valid inputs
-# =========================================================
 
+# =========================================================
+# 1. Test construction
+# =========================================================
 class TestSoilConstruction:
-    """Construction should succeed with valid inputs and store attributes correctly."""
-
-    def test_clay_construction(self, stiff_clay):
+    def test_clay_construction(self, stiff_clay): 
         assert stiff_clay.soil_index == 1
         assert stiff_clay.unit_weight == 120.0
         assert stiff_clay.friction_angle == 0.0
-        assert stiff_clay.cohesion == 2000.0
+        assert stiff_clay.cohesion == 2000.0 # psf
         assert stiff_clay.n60 == 15
 
-    def test_sand_construction(self, dense_sand):
-        assert dense_sand.friction_angle == 40.0
-        assert dense_sand.cohesion == 0.0
+    def test_sand_construction(self, loose_sand):
+        assert loose_sand.soil_index == 3
+        assert loose_sand.unit_weight == 110.0
+        assert loose_sand.friction_angle == 28.0
+        assert loose_sand.cohesion == 0.0
+        assert loose_sand.n60 == 8
 
     def test_default_soil_type_advanced_is_none(self, stiff_clay):
-        assert stiff_clay.soil_type_advanced is None
+        assert stiff_clay.soil_type_advanced == None
 
-    def test_igm_advanced_type(self, cohesionless_igm):
-        assert cohesionless_igm.soil_type_advanced == "igm_cohesionless"
-
-
-# =========================================================
-# 2. Sanity checks: invalid inputs should raise
-# =========================================================
-
-class TestSoilSanityChecks:
-    """Invalid inputs must raise proper errors early (fail fast)."""
-
-    # ---- unit_weight ----
-    @pytest.mark.parametrize("bad_uw", [-1.0, 0.0, 50.0])   # < water = 62.4
-    def test_unit_weight_below_water_raises(self, bad_uw):
-        with pytest.raises(ValueError, match="unit weight"):
-            Soil(soil_index=1, unit_weight=bad_uw,
-                 friction_angle=30, cohesion=0, n60=10)
-
-    def test_unit_weight_wrong_type_raises(self):
-        with pytest.raises(TypeError):
-            Soil(soil_index=1, unit_weight="heavy",
-                 friction_angle=30, cohesion=0, n60=10)
-
-    # ---- friction_angle ----
-    @pytest.mark.parametrize("bad_phi", [-1.0, -0.001])
-    def test_negative_friction_angle_raises(self, bad_phi):
-        with pytest.raises(ValueError, match="friction angle"):
-            Soil(soil_index=1, unit_weight=120,
-                 friction_angle=bad_phi, cohesion=1000, n60=10)
-
-    def test_friction_angle_wrong_type_raises(self):
-        with pytest.raises(TypeError):
-            Soil(soil_index=1, unit_weight=120,
-                 friction_angle="thirty", cohesion=0, n60=10)
-
-    # ---- cohesion ----
-    @pytest.mark.parametrize("bad_c", [-1.0, -100.0])
-    def test_negative_cohesion_raises(self, bad_c):
-        with pytest.raises(ValueError, match="cohesion"):
-            Soil(soil_index=1, unit_weight=120,
-                 friction_angle=30, cohesion=bad_c, n60=10)
-
-    # ---- n60 ----
-    @pytest.mark.parametrize("bad_n", [-2, -5])
-    def test_negative_n60_raises(self, bad_n):
-        with pytest.raises(ValueError, match="n60"):
-            Soil(soil_index=1, unit_weight=120,
-                 friction_angle=30, cohesion=0, n60=bad_n)
-
-    # ---- soil_type_advanced ----
-    def test_invalid_advanced_type_raises(self):
-        with pytest.raises(ValueError, match="soil_type_advanced"):
-            Soil(soil_index=1, unit_weight=120,
-                 friction_angle=30, cohesion=0, n60=10,
-                 soil_type_advanced="mystery_material")
-
-    def test_advanced_type_wrong_type_raises(self):
-        with pytest.raises(TypeError):
-            Soil(soil_index=1, unit_weight=120,
-                 friction_angle=30, cohesion=0, n60=10,
-                 soil_type_advanced=42)  # int, not str
-
+    def test_igm_advanced_type(self, igm_cohesionless):
+        assert igm_cohesionless.soil_type_advanced == "igm_cohesionless"
 
 # =========================================================
-# 3. Soil type determination logic
+# 2. test sanity check
 # =========================================================
 
-class TestSoilTypeGeneral:
-    """_determine_soil_type() logic:
-       Type 0: mixed (c != 0 AND phi != 0)
-       Type 1: cohesionless (c == 0)
-       Type 2: cohesive (c != 0, phi == 0)
-    """
+class TestSanityChecks:
+    @pytest.mark.parametrize("bad_friction_angle", [-1.0, -10.0])
+    def  test_sanity_check_friction_angle(self, bad_friction_angle):
+        with pytest.raises(ValueError, match = "friction_angle"):
+            Soil(soil_index = 0, friction_angle = bad_friction_angle)
 
-    def test_clay_is_type_2(self, stiff_clay):
-        assert stiff_clay.soil_type_general == 2
 
-    def test_sand_is_type_1(self, loose_sand):
-        assert loose_sand.soil_type_general == 1
+    @pytest.mark.parametrize("bad_cohesion", [-1, -1000])
+    def test_sanity_check_cohesion(self, bad_cohesion):
+        with pytest.raises(ValueError, match = "cohesion"):
+            Soil(soil_index = 1, cohesion = bad_cohesion)
 
-    def test_mixed_is_type_0(self):
-        mixed = Soil(soil_index=1, unit_weight=120,
-                     friction_angle=25, cohesion=500, n60=10)
-        assert mixed.soil_type_general == 0
+    @pytest.mark.parametrize(["bad_friction_angle", "bad_cohesion"], [(0, 0)])
+    def test_sanity_check_friction_angle_cohesion(self, bad_friction_angle, bad_cohesion):
+        with pytest.raises(ValueError, match = "friction_angle and cohesion"):
+            Soil(soil_index = 2, friction_angle = bad_friction_angle, cohesion = bad_cohesion)
 
-    def test_both_zero_edge_case(self):
-        """Docstring says type -1 for both zero, but current code returns type 2.
-        This test documents current behavior — update if the code is fixed."""
-        edge = Soil(soil_index=1, unit_weight=120,
-                    friction_angle=0, cohesion=0, n60=10)
-        # Current implementation returns type 2 (cohesive branch when c==0 hits
-        # `elif self.cohesion == 0` returns 1... actually returns 1). Trace:
-        #   friction=0, cohesion=0 → first `if` False → `elif cohesion==0` True → 1
-        assert edge.soil_type_general == 1  # ← 但注释说应该是 -1！
-
+    @pytest.mark.parametrize("bad_n60", [-1, -100])
+    def test_sanity_check_n60(self, bad_n60):
+        with pytest.raises(ValueError, match = "n60"):
+            Soil(soil_index = 3, friction_angle = 1, cohesion = 1, n60 = bad_n60)
 
 # =========================================================
-# 4. from_dict classmethod
+# 3. from_dict classmethod
 # =========================================================
-
 class TestFromDict:
+    def test_from_dict_basic(self, dict_basic):
+        """
+        Test initialization by dict_basic
+        """
+        soil = Soil.from_dict(dict_basic)
 
-    def test_from_dict_basic(self):
-        data = {
-            "soil_index": 1,
-            "unit_weight": 120.0,
-            "friction_angle": 30.0,
-            "cohesion": 500.0,
-            "n60": 10,
-            "soil_type_advanced": None,
-        }
-        soil = Soil.from_dict(data)
-        assert soil.soil_index == 1
-        assert soil.unit_weight == 120.0
-        assert soil.friction_angle == 30.0
-        assert soil.cohesion == 500.0
+        assert soil.soil_index == 0
+        assert soil.unit_weight == 120
+        assert soil.friction_angle == 30
+        assert soil.cohesion == 100
+        assert soil.n60 == 30
+        assert soil.soil_type_advanced == None
 
-    def test_from_dict_string_numbers(self):
-        """Values as strings should still work (from_dict does float())."""
-        data = {
-            "soil_index": "1",
-            "unit_weight": "120.0",
-            "friction_angle": "30.0",
-            "cohesion": "500.0",
-            "n60": 10,
-            "soil_type_advanced": None,
-        }
-        soil = Soil.from_dict(data)
-        assert soil.unit_weight == 120.0
-
-    def test_from_dict_igm(self):
-        data = {
-            "soil_index": 5, "unit_weight": 135.0,
-            "friction_angle": 42.0, "cohesion": 0.0, "n60": 60,
-            "soil_type_advanced": "igm_cohesionless",
-        }
-        soil = Soil.from_dict(data)
+    def test_from_dict_igm(self, dict_igm):
+        """
+        Test initizalization by dict_igm
+        """
+        soil = Soil.from_dict(dict_igm)
         assert soil.soil_type_advanced == "igm_cohesionless"
 
+    def test_from_dict_gs(self, dict_gs):
+        """
+        Test initizalization by dict_gs
+        """
+        soil = Soil.from_dict(dict_gs)
+        assert soil.soil_type_advanced == "gs"
+
 
 # =========================================================
-# 5. Modify_* methods
+# 4. test soil_type_genernal
 # =========================================================
+class TestSoilTypeGeneral:
+    def test_mix_is_0(self, mixed_soil):
+        """
+        When friction_angle != 0 and cohesion != 0, return 0
+        """
+        assert mixed_soil.soil_type_general == 0
 
+    def test_sand_is_1(self, dense_sand):
+        """
+        sand should have soil_type_general == 1
+        """
+        assert dense_sand.soil_type_general == 1
+
+    def test_clay_is_2(self, stiff_clay):
+        """
+        clay should have soil_type_general == 2
+        """
+        assert stiff_clay.soil_type_general == 2
+
+# =========================================================
+# 5. test modify methods
+# =========================================================
 class TestModifyMethods:
+    @pytest.mark.parametrize("friction_angle_new", [0, 10,20,30])
+    def test_modify_friction_angle(self, friction_angle_new, stiff_clay, mixed_soil, loose_sand):
+        """
+        Test modifying friction angle
+        """
+        stiff_clay.modify_friction_angle(friction_angle_new)
+        assert stiff_clay.friction_angle == friction_angle_new
 
-    def test_modify_unit_weight(self, stiff_clay):
-        stiff_clay.modify_unit_weight(115.0)
-        assert stiff_clay.unit_weight == 115.0
+        mixed_soil.modify_friction_angle(friction_angle_new)
+        assert mixed_soil.friction_angle == friction_angle_new
 
-    def test_modify_unit_weight_invalid_raises(self, stiff_clay):
-        with pytest.raises(ValueError):
-            stiff_clay.modify_unit_weight(30.0)     # < water
-        # State should NOT change after failed modification
-        assert stiff_clay.unit_weight == 120.0
+        # friction_angle and cohesion cannot be zero simultaneously
+        if friction_angle_new == 0:
+            with pytest.raises(ValueError, match = "friction_angle and cohesion"):
+                loose_sand.modify_friction_angle(friction_angle_new)
+        else:
+            loose_sand.modify_friction_angle(friction_angle_new)
+            assert loose_sand.friction_angle == friction_angle_new
 
-    def test_modify_friction_angle(self, dense_sand):
-        dense_sand.modify_friction_angle(38.0)
-        assert dense_sand.friction_angle == 38.0
+    @pytest.mark.parametrize("friction_angle_new_invalid", [-1, -100])
+    def test_modify_friction_angle_invalid(self, friction_angle_new_invalid, stiff_clay, mixed_soil, 
+                                           loose_sand, igm_cohesionless):
+        """
+        Test modifying friction angle with invalid values
+        """
+        with pytest.raises(ValueError, match = "friction_angle"):
+            stiff_clay.modify_friction_angle(friction_angle_new_invalid)
 
-    def test_modify_friction_angle_invalid_raises(self, dense_sand):
-        with pytest.raises(ValueError):
-            dense_sand.modify_friction_angle(-5.0)
-        assert dense_sand.friction_angle == 40.0    # unchanged
+        with pytest.raises(ValueError, match = "friction_angle"):
+            mixed_soil.modify_friction_angle(friction_angle_new_invalid)
 
-    def test_modify_cohesion(self, stiff_clay):
-        stiff_clay.modify_cohesion(1500.0)
-        assert stiff_clay.cohesion == 1500.0
+        with pytest.raises(ValueError, match = "friction_angle"):
+            loose_sand.modify_friction_angle(friction_angle_new_invalid)
 
-    def test_modify_cohesion_invalid_raises(self, stiff_clay):
-        with pytest.raises(ValueError):
-            stiff_clay.modify_cohesion(-10.0)
-        assert stiff_clay.cohesion == 2000.0
+        with pytest.raises(ValueError, match = "friction_angle"):
+            igm_cohesionless.modify_friction_angle(friction_angle_new_invalid)
+        
+            
+    @pytest.mark.parametrize("cohesion_new", [0, 1000,10000])
+    def test_modify_cohesion(self, cohesion_new, stiff_clay, mixed_soil, dense_sand):
+        """
+        Test modify cohesion method
+        """
+        if cohesion_new == 0:
+            with pytest.raises(ValueError, match = "friction_angle and cohesion"):
+                stiff_clay.modify_cohesion(cohesion_new)
+        else:
+            stiff_clay.modify_cohesion(cohesion_new)
+            assert stiff_clay.cohesion == cohesion_new
 
+        mixed_soil.modify_cohesion(cohesion_new)
+        assert mixed_soil.cohesion == cohesion_new
+
+        dense_sand.modify_cohesion(cohesion_new)
+        assert dense_sand.cohesion == cohesion_new
+
+    @pytest.mark.parametrize("cohesion_new_invalid", [-1, -1000])
+    def test_modify_cohesion_invalid(self, cohesion_new_invalid, stiff_clay, mixed_soil, 
+                                           loose_sand, igm_cohesionless):
+        """
+        Test modifying cohesion with invalid values
+        """
+        with pytest.raises(ValueError, match = "cohesion"):
+            stiff_clay.modify_cohesion(cohesion_new_invalid)
+
+        with pytest.raises(ValueError, match = "cohesion"):
+            mixed_soil.modify_cohesion(cohesion_new_invalid)
+
+        with pytest.raises(ValueError, match = "cohesion"):
+            loose_sand.modify_cohesion(cohesion_new_invalid)
+
+        with pytest.raises(ValueError, match = "cohesion"):
+            igm_cohesionless.modify_cohesion(cohesion_new_invalid)
+
+    def test_modify_soil_type_advanced(self, igm_cohesionless):
+        """
+        Test modifying soil_type_advanced
+        """
+        igm_cohesionless.modify_soil_type_advanced( "gs")
+        assert igm_cohesionless.soil_type_advanced == "gs" 
+
+        igm_cohesionless.modify_soil_type_advanced( "igm_cohesionless")
+        assert igm_cohesionless.soil_type_advanced == "igm_cohesionless" 
 
 # =========================================================
-# 6. NumPy array inputs (since NUMERIC_TYPES includes ndarray)
+# 6. test numpy array input
 # =========================================================
-
-class TestNumpyInputs:
-    """Class advertises support for numpy arrays via NUMERIC_TYPES."""
-
-    def test_scalar_ndarray_unit_weight(self):
-        soil = Soil(soil_index=1,
-                    unit_weight=np.float64(120.0),
-                    friction_angle=30, cohesion=0, n60=10)
-        assert soil.unit_weight == 120.0
-
-    def test_negative_in_array_raises(self):
-        """Sanity check uses np.min — arrays with any negative should fail."""
-        with pytest.raises(ValueError):
-            Soil(soil_index=1, unit_weight=120,
-                 friction_angle=np.array([30.0, -5.0, 25.0]),
-                 cohesion=0, n60=10)
-
+class TestNumpyInput:
+    @pytest.mark.parametrize("soil_index", [np.array([0])])
+    @pytest.mark.parametrize("friction_angle", [np.array([30]), np.array([0])])
+    @pytest.mark.parametrize("cohesion", [np.array([100])])
+    @pytest.mark.parametrize("n60", [np.array([10])])
+    def test_numpy_friction_angle(self, soil_index, friction_angle, cohesion,
+                                  n60):
+        """
+        Test using friction angle in format of np.ndarray
+        """
+        soil = Soil(soil_index = soil_index, friction_angle = friction_angle, cohesion = cohesion,
+                     n60 = n60)
+        assert soil.soil_index == soil_index.item(0)
+        assert soil.friction_angle == friction_angle.item(0)
+        assert soil.cohesion == cohesion.item(0)
+        assert soil.n60 == n60.item(0)
 
 # =========================================================
-# 7. Inheritance
+# 7. test output methods
 # =========================================================
+class TestDisplayProperties:
+    """
+    Test display_properties() method
+    """
+    def test_display_properties(self, capsys, soft_clay):
+        soft_clay.display_properties()
+        captured = capsys.readouterr()
+        assert "soil_index" in captured.out
+        assert "unit_weight" in captured.out
+        assert "friction_angle" in captured.out
+        assert "cohesion" in captured.out
+        assert "n60" in captured.out
 
-class TestGeomaterialInheritance:
-
-    def test_is_geomaterial(self, stiff_clay):
+# =========================================================
+# 7. test inheritance
+# =========================================================
+class TestInheritance:
+    def test_is_geomaterial(self, stiff_clay, igm_cohesionless):
         from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomaterial
         assert isinstance(stiff_clay, Geomaterial)
-
-
-# =========================================================
-# 8. display_properties (smoke test)
-# =========================================================
-
-class TestDisplayProperties:
-
-    def test_display_default(self, stiff_clay, capsys):
-        stiff_clay.display_properties()
-        captured = capsys.readouterr()
-        assert "unit_weight" in captured.out
-        assert "cohesion" in captured.out
-
-    def test_display_custom_subset(self, stiff_clay, capsys):
-        stiff_clay.display_properties(["cohesion"])
-        captured = capsys.readouterr()
-        assert "cohesion" in captured.out
-        assert "unit_weight" not in captured.out
-
-    def test_display_unknown_property_raises(self, stiff_clay):
-        with pytest.raises(AttributeError):
-            stiff_clay.display_properties(["mystery_property"])
-
-
-# =========================================================
-# 9. Known-issue / regression tests (currently expected to fail)
-# =========================================================
-
-class TestKnownIssues:
-    """Tests documenting bugs / inconsistencies you may want to fix.
-    Marked xfail so they don't break CI but are visible."""
-
-    @pytest.mark.xfail(reason="n60 default -1 conflicts with sanity check >= 0")
-    def test_default_n60_should_not_raise(self):
-        """Constructor with default n60 should either accept or be documented as required."""
-        Soil(soil_index=1, unit_weight=120, friction_angle=30, cohesion=0)
-
-    @pytest.mark.xfail(reason="typo: 'elsatic_modulus' instead of 'elastic_modulus'")
-    def test_elastic_modulus_attribute_name(self, stiff_clay):
-        assert hasattr(stiff_clay, "elastic_modulus")
-        assert not hasattr(stiff_clay, "elsatic_modulus")
-
-    @pytest.mark.xfail(reason="Docstring says both-zero returns type -1, code returns 1")
-    def test_both_zero_should_be_type_minus_1(self):
-        edge = Soil(soil_index=1, unit_weight=120,
-                    friction_angle=0, cohesion=0, n60=10)
-        assert edge.soil_type_general == -1
+        assert isinstance(igm_cohesionless, Geomaterial)

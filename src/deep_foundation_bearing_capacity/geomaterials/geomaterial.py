@@ -36,7 +36,7 @@ class Geomaterial:
         # sanity check on soil unit weight
 
         if np.min(np.asarray(unit_weight)) < constants.UNIT_WEIGHT_WATER:
-            raise ValueError("ERROR: soil unit weight is unlikely smaller than water unit weight.")
+            raise ValueError("ERROR: soil unit_weight is unlikely smaller than water unit weight.")
 
         return True    
     

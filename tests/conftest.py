@@ -67,7 +67,7 @@ def dense_sand():
 
 
 @pytest.fixture
-def cohesionless_igm():
+def igm_cohesionless():
     """Cohesionless IGM: sand with special advanced type."""
     return Soil(
         soil_index=5,
