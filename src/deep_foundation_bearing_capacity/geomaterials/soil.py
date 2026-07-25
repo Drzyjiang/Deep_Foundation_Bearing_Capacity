@@ -6,8 +6,8 @@ from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomateria
 
 
 class Soil(Geomaterial):
-    def __init__(self, soil_index:int, unit_weight: float = 0, elastic_modulus: float = 0,
-                  friction_angle:float = 0, cohesion:float = 0, n60: float=-1,
+    def __init__(self, soil_index:int, unit_weight: float = 120, elastic_modulus: float = 0,
+                  friction_angle:float = 0, cohesion:float = 0, n60: float= None,
                  soil_type_advanced: str = None):
         '''
         To initialize soil parameters
@@ -26,6 +26,7 @@ class Soil(Geomaterial):
         
         self._sanity_check_friction_angle(friction_angle)
         self._sanity_check_cohesion(cohesion)
+        self._sanity_check_friction_angle_cohesion(friction_angle, cohesion)
         self._sanity_check_n60(n60)
 
         '''
@@ -46,7 +47,7 @@ class Soil(Geomaterial):
 
 
         # Soil type general (int)
-        self.soil_type_general = self._determine_soil_type()
+        self.soil_type_general = self._determine_soil_type_general()
 
         # Soil type advanced (str)
         self.soil_type_advanced = soil_type_advanced
@@ -76,8 +77,8 @@ class Soil(Geomaterial):
         
         # sanity check on soil unit weight
         if np.min(np.asarray(friction_angle)) < 0:
-            raise ValueError("ERROR: friction angle shall be zero or greater.")
-        
+            raise ValueError("ERROR: friction_angle shall be zero or greater.")
+            
         return True
     
     def _sanity_check_cohesion(self, cohesion):
@@ -103,6 +104,16 @@ class Soil(Geomaterial):
         
         return True
     
+    def _sanity_check_friction_angle_cohesion(self, friction_angle, cohesion):
+        """
+        Check friction_angle and cohesion at the same time.
+        friction_angle and cohesion cannot be zero at the same time
+        """
+        if friction_angle == 0 and cohesion == 0:
+            raise ValueError("ERROR: friction_angle and cohesion cannot be zero at the same time.")
+        
+        return True
+    
     def _sanity_check_n60(self, n60):
         '''
         To perform sanity check on N60 blowcounts
@@ -114,16 +125,14 @@ class Soil(Geomaterial):
             True if passes
         '''
 
-        # sanity check on soil cohesion
+        # sanity check on n60
 
         if not isinstance(n60, constants.NUMERIC_TYPES):
             raise TypeError("n60 data type shall be float, int, np.ndarray, np.generic.")
         
-        # sanity check on soil unit weight
-        if np.min(np.asarray(n60)) < 0:
+        if n60 is not None and np.min(np.asarray(n60)) < 0:
             raise ValueError("ERROR: n60 shall be zero or greater.")
 
-        
         return True
     
     def _sanity_check_soil_type_advanced(self, soil_type_advanced:str, n60 = None):
@@ -142,48 +151,42 @@ class Soil(Geomaterial):
         
         #if soil_type_advanced == "igm_cohesionless" and n60 is not None and n60 <50:
         #    raise ValueError("ERROR: cohesionless igm should have N60 greater than 50.")
-        
         return True
     
-    def modify_unit_weight(self, unit_weight_new):
-        '''
-        To modify self.unit_weight.
-        '''
-
-        self._sanity_check_unit_weight(unit_weight_new)
-
-        self.unit_weight = unit_weight_new
 
     def modify_friction_angle(self, friction_angle_new):
         '''
         To modify self.friction_angle.
         '''
-
         self._sanity_check_friction_angle(friction_angle_new)
+        self._sanity_check_friction_angle_cohesion(friction_angle_new, self.cohesion)
 
         self.friction_angle = friction_angle_new
+        self.soil_type_general = self._determine_soil_type_general()
 
     def modify_cohesion(self, cohesion_new):
         '''
         To modify self.cohesion.
         '''
-
         self._sanity_check_cohesion(cohesion_new)
+        self._sanity_check_friction_angle_cohesion(self.friction_angle, cohesion_new)
 
         self.cohesion = cohesion_new
+        self.soil_type_general = self._determine_soil_type_general()
 
     def modify_soil_type_advanced(self, advanced_type: str)-> bool:
         '''
-        To manually change soil type of gravelly sand (Type 3)
+        To manually change soil type advanced
         '''
-        self.soil_type_general = advanced_type
+        self._sanity_check_soil_type_advanced(advanced_type)
+
+        self.soil_type_advanced = advanced_type
 
         return True
 
-    def _determine_soil_type(self)->int:
+    def _determine_soil_type_general(self)->int:
         '''
         To determine soil 
-        Type -1 (cohesion == 0 and friction_angle == 0): error
         Type 0 (cohesion !=0 and friction_angle !=0): mixed of cohesionless and cohesive. This case is RARE in calculation.
         Type 1 (cohesion == 0): cohesionless only, sand.
         Type 2 (cohesion != 0): cohesive only, clay.

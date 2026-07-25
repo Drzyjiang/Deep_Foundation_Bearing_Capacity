@@ -21,7 +21,7 @@ class Geomaterial:
         # self._sanity_check_elastic_modulus(elastic_modulus)
 
         self.unit_weight = unit_weight
-        self.elsatic_modulus = elastic_modulus
+        self.elastic_modulus = elastic_modulus
         
 
 
@@ -46,6 +46,15 @@ class Geomaterial:
         To perform sanity check on elastic modulus
         '''
         pass
+
+    def modify_unit_weight(self, unit_weight_new):
+        '''
+        To modify self.unit_weight.
+        '''
+
+        self._sanity_check_unit_weight(unit_weight_new)
+
+        self.unit_weight = unit_weight_new
 
     @abstractmethod
     def display_properties(self, properties:list[str]):
