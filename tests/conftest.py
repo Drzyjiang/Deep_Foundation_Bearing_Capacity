@@ -178,9 +178,25 @@ def igm_cohesive():
                  joint = "closed")
 
 @pytest.fixture
-def layer_typical_1():
+def layer_typical_1(stiff_clay):
     """
-    A typical layer
+    A typical layer with clay
     """
     return Layer(layer_index = 0, geomaterial = stiff_clay, ground_water_depth  = 0,
                  top_depth = 0, thickness = 10)
+
+@pytest.fixture
+def layer_typical_2(loose_sand):
+    """
+    A typical layer with sand
+    """
+    return Layer(layer_index = 1, geomaterial = loose_sand, ground_water_depth  = 0,
+                 top_depth = 10, thickness = 10)
+
+@pytest.fixture
+def layer_typical_3(competent_rock):
+    """
+    A typical layer with compent rock
+    """
+    return Layer(layer_index = 2, geomaterial = competent_rock, ground_water_depth  = 0,
+                 top_depth = 20, thickness = 10)
