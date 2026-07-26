@@ -3,14 +3,20 @@
 
 import pytest
 
+from deep_foundation_bearing_capacity.constants.constants import PSI2PSF
+from deep_foundation_bearing_capacity.geomaterials.layer import Layer
+from deep_foundation_bearing_capacity.geomaterials.rock import Rock
 from deep_foundation_bearing_capacity.geomaterials.soil import Soil
 
-# ---------- Soil fixtures (typical instances) ----------
 
+# ---------- Soil fixtures (typical instances) ----------
 @pytest.fixture
 def mixed_soil():
     """
     Mixed soil: c > 0, phi > 0.
+    
+    Guaranteed properties (tests may depend on these):
+    ALL
     """
     return Soil(
         soil_index=1,
@@ -22,7 +28,13 @@ def mixed_soil():
 
 @pytest.fixture
 def stiff_clay():
-    """Cohesive soil (clay): c > 0, phi = 0."""
+    """
+    Cohesive soil (clay): c > 0, phi = 0.
+    
+    Guaranteed properties (tests may depend on these):
+    ALL
+    """
+ 
     return Soil(
         soil_index=1,
         unit_weight=120.0,
@@ -34,6 +46,11 @@ def stiff_clay():
 
 @pytest.fixture
 def soft_clay():
+    """
+    Guaranteed properties (tests may depend on these):
+    ALL
+    """
+    
     return Soil(
         soil_index=2,
         unit_weight=100.0,
@@ -45,7 +62,12 @@ def soft_clay():
 
 @pytest.fixture
 def loose_sand():
-    """Cohesionless soil (sand): c = 0, phi > 0."""
+    """
+    Cohesionless soil (sand): c = 0, phi > 0.
+    
+    Guaranteed properties (tests may depend on these):
+    ALL
+    """
     return Soil(
         soil_index=3,
         unit_weight=110.0,
@@ -57,6 +79,10 @@ def loose_sand():
 
 @pytest.fixture
 def dense_sand():
+    """
+    Guaranteed properties (tests may depend on these):
+    ALL
+    """
     return Soil(
         soil_index=4,
         unit_weight=130.0,
@@ -68,7 +94,13 @@ def dense_sand():
 
 @pytest.fixture
 def igm_cohesionless():
-    """Cohesionless IGM: sand with special advanced type."""
+    """
+    Cohesionless IGM: sand with special advanced type.
+    
+    Guaranteed properties (tests may depend on these):
+    ALL
+    """
+ 
     return Soil(
         soil_index=5,
         unit_weight=135.0,
@@ -119,3 +151,36 @@ def dict_gs():
             "n60": 30,
             "soil_type_advanced": "gs"
             }
+
+# ---------- Rock fixtures (typical instances) ----------
+@pytest.fixture
+def competent_rock():
+    """
+    Guaranteed properties (tests may depend on these):
+    ALL
+    """
+    return Rock(rock_index = 0, unit_weight = 150, elastic_modulus = 5000 * PSI2PSF,
+                 friction_angle = 30, qu = 5e6 * PSI2PSF, rqd = 100, 
+                 rock_type = "A", rock_quality = "Very good", 
+                 rock_type_advanced = None, 
+                 joint = "closed")
+
+@pytest.fixture
+def igm_cohesive():
+    """
+    Guaranteed properties (tests may depend on these):
+    ALL
+    """
+    return Rock(rock_index = 0, unit_weight = 135, elastic_modulus = 1000 * PSI2PSF,
+                 friction_angle = 27, qu = 1e4, rqd = 50, 
+                 rock_type = "B", rock_quality = "Fair", 
+                 rock_type_advanced = "igm_cohesive", 
+                 joint = "closed")
+
+@pytest.fixture
+def layer_typical_1():
+    """
+    A typical layer
+    """
+    return Layer(layer_index = 0, geomaterial = stiff_clay, ground_water_depth  = 0,
+                 top_depth = 0, thickness = 10)

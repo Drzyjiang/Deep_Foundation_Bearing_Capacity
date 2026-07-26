@@ -31,7 +31,7 @@ class TestSoilConstruction:
         assert igm_cohesionless.soil_type_advanced == "igm_cohesionless"
 
 # =========================================================
-# 2. test sanity check
+# 2. test sanity checks
 # =========================================================
 
 class TestSanityChecks:

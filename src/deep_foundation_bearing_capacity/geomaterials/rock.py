@@ -4,10 +4,10 @@ from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomateria
 
 
 class Rock(Geomaterial):
-    def __init__(self, rock_index, unit_weight: float = 0, elastic_modulus: float = 0,
+    def __init__(self, rock_index, unit_weight: float = 150, elastic_modulus: float = 0,
                  friction_angle: float = None, qu: float = None, rqd: float = None, 
                  rock_type:str = None, rock_quality: str = None, rock_type_advanced: str = None, 
-                 joint: str = None):
+                 joint: str = "open"):
         '''
         A class for (competent) rock material.
 
@@ -29,7 +29,7 @@ class Rock(Geomaterial):
             rock_quality (str): one from ["Excellent", "Very good", "Good", "Fair", "Poor", 
                                      "Very poor"]
 
-            rock_type_advanced (str): one from ["igm_cohesive"]
+            rock_type_advanced (str): one from [None, "igm_cohesive"]
 
             rock_friction_angle (float): rock friction angle
 
@@ -92,6 +92,7 @@ class Rock(Geomaterial):
         return cls(rock_index = int(data.get("rock_index")),
                    rqd = float(data.get("rqd")),
                    unit_weight = float(data.get("unit_weight")),
+                   elastic_modulus = float(data.get("elastic_modulus")),
                    friction_angle = float(data.get("friction_angle")),
                    qu = float(data.get("qu")),
                    rock_type = str(data.get("rock_type")),
@@ -109,6 +110,9 @@ class Rock(Geomaterial):
             qu (float): rock unconfined compressive strength in psf
             rock_type_advanced (str): descriptor
         '''
+        if qu is None:
+            return True
+
         if(qu <= 0):
             raise ValueError("ERROR: rock qu shall be a positive value.")
         elif rock_type_advanced == "igm_cohesive":
@@ -123,7 +127,10 @@ class Rock(Geomaterial):
         '''
         To perform sanity check on rock quality designation
         '''
-        if(rqd is not None and rqd < 0):
+        if rqd is None:
+            return True
+
+        if rqd < 0:
             raise ValueError("ERROR: rock RQD shall be a non-negative value.")
         elif rqd > 100:
             raise ValueError("ERROR: rock RQD shall be less than 100.")
@@ -134,8 +141,9 @@ class Rock(Geomaterial):
         '''
         To perform sanity check on rock_type
         '''
-        if isinstance(rock_type, str) and rock_type == "None":
-            raise TypeError("ERROR: rock_type_advanced cannot be 'None'")
+
+        if rock_type == "None":
+            raise TypeError("ERROR: rock_type_advanced cannot be 'None'. Should be None")
 
         if rock_type is not None and rock_type not in self.rock_type_options:
             raise ValueError(f"ERROR: rock_type shall be one from {self.rock_type_options}.")
@@ -146,8 +154,7 @@ class Rock(Geomaterial):
         '''
         To perform sanity check on rock_quality.
         '''
-        rock_quality_options = ["Excellent", "Very good", "Good", "Fair", "Poor", "Very poor"]
-
+    
         if isinstance(rock_quality, str) and rock_quality == "None":
             raise TypeError("ERROR: rock_type_advanced cannot be 'None'")
 
@@ -160,8 +167,8 @@ class Rock(Geomaterial):
         '''
         To perform sanity check on rock_type_advanced
         '''
-        if isinstance(rock_type_advanced, str) and rock_type_advanced == "None":
-            raise TypeError("ERROR: rock_type_advanced cannot be 'None'")
+        if rock_type_advanced == "None":
+            raise ValueError("ERROR: rock_type_advanced cannot be 'None'. Should be None")
         
         if (rock_type_advanced is not None) and (rock_type_advanced not in self.rock_type_advanced_options):
             raise ValueError(f"ERROR: rock_type_advanced shall be one from {self.rock_type_advanced_options}")
