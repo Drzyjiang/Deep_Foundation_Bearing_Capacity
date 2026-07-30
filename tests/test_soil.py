@@ -206,7 +206,7 @@ class TestNumpyInput:
     @pytest.mark.parametrize("friction_angle", [np.array([30]), np.array([0])])
     @pytest.mark.parametrize("cohesion", [np.array([100])])
     @pytest.mark.parametrize("n60", [np.array([10])])
-    def test_numpy_friction_angle(self, soil_index, friction_angle, cohesion,
+    def test_numpy_input(self, soil_index, friction_angle, cohesion,
                                   n60):
         """
         Test using friction angle in format of np.ndarray

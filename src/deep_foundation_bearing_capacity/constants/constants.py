@@ -52,6 +52,7 @@ ARRAY_TYPE = Union[np.ndarray]
 ARRAY_TYPES = (np.ndarray,)
 
 # numeric types
+NUMERIC_TYPE = SCALAR_TYPE | ARRAY_TYPE
 NUMERIC_TYPES = SCALAR_TYPES + ARRAY_TYPES
 
 # concrete typical elastic modulus in unit of psf

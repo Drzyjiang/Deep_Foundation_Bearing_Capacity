@@ -1,11 +1,12 @@
 # class for layer parameters
 
-from deep_foundation_bearing_capacity.constants import constants
+from deep_foundation_bearing_capacity.constants.constants import NUMERIC_TYPE
 from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomaterial
 
 
 class Layer:
-    def __init__(self, layer_index: int, geomaterial: Geomaterial = None, ground_water_depth:float = 0, top_depth: float = None, thickness: float = None):
+    def __init__(self, layer_index: NUMERIC_TYPE, geomaterial: Geomaterial = None, ground_water_depth:NUMERIC_TYPE = 0,
+                  top_depth: NUMERIC_TYPE = None, thickness: NUMERIC_TYPE = None):
         '''
         To initialize layer parameters
 
@@ -41,6 +42,7 @@ class Layer:
         '''
         return cls(layer_index = data.get("layer_index"),
                    ground_water_depth = data.get("ground_water_depth"),
+                   geomaterial = data.get("geomaterial"),
                    top_depth = data.get("top_depth"),
                    thickness = data.get("thickness")
                    )
@@ -51,18 +53,16 @@ class Layer:
         '''
         To perform sanity check on layer_index
         '''
+        pass
 
-        if not isinstance(layer_index, int):
-            raise TypeError("layer_index shall be type int.")
-        else:
-            return True
-
-    def _sanity_check_ground_water_depth(self, ground_water_depth):
+    def _sanity_check_ground_water_depth(self, ground_water_depth: NUMERIC_TYPE):
         '''
         To perform sanity check on ground_water_depth
         '''
-
-        if not isinstance(ground_water_depth, constants.NUMERIC_TYPES):
+        if ground_water_depth is None:
+            return True
+        print(ground_water_depth)
+        if not isinstance(ground_water_depth, NUMERIC_TYPE):
             raise TypeError("ground_water_depth data type shall be float, int, np.ndarray, np.generic.")
     
         return True
@@ -71,7 +71,10 @@ class Layer:
         '''
         To perform sanity check on top_depth
         '''
-        if not isinstance(top_depth, constants.NUMERIC_TYPES):
+        if top_depth is None:
+            return True
+
+        if not isinstance(top_depth, NUMERIC_TYPE):
             raise TypeError("ground_water_depth data type shall be float, int, np.ndarray, np.generic.")
     
         return True
@@ -80,11 +83,14 @@ class Layer:
         '''
         To perform sanity check on thickness
         '''
-        if not isinstance(thickness, constants.NUMERIC_TYPES):
+        if thickness is None:
+            return True
+
+        if not isinstance(thickness, NUMERIC_TYPE):
             raise TypeError("thickness data type shall be float, int, np.ndarray, np.generic.")
         
         if thickness < 0:
-            raise ValueError("Thickness shall be a non-negative value.")
+            raise ValueError("layer thickness shall be a non-negative value.")
     
         return True
 
