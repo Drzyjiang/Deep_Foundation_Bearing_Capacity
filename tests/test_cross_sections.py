@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 
-from deep_foundation_bearing_capacity.cross_sections.cross_sections import CircularSection, SquareSection
+from deep_foundation_bearing_capacity.cross_sections.cross_sections import CircularSection, CrossSection, SquareSection
 
 # =============================
 # 1. test construction
@@ -39,3 +39,14 @@ class TestSanityChecks:
         
         with pytest.raises(ValueError, match = "section_dimension"):
             temp = SquareSection(wrong_dimension)
+
+# =============================
+# 3. test inheritance
+# =============================
+class TestInheritance:
+    def test_inheritance(self, circular_section_typical, square_section_typical):
+        """
+        Test circular and square cross sections are children of CrossSection
+        """
+        assert isinstance(circular_section_typical, CrossSection)
+        assert isinstance(square_section_typical, CrossSection)
