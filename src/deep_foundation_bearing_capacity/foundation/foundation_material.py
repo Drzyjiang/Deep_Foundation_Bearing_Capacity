@@ -46,9 +46,21 @@ class FoundationMaterial:
             raise ValueError("ERROR: elastic_modulus shall be a positive value.")
 
 class FoundationConcrete(FoundationMaterial):
+    # arbitrary modulus lower and upper bounds 
+    # open to modify
+    elastic_modulus_lower_bound_percentage = 0.7
+    elastic_modulus_upper_bound_percentage = 10.0
+
+    # arbitrary yield strength lower and upper bounds
+    # open to modify
+    yield_strength_lower_bound_percentage = 0.7
+    yield_strength_upper_bound_percentage = 5.0
+
     def __init__(self, unit_weight:float = 150, elastic_modulus:float = ELASTIC_MODULUS_CONCRETE, 
                  yield_strength: float = YIELD_STRENGTH_CONCRETE):
         super().__init__(unit_weight, elastic_modulus)
+
+
 
         self._sanity_check_elastic_modulus(elastic_modulus)
         self._sanity_check_yield_strength(yield_strength)
@@ -61,28 +73,25 @@ class FoundationConcrete(FoundationMaterial):
         Args:
             elastic_modulus (float): concrete elastic modulus in unit of psf
         '''
-        elastic_modulus_lower_bound_percentage = 0.7
-        elastic_modulus_upper_bound_percentage = 10.0
         
 
-        if elastic_modulus < (elastic_modulus_lower_bound_percentage * ELASTIC_MODULUS_CONCRETE) or ( 
-           elastic_modulus > (elastic_modulus_upper_bound_percentage * ELASTIC_MODULUS_CONCRETE)):
+        if elastic_modulus < (self.elastic_modulus_lower_bound_percentage * ELASTIC_MODULUS_CONCRETE) or ( 
+           elastic_modulus > (self.elastic_modulus_upper_bound_percentage * ELASTIC_MODULUS_CONCRETE)):
             raise ValueError("ERROR: concrete elastic_modulus is out of normal range.")
         
         return True
-    
+
     def _sanity_check_yield_strength(self, yield_strength:float)->bool:
         '''
         Sanity check on yield strength
         Args:
             yield_strength (float): concrete yield strength
         '''
-        yield_strength_lower_bound_percentage = 0.7
-        yield_strength_upper_bound_percentage = 5.0
+
         yield_strength_typical = 4000.0 * PSI2PSF
 
-        if yield_strength < yield_strength_lower_bound_percentage * yield_strength_typical or (
-            yield_strength > yield_strength_upper_bound_percentage * yield_strength_typical):
+        if yield_strength < self.yield_strength_lower_bound_percentage * yield_strength_typical or (
+            yield_strength > self.yield_strength_upper_bound_percentage * yield_strength_typical):
             raise ValueError("ERROR: concrete yield_strength is out of normal range.")
 
         return True

@@ -5,6 +5,7 @@ import pytest
 
 from deep_foundation_bearing_capacity.constants.constants import PSI2PSF
 from deep_foundation_bearing_capacity.cross_sections.cross_sections import CircularSection, SquareSection
+from deep_foundation_bearing_capacity.foundation.foundation_material import FoundationConcrete
 from deep_foundation_bearing_capacity.geomaterials.layer import Layer
 from deep_foundation_bearing_capacity.geomaterials.rock import Rock
 from deep_foundation_bearing_capacity.geomaterials.soil import Soil
@@ -224,3 +225,10 @@ def square_section_typical():
     typical square section
     """
     return SquareSection(section_dimension = 1)
+
+@pytest.fixture
+def foundation_concrete_typical():
+    """
+    Typical foundation concrete
+    """
+    return FoundationConcrete()
