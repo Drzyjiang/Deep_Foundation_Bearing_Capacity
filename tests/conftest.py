@@ -9,6 +9,7 @@ from deep_foundation_bearing_capacity.foundation.foundation_material import Foun
 from deep_foundation_bearing_capacity.geomaterials.layer import Layer
 from deep_foundation_bearing_capacity.geomaterials.rock import Rock
 from deep_foundation_bearing_capacity.geomaterials.soil import Soil
+from deep_foundation_bearing_capacity.segments.segments import Segment
 
 
 # ---------- Soil fixtures (typical instances) ----------
@@ -232,3 +233,23 @@ def foundation_concrete_typical():
     Typical foundation concrete
     """
     return FoundationConcrete()
+
+@pytest.fixture
+def segment_typical_1(layer_typical_1, circular_section_typical, foundation_concrete_typical):
+    """
+    Typical segment, made of circular_section typical, layer_typical_1, 
+    and foundation_concrete_typical
+    """
+    return Segment(cross_section = circular_section_typical, 
+                   layer = layer_typical_1,
+                   foundation_material = foundation_concrete_typical)
+
+@pytest.fixture
+def segment_typical_2(layer_typical_2, square_section_typical, foundation_concrete_typical):
+    """
+    Typical segment, made of circular_section typical, layer_typical_1, 
+    and foundation_concrete_typical
+    """
+    return Segment(cross_section = square_section_typical, 
+                   layer = layer_typical_2,
+                   foundation_material = foundation_concrete_typical)

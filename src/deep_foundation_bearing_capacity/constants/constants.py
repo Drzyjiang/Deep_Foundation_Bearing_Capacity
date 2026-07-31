@@ -39,6 +39,9 @@ NONZERO_OFFSET = 1E-14
 # unit weight of water in pcf
 UNIT_WEIGHT_WATER = 62.4
 
+# unit weight of concrete in pcf
+UNIT_WEIGHT_CONCRETE = 150.0
+
 # atmospheric pressure in psf
 #ATM = 2116.22 # accurate
 ATM = 2000 # approximate

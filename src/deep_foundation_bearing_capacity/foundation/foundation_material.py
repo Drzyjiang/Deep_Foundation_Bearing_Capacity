@@ -7,6 +7,7 @@ from deep_foundation_bearing_capacity.constants.constants import (
     ELASTIC_MODULUS_CONCRETE,
     PSI2PSF,
     SCALAR_TYPE,
+    UNIT_WEIGHT_CONCRETE,
     YIELD_STRENGTH_CONCRETE,
 )
 
@@ -56,7 +57,7 @@ class FoundationConcrete(FoundationMaterial):
     yield_strength_lower_bound_percentage = 0.7
     yield_strength_upper_bound_percentage = 5.0
 
-    def __init__(self, unit_weight:float = 150, elastic_modulus:float = ELASTIC_MODULUS_CONCRETE, 
+    def __init__(self, unit_weight:float = UNIT_WEIGHT_CONCRETE, elastic_modulus:float = ELASTIC_MODULUS_CONCRETE, 
                  yield_strength: float = YIELD_STRENGTH_CONCRETE):
         super().__init__(unit_weight, elastic_modulus)
 
