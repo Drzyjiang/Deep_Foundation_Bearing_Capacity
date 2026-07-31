@@ -5,6 +5,7 @@ import pytest
 
 from deep_foundation_bearing_capacity.constants.constants import PSI2PSF
 from deep_foundation_bearing_capacity.cross_sections.cross_sections import CircularSection, SquareSection
+from deep_foundation_bearing_capacity.foundation.deep_foundation import DeepFoundation
 from deep_foundation_bearing_capacity.foundation.foundation_material import FoundationConcrete
 from deep_foundation_bearing_capacity.geomaterials.layer import Layer
 from deep_foundation_bearing_capacity.geomaterials.rock import Rock
@@ -247,9 +248,26 @@ def segment_typical_1(layer_typical_1, circular_section_typical, foundation_conc
 @pytest.fixture
 def segment_typical_2(layer_typical_2, square_section_typical, foundation_concrete_typical):
     """
-    Typical segment, made of circular_section typical, layer_typical_1, 
+    Typical segment, made of square_section typical, layer_typical_2, 
     and foundation_concrete_typical
     """
     return Segment(cross_section = square_section_typical, 
                    layer = layer_typical_2,
                    foundation_material = foundation_concrete_typical)
+
+@pytest.fixture
+def segment_typical_3(layer_typical_3, square_section_typical, foundation_concrete_typical):
+    """
+    Typical segment, made of square_section typical, layer_typical_3, 
+    and foundation_concrete_typical
+    """
+    return Segment(cross_section = square_section_typical, 
+                   layer = layer_typical_3,
+                   foundation_material = foundation_concrete_typical)
+
+@pytest.fixture(scope = "function")
+def deep_foundation_typical(segment_typical_1, segment_typical_2, segment_typical_3):
+    """
+    Tyical deep foundation
+    """
+    return DeepFoundation(segments=[segment_typical_1, segment_typical_2, segment_typical_3])

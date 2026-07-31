@@ -35,8 +35,6 @@ class DeepFoundation:
         # factor of safety
         self.fs = fs
 
-
-
         
     @property
     def effective_weight(self):
@@ -71,7 +69,7 @@ class DeepFoundation:
         
         for segment in segments:
             if not isinstance(segment, Segment):
-                raise TypeError("ERROR: all segments shall be type Segment.")
+                raise TypeError(f"ERROR: all segments shall be type {Segment}.")
             
         return True
     
@@ -400,6 +398,7 @@ class DeepFoundation:
 
 class SideResistanceCorrections:
     '''
+    TODO: NOT TESTED YET
     Methods to correct side resistance only
     '''
     def __init__(self,segments:Segment):
@@ -407,7 +406,7 @@ class SideResistanceCorrections:
         self.segments = segments
     
     def apply_all(self,  segment_side_resistances, segment_bottom_depth_values, 
-                  segment_top_depth_values, applications = ["depth"]):
+                  segment_top_depth_values, applications = ["correct_moist_change"]):
         '''
         Args:
             applications (list[str]): list of strs that describe applicable functions
@@ -418,7 +417,7 @@ class SideResistanceCorrections:
                                                                   segment_top_depth_values)
         return segment_side_resistances
 
-    def depth(self, segment_side_resistances, segment_bottom_depth_values, segment_top_depth_values):
+    def correct_moisture_change(self, segment_side_resistances, segment_bottom_depth_values, segment_top_depth_values):
         '''
         depth related correction
 
