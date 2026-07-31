@@ -4,6 +4,7 @@
 import pytest
 
 from deep_foundation_bearing_capacity.constants.constants import PSI2PSF
+from deep_foundation_bearing_capacity.cross_sections.cross_sections import CircularSection, SquareSection
 from deep_foundation_bearing_capacity.geomaterials.layer import Layer
 from deep_foundation_bearing_capacity.geomaterials.rock import Rock
 from deep_foundation_bearing_capacity.geomaterials.soil import Soil
@@ -209,3 +210,17 @@ def dict_layer(stiff_clay):
             "top_depth": 0,
             "thickness": 10
             }
+
+@pytest.fixture
+def circular_section_typical():
+    """
+    typical circular section
+    """
+    return CircularSection(section_dimension = 1)
+
+@pytest.fixture
+def square_section_typical():
+    """
+    typical square section
+    """
+    return SquareSection(section_dimension = 1)

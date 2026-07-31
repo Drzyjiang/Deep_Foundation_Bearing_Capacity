@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 #from soil_layer.layer import Layer
-from deep_foundation_bearing_capacity.constants import constants
+from deep_foundation_bearing_capacity.constants.constants import NUMERIC_TYPE
 
 
 class CrossSection(ABC):
@@ -20,13 +20,13 @@ class CrossSection(ABC):
 
         self.section_dimension = section_dimension
 
-    def _sanity_check_section_dimension(self,section_dimension):
+    def _sanity_check_section_dimension(self,section_dimension: NUMERIC_TYPE):
         '''
         Sanity check on section_dimension
         '''
 
-        if not isinstance(section_dimension, constants.SCALAR_TYPES):
-            raise TypeError(f"ERROR: section_dimension shall be {constants.SCALAR_TYPES}")
+        if not isinstance(section_dimension, NUMERIC_TYPE):
+            raise TypeError(f"ERROR: section_dimension shall be {NUMERIC_TYPE}")
         elif section_dimension <= 0:
             raise ValueError(f"ERROR: section_dimension shall be greater than zero.")
         else:
