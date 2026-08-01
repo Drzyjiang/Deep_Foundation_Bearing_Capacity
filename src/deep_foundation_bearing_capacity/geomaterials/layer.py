@@ -61,7 +61,7 @@ class Layer:
         '''
         if ground_water_depth is None:
             return True
-        print(ground_water_depth)
+      
         if not isinstance(ground_water_depth, NUMERIC_TYPE):
             raise TypeError("ground_water_depth data type shall be float, int, np.ndarray, np.generic.")
     

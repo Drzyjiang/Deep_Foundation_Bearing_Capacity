@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from deep_foundation_bearing_capacity.constants.constants import (
-    ATM,
+    ATM_APPROXIMATE,
     FT2M,
     PSF2MPA,
     PSF2TSF,
@@ -115,7 +115,7 @@ class RockSideResistance(SideResistance):
 
             return idx1, idx2
 
-        sigma_n_pa_ratio = sigma_n / ATM
+        sigma_n_pa_ratio = sigma_n / ATM_APPROXIMATE
 
         idx1, idx2 = find_closest(list(range(1,8)), sigma_n_pa_ratio)
 
@@ -194,7 +194,7 @@ class RockSideResistance(SideResistance):
             uplift (bool): whether side resistance is for uplift
         '''
         qu = min(self.layer.geomaterial.qu, YIELD_STRENGTH_CONCRETE)
-        return 0.65 * ATM * (qu/ATM)**0.5
+        return 0.65 * ATM_APPROXIMATE * (qu/ATM_APPROXIMATE)**0.5
     
     def _uplift_resistance_reduction(self)->float:
         '''
@@ -262,15 +262,15 @@ class SoilSideResistance(SideResistance):
             alpha (float)
         '''
 
-        su_to_pa = self.layer.geomaterial.cohesion / ATM
+        su_to_pa = self.layer.geomaterial.cohesion / ATM_APPROXIMATE
         XP = [1.5, 2.5]
         YP = [0.55, 0.45]
-
+        print(su_to_pa)
         alpha = float(np.interp(su_to_pa, XP, YP))
 
         return alpha
 
-    def _calculate_beta(self, effective_stress: SCALAR_TYPE)->SCALAR_TYPE:
+    def _calculate_beta(self, effective_stress: SCALAR_TYPE = 0)->SCALAR_TYPE:
         '''
         To calculate beta for cohesionless soil or gravelly sand/gravels
         Note: length is in unit of foot, NOT meter.
@@ -322,7 +322,7 @@ class SoilSideResistance(SideResistance):
         Return:
             deg (SCALAR_TYPE): friction angle in unit of deg
         '''
-        deg = np.degrees(np.atan( (self.layer.geomaterial.n60/ (12.3 + 20.3 * effective_stress/ATM))**0.34 ))
+        deg = np.degrees(np.atan( (self.layer.geomaterial.n60/ (12.3 + 20.3 * effective_stress/ATM_APPROXIMATE))**0.34 ))
         deg = min(deg, 45)
 
         return deg
@@ -332,7 +332,7 @@ class SoilSideResistance(SideResistance):
         To calcualte earth pressure coefficient 
         '''
         phi_prime_rad = np.radians(self._calculate_phi_prime(effective_stress))
-        ko = (1 - np.sin(phi_prime_rad)) * (0.2*ATM*self.layer.geomaterial.n60 / effective_stress)**(np.sin(phi_prime_rad))
+        ko = (1 - np.sin(phi_prime_rad)) * (0.2*ATM_APPROXIMATE*self.layer.geomaterial.n60 / effective_stress)**(np.sin(phi_prime_rad))
 
         return ko
 
@@ -381,7 +381,7 @@ class SoilSideResistance(SideResistance):
         else:
             alpha = self._calculate_alpha()
 
-        side_resistance_cohesive = alpha * self.layer.soil.cohesion
+        side_resistance_cohesive = alpha * self.layer.geomaterial.cohesion
 
         # apply uplift reduction
         if uplift:
@@ -523,7 +523,7 @@ class SoilEndResistance(EndResistance):
     def __init__(self, layer: Layer):
         self.layer = layer
 
-    def end_resistance_unit(self, end_resistance_context):
+    def end_resistance_unit(self, end_resistance_context = EndResistanceContext()):
         '''
         Top wrapper for end resistance
 

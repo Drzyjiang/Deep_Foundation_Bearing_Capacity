@@ -43,8 +43,8 @@ UNIT_WEIGHT_WATER = 62.4
 UNIT_WEIGHT_CONCRETE = 150.0
 
 # atmospheric pressure in psf
-#ATM = 2116.22 # accurate
-ATM = 2000 # approximate
+ATM = 2116.22 # accurate
+ATM_APPROXIMATE = 2000 # approximate
 
 # scalar data type
 SCALAR_TYPE = Union[int, float, np.integer, np.floating]
