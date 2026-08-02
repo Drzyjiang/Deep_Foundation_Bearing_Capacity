@@ -12,6 +12,8 @@ class CrossSection(ABC):
     '''
     Class for general cross section
     '''
+    CROSS_SECTION_NAME = "UNDEFINED"
+
     def __init__(self, section_dimension):
         '''
 
@@ -31,11 +33,12 @@ class CrossSection(ABC):
             raise ValueError(f"ERROR: section_dimension shall be greater than zero.")
         else:
             return True
+   
 
     # calculate cross-section area
     @property
     @abstractmethod
-    def cross_section_area(self):
+    def area(self):
         ...
     
     # calculate perimeter
@@ -44,20 +47,29 @@ class CrossSection(ABC):
     def perimeter(self):
         ...
 
+    @abstractmethod
+    def display_properties(self):
+        """
+        Display cross-section properties
+        """
+        pass
+
 
 class CircularSection(CrossSection):
     '''
     Class for circular cross-section
     '''
+    CROSS_SECTION_NAME = "Circular Section"
+
+
     def __init__(self, section_dimension):
         super().__init__(section_dimension)
 
-        # 
         self.diameter = section_dimension
 
 
     @property
-    def cross_section_area(self):
+    def area(self):
         '''
         To calculate area of the cross-section
         '''
@@ -70,12 +82,25 @@ class CircularSection(CrossSection):
         To calculate perimeter of cross section
         '''
         return np.pi *  self.diameter
-    
+
+    def display_properties(self, properties: list[str] = ["CROSS_SECTION_NAME", "diameter", 
+                                                          "perimeter", "area"]):
+        """
+        Display properties
+        """
+        #sanity check
+        for property in properties:
+            try: 
+                print(f"{property} is: {getattr(self, property)}")
+            except AttributeError:
+                print(f"ERROR: {property} does not exist.")
 
 class SquareSection(CrossSection):
     '''
     Class for square cross-section
     '''
+    CROSS_SECTION_NAME = "Square Section"
+
     def __init__(self, section_dimension):
         super().__init__(section_dimension)
 
@@ -84,7 +109,7 @@ class SquareSection(CrossSection):
         self.length = section_dimension
 
     @property
-    def cross_section_area(self):
+    def area(self):
         '''
         To calculate area of the cross-section
         '''
@@ -97,3 +122,15 @@ class SquareSection(CrossSection):
         To calculate perimeter of cross section
         '''
         return  4 * self.length
+
+    def display_properties(self, properties: list[str] = ["CROSS_SECTION_NAME", "length", 
+                                                          "perimeter", "area"]):
+        """
+        Display properties
+        """
+        #sanity check
+        for property in properties:
+            try: 
+                print(f"{property} is: {getattr(self, property)}")
+            except AttributeError:
+                print(f"ERROR: {property} does not exist.")

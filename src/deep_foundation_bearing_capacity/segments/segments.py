@@ -63,7 +63,7 @@ class Segment:
         if self.foundation_material is None:
             return -1
         else:
-            return self.foundation_material.unit_weight * (self.cross_section.cross_section_area
+            return self.foundation_material.unit_weight * (self.cross_section.area
                                                             * self.segment_length) 
 
     @property
@@ -80,7 +80,7 @@ class Segment:
                                            self.layer.ground_water_depth, 0), self.layer.thickness)
             print((self.foundation_material.unit_weight - 
                     constants.UNIT_WEIGHT_WATER) * saturated_thickness)
-            return self.cross_section.cross_section_area * (self.foundation_material.unit_weight
+            return self.cross_section.area * (self.foundation_material.unit_weight
                     * dry_thickness + (self.foundation_material.unit_weight - 
                     constants.UNIT_WEIGHT_WATER) * saturated_thickness)         
         
@@ -107,7 +107,7 @@ class Segment:
         Note: this is not unit resistance.
         '''
         end_resistance_unit = self.end_resistance_obj.end_resistance_unit(end_resistance_context)
-        end_resistance = end_resistance_unit * self.cross_section.cross_section_area
+        end_resistance = end_resistance_unit * self.cross_section.area
 
         return end_resistance
     
@@ -130,4 +130,4 @@ class Segment:
         '''
         #
         return REDUCTION_ASD_CONCRETE_COMPRESSION * (
-            self.cross_section.cross_section_area * self.foundation_material.yield_strength)
+            self.cross_section.area * self.foundation_material.yield_strength)
