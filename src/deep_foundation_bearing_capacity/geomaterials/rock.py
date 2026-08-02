@@ -92,7 +92,7 @@ class Rock(Geomaterial):
         return cls(rock_index = int(data.get("rock_index")),
                    rqd = float(data.get("rqd")),
                    unit_weight = float(data.get("unit_weight")),
-                   elastic_modulus = float(data.get("elastic_modulus")),
+                   elastic_modulus = float(data.get("elastic_modulus", 0)),
                    friction_angle = float(data.get("friction_angle")),
                    qu = float(data.get("qu")),
                    rock_type = str(data.get("rock_type")),

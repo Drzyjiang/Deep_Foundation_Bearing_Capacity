@@ -58,6 +58,8 @@ class SideResistance:
             return SoilSideResistance(layer)
         elif isinstance(layer.geomaterial, Rock):
             return RockSideResistance(layer)
+
+      
         
         raise TypeError(f"ERROR: layer.geomaterial {layer.geomaterial} is not supported.")
     
@@ -265,7 +267,7 @@ class SoilSideResistance(SideResistance):
         su_to_pa = self.layer.geomaterial.cohesion / ATM_APPROXIMATE
         XP = [1.5, 2.5]
         YP = [0.55, 0.45]
-        print(su_to_pa)
+        
         alpha = float(np.interp(su_to_pa, XP, YP))
 
         return alpha
