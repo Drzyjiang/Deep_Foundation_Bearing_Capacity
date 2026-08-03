@@ -78,8 +78,7 @@ class Segment:
             dry_thickness = min(max(self.layer.ground_water_depth - self.layer.top_depth, 0), self.layer.thickness)
             saturated_thickness = min(max(self.layer.top_depth+self.layer.thickness -
                                            self.layer.ground_water_depth, 0), self.layer.thickness)
-            print((self.foundation_material.unit_weight - 
-                    constants.UNIT_WEIGHT_WATER) * saturated_thickness)
+
             return self.cross_section.area * (self.foundation_material.unit_weight
                     * dry_thickness + (self.foundation_material.unit_weight - 
                     constants.UNIT_WEIGHT_WATER) * saturated_thickness)         

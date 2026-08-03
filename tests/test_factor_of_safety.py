@@ -36,9 +36,9 @@ class TestFactorOfSafetyDeepFoundation:
         Test construction of class FactorOfSafetyDeepFoundation
         """
         fs = FactorOfSafetyDeepFoundation(factor_of_safety = 3.0, fs_end_bearing=2.5 )
-        assert fs.fs_deep_foundation_skin_compression == 3.0
-        assert fs.fs_deep_foundation_skin_uplift == 3.0
-        assert fs.fs_deep_foundation_end == 2.5
+        assert fs.fs_side_compression == 3.0
+        assert fs.fs_side_uplift == 3.0
+        assert fs.fs_end == 2.5
 
     @pytest.mark.parametrize("fs_side", [np.array([2.0])])
     @pytest.mark.parametrize("fs_end_bearing", [np.array([2.5])])
@@ -47,8 +47,8 @@ class TestFactorOfSafetyDeepFoundation:
         Test input format of numpy
         """
         fs = FactorOfSafetyDeepFoundation(fs_side, fs_end_bearing)
-        assert fs.fs_deep_foundation_skin_compression == fs_side
-        assert fs.fs_deep_foundation_end == fs_end_bearing
+        assert fs.fs_side_compression == fs_side
+        assert fs.fs_end == fs_end_bearing
 
     def test_inheritance(self):
         """

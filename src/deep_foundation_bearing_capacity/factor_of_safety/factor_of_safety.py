@@ -59,9 +59,9 @@ class FactorOfSafetyDeepFoundation (FactorOfSafety):
             self._sanity_check_fs(fs_end_bearing)
 
         # factor of safety for deep foundation
-        self.fs_deep_foundation_skin_compression = self.factor_of_safety
-        self.fs_deep_foundation_skin_uplift = self.factor_of_safety
-        self.fs_deep_foundation_end = fs_end_bearing
+        self.fs_side_compression = self.factor_of_safety
+        self.fs_side_uplift = self.factor_of_safety
+        self.fs_end = fs_end_bearing
 
 
         

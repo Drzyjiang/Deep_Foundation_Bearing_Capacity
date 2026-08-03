@@ -41,7 +41,6 @@ class DeepFoundation:
         '''
         calculate deep foundation effective self weight in unit of pound
         '''
-
         return self.calculate_segment_weights_effective_accumulative()[-1]
     
     def calculate_segment_weights_effective_accumulative(self)->list[float]:
@@ -188,9 +187,9 @@ class DeepFoundation:
 
         # apply factor of safety
         if uplift == False:
-            fs = self.fs.fs_deep_foundation_skin_compression
+            fs = self.fs.fs_side_compression
         else:
-            fs = self.fs.fs_deep_foundation_skin_uplift
+            fs = self.fs.fs_side_uplift
         segment_side_resistances = [x / fs for x in segment_side_resistances]
         
         # apply correction
@@ -219,7 +218,7 @@ class DeepFoundation:
             segment_end_resistances.append(segment_end_resistance)
 
         # apply factor of safety
-        segment_end_resistances = [x/ self.fs.fs_deep_foundation_end for x in segment_end_resistances]
+        segment_end_resistances = [x/ self.fs.fs_end for x in segment_end_resistances]
 
         return segment_end_resistances
 
