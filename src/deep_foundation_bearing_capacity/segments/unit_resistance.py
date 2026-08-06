@@ -190,7 +190,7 @@ class RockSideResistance(SideResistance):
         '''
         Top wrapper of side resistance of rock
         Assume smooth rock socket
-
+        Reference: FHWA Drilled shaft manual 99 Eq.11.24
         Args:
             side_resistance_context (SideResistanceContext): context parameters for side resistance
             uplift (bool): whether side resistance is for uplift
@@ -303,10 +303,9 @@ class SoilSideResistance(SideResistance):
         # determine based on soil_type_general
         if self.layer.geomaterial.soil_type_general == 1: # sand
             if self.layer.geomaterial.n60 >= 15:
-                # note: when depth is in unit of foot, use coefficient of 0.135, not 0.245
-                beta =  1.5 - 0.135 * depth_mid**0.5
+                beta =  1.5 - 0.245 * (depth_mid * FT2M)**0.5
             else:
-                beta = (self.layer.geomaterial.n60 / 15.0) * (1.5 - 0.135 * depth_mid**0.5)
+                beta = (self.layer.geomaterial.n60 / 15.0) * (1.5 - 0.245 * (depth_mid *FT2M)**0.5)
   
             # minimum beta is 0.25
             beta = max(beta, 0.25)
@@ -478,8 +477,9 @@ class RockEndResistance(EndResistance):
         '''
         if self.socket_width_ratio >= 1.5 and self.layer.geomaterial.rqd == 100: # FHWA 99 Eq.(11.5)
             return self.layer.geomaterial.qu * 2.5
-        elif self.layer.geomaterial.joint == "closed" and self.layer.geomaterial.rqd >= 70: # FHWA 99 (Eq. 11.6)
-            print(4.83 * (self.layer.geomaterial.qu * PSF2MPA)**0.51 / PSF2MPA)
+        elif self.layer.geomaterial.joint == "closed" and self.layer.geomaterial.rqd >= 70 and (
+            self.layer.geomaterial.qu >5.2 / PSF2TSF): # FHWA 99 (Eq. 11.6)
+            
             return 4.83 * (self.layer.geomaterial.qu * PSF2MPA)**0.51 / PSF2MPA
         else: # FHWA 99 (Eq.11.7)
             s = self.get_s()
