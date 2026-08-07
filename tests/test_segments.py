@@ -49,7 +49,7 @@ class TestProperties:
         """
         Test self_weight_effective()
         """
-        assert segment_typical_1.self_weight_effective == segment_typical_1.cross_section.cross_section_area * (
+        assert segment_typical_1.self_weight_effective == segment_typical_1.cross_section.area * (
             UNIT_WEIGHT_CONCRETE * segment_typical_1.segment_length  -
             UNIT_WEIGHT_WATER * segment_typical_1.segment_length) 
         

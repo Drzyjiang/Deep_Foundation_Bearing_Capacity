@@ -96,11 +96,15 @@ class RockSideResistance(SideResistance):
     def _calculate_alpha(self, sigma_n = None ):
         '''
         To calculate alpha (empirical factor for cohesive igm, not for cohesive soil)
-        Reference: FHWA Driller Shaft manual 99 Figure 11.5
+        Reference: FHWA Driller Shaft manual 99 Figure 11.5, Eq.(11.23)
+        sigma_n is pressure exerted by fluid concrete at the middle of layer
+        sigma_n is estimated as 65% of total vertical stress at mid depth with constant unit weight 
         '''
-        # sigma_n is pressure exerted by fluid concrete at the middle of layer
+
         if sigma_n is None:
-            sigma_n = (self.layer.top_depth + self.layer.thickness * 0.5) * self.layer.geomaterial.unit_weight
+            # depth is capped at 12 m, 
+            depth = min(12 / FT2M, self.layer.top_depth + self.layer.thickness * 0.5)
+            sigma_n = 0.65 * depth * self.layer.geomaterial.unit_weight
 
         def find_closest(lst:list[float], target:float):
             '''

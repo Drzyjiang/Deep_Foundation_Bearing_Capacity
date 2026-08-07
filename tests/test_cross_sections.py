@@ -14,7 +14,7 @@ class TestConstruction:
         test CircularSection
         """
         assert circular_section_typical.diameter == 1
-        assert circular_section_typical.cross_section_area == pytest.approx(0.25* np.pi * 1*1, rel = EPSILON)
+        assert circular_section_typical.area == pytest.approx(0.25* np.pi * 1*1, rel = EPSILON)
         assert circular_section_typical.perimeter == pytest.approx(np.pi *  1, rel = EPSILON)
 
     def test_square_section(self, square_section_typical):
@@ -22,7 +22,7 @@ class TestConstruction:
         Test SquareSection
         """
         assert square_section_typical.length == pytest.approx(1.0, rel = EPSILON)
-        assert square_section_typical.cross_section_area == pytest.approx(1.0, rel = EPSILON)
+        assert square_section_typical.area == pytest.approx(1.0, rel = EPSILON)
         assert square_section_typical.perimeter == pytest.approx(4, rel = EPSILON)
 
 # =============================

@@ -7,7 +7,7 @@ import numpy as np
 from deep_foundation_bearing_capacity.constants import constants
 
 
-class Geomaterial(ABC):
+class Geomaterial:
     def __init__(self, unit_weight:float = 0, elastic_modulus: float = 0):
         '''
         Args:
@@ -56,7 +56,7 @@ class Geomaterial(ABC):
 
         self.unit_weight = unit_weight_new
 
-    @abstractmethod
+    #@abstractmethod
     def display_properties(self, properties:list[str]):
         '''
         To display specified geomaterial properties
