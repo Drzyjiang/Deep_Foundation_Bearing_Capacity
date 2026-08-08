@@ -27,7 +27,7 @@ jobs:
           pip install -e ".[dev]"
 
       - name: Lint
-        run: ruff check tests/
+        run: ruff check src/ tests/
 
       - name: Run tests
         run: pytest --cov = deep_foundation_bearing_capacity --cov-report=term-missing
