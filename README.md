@@ -9,7 +9,7 @@ This project implements drill shafts' geotechnical axial capacity by reproducing
 
 ## Features
 ### Side and end resistances in cohesive soils.
-Side resistance in cohesive soil, i.e., adhesion, is denoted as the product of soil's undrained shear strength and an adhesion factor that is usually noted as $\alpha$. Thus this method is also known as the "alpha" method. Side resistance is calculated using the following equation:
+Side resistance in cohesive soil, i.e., adhesion, is denoted as the product of soil's undrained shear strength and an adhesion factor that is usually noted as $\alpha$. Thus this method is also known as the "alpha" method. Side resistance is calculated using the following equation:<br>
 $$f_{max} = \alpha S_u$$
 where adhesion factor $\alpha$ depends on $S_u/p_a$ ratio and varies linearly from 0.55 with $S_u/p_a$ ratio 1.5 to 0.45 with the ratio of 2.5 and remains constant beyond; $S_u$ is soil's undrained shear strength.  It is also noted that adhesion shall be neglected for upper 5 ft clayey soil or depth of seasonal moisture change, whichever is deeper, and for the shaft section $B$ (shaft diameter) above bottom.
 
@@ -164,8 +164,7 @@ Deep_Foundation_Bearing_Capacity/
 +---tests/                               # pytest suite, flattened
 |     |---...
 +---.github/---workflows/ci.yml          # CI
-+---results/                             # example results
-|     |---...
+
 
 ```
 
