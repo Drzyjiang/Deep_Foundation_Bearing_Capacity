@@ -30,4 +30,4 @@ jobs:
         run: ruff check src/ tests/
 
       - name: Run tests
-        run: pytest --cov = deep_foundation_bearing_capacity --cov-report=term-missing
+        run: pytest --cov=deep_foundation_bearing_capacity --cov-report=term-missing
