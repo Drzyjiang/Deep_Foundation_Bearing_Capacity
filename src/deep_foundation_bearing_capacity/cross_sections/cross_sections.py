@@ -30,7 +30,7 @@ class CrossSection(ABC):
         if not isinstance(section_dimension, NUMERIC_TYPE):
             raise TypeError(f"ERROR: section_dimension shall be {NUMERIC_TYPE}")
         elif section_dimension <= 0:
-            raise ValueError(f"ERROR: section_dimension shall be greater than zero.")
+            raise ValueError("ERROR: section_dimension shall be greater than zero.")
         else:
             return True
    

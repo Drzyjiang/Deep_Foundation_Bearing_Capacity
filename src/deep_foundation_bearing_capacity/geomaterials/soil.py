@@ -189,7 +189,8 @@ class Soil(Geomaterial):
     def _determine_soil_type_general(self)->int:
         '''
         To determine soil 
-        Type 0 (cohesion !=0 and friction_angle !=0): mixed of cohesionless and cohesive. This case is RARE in calculation.
+        Type 0 (cohesion !=0 and friction_angle !=0): mixed of cohesionless and cohesive. 
+                                                      This case is RARE in calculation.
         Type 1 (cohesion == 0): cohesionless only, sand.
         Type 2 (cohesion != 0): cohesive only, clay.
         

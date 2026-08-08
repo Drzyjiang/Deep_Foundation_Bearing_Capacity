@@ -186,7 +186,7 @@ class DeepFoundation:
             segment_side_resistances.append(segment.calculate_side_resistance(side_resistance_context))
 
         # apply factor of safety
-        if uplift == False:
+        if not uplift:
             fs = self.fs.fs_side_compression
         else:
             fs = self.fs.fs_side_uplift
@@ -312,7 +312,7 @@ class DeepFoundation:
         
         # sanity_check on target
         if target != "compression" and target != "uplift":
-            raise ValueError(f"ERROR: target shall be either 'compression' or 'uplift'.")
+            raise ValueError("ERROR: target shall be either 'compression' or 'uplift'.")
 
         if target == "compression":
             resistances_accumulative = self.calculate_compression_resistances_accumulative()

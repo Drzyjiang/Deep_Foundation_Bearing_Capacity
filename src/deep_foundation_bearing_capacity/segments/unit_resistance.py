@@ -1,6 +1,5 @@
 # unit resistance for deep foundations
-import csv
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -15,8 +14,6 @@ from deep_foundation_bearing_capacity.constants.constants import (
     SCALAR_TYPE,
     YIELD_STRENGTH_CONCRETE,
 )
-from deep_foundation_bearing_capacity.factor_of_safety.factor_of_safety import FactorOfSafetyDeepFoundation
-from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomaterial
 from deep_foundation_bearing_capacity.geomaterials.layer import Layer
 from deep_foundation_bearing_capacity.geomaterials.rock import Rock
 from deep_foundation_bearing_capacity.geomaterials.soil import Soil
@@ -139,8 +136,7 @@ class RockSideResistance(SideResistance):
         alpha_values = []
 
         for idx in [idx1, idx2]:
-            xp = []
-            yp = []
+
             df = pd.read_csv(alpha_curve_names[idx][1])
          
             # interpolate by qu
@@ -148,7 +144,8 @@ class RockSideResistance(SideResistance):
       
         # Use Fig 11.5 to get alpha through interpolating by sigma_n_pa_ratio
         # use log(sigma_n_pa_ratio) instead of sigma_n_pa_ratio
-        alpha = np.interp(np.log(sigma_n_pa_ratio), [np.log(alpha_curve_names[idx1][0]), alpha_curve_names[idx2][0]], alpha_values)
+        alpha = np.interp(np.log(sigma_n_pa_ratio), [np.log(alpha_curve_names[idx1][0]), 
+                                                     alpha_curve_names[idx2][0]], alpha_values)
         alpha = alpha * np.tan(np.radians(self.layer.geomaterial.friction_angle)) / np.tan(np.radians(30))
 
         return alpha
@@ -229,12 +226,12 @@ class SoilSideResistance(SideResistance):
             raise ValueError("ERROR: negative effective stress is currently not applicable.")
         
         # sanity check on alpha_override
-        if not side_resistance_context.alpha_override is None and (
+        if side_resistance_context.alpha_override is not None and (
             side_resistance_context.alpha_override < 0.45 or side_resistance_context.alpha_override > 0.55):
             raise ValueError("ERROR: typical alpha_override shall be between 0.45 and 0.55.")
         
         # sanity check on beta_override
-        if not side_resistance_context.beta_override is None and (
+        if side_resistance_context.beta_override is not None and (
             side_resistance_context.beta_override <0.25 or side_resistance_context.beta_override > 1.80):
             raise ValueError("ERROR: typical beta_override shall be between 0.25 and 1.80.")
 
@@ -302,7 +299,8 @@ class SoilSideResistance(SideResistance):
             # maximum beta is 1.80 for gravelly sand or gravels
             beta = min(beta, 1.80)
         elif self.layer.geomaterial.soil_type_advanced == "igm_cohesionless":
-            return self._calculate_ko(effective_stress) * np.tan(np.radians(self._calculate_phi_prime(effective_stress)))
+            return self._calculate_ko(effective_stress) * np.tan(
+                np.radians(self._calculate_phi_prime(effective_stress)))
 
         # determine based on soil_type_general
         if self.layer.geomaterial.soil_type_general == 1: # sand
@@ -327,7 +325,8 @@ class SoilSideResistance(SideResistance):
         Return:
             deg (SCALAR_TYPE): friction angle in unit of deg
         '''
-        deg = np.degrees(np.atan( (self.layer.geomaterial.n60/ (12.3 + 20.3 * effective_stress/ATM_APPROXIMATE))**0.34 ))
+        deg = np.degrees(np.atan( (self.layer.geomaterial.n60/ 
+                                   (12.3 + 20.3 * effective_stress/ATM_APPROXIMATE))**0.34))
         deg = min(deg, 45)
 
         return deg
@@ -337,11 +336,13 @@ class SoilSideResistance(SideResistance):
         To calcualte earth pressure coefficient 
         '''
         phi_prime_rad = np.radians(self._calculate_phi_prime(effective_stress))
-        ko = (1 - np.sin(phi_prime_rad)) * (0.2*ATM_APPROXIMATE*self.layer.geomaterial.n60 / effective_stress)**(np.sin(phi_prime_rad))
+        ko = (1 - np.sin(phi_prime_rad)) * (
+            0.2*ATM_APPROXIMATE*self.layer.geomaterial.n60 / effective_stress)**(np.sin(phi_prime_rad))
 
         return ko
 
-    def side_resistance_unit_cohesionless(self, effective_stress: float, beta_override:float = None, uplift:bool = False):
+    def side_resistance_unit_cohesionless(self, effective_stress: float, 
+                                          beta_override:float = None, uplift:bool = False):
         '''
         To calculate side resistance for cohesionless layer
 
@@ -356,7 +357,7 @@ class SoilSideResistance(SideResistance):
 
         '''
 
-        if not beta_override is None:
+        if beta_override is not None:
             beta = beta_override
         else:
             beta = self._calculate_beta(effective_stress) 
@@ -381,7 +382,7 @@ class SoilSideResistance(SideResistance):
             side_resistance_cohesionless (constants.SCALR_TYPE): side resistance of coheionless soil in unit of psf
         '''
 
-        if not alpha_override is None:
+        if alpha_override is not None:
             alpha = alpha_override
         else:
             alpha = self._calculate_alpha()

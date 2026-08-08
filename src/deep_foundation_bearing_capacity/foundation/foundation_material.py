@@ -1,12 +1,8 @@
 # classes for foundation materials
-from abc import abstractmethod
-
-import numpy as np
 
 from deep_foundation_bearing_capacity.constants.constants import (
     ELASTIC_MODULUS_CONCRETE,
     PSI2PSF,
-    SCALAR_TYPE,
     UNIT_WEIGHT_CONCRETE,
     YIELD_STRENGTH_CONCRETE,
 )
