@@ -6,8 +6,6 @@ from deep_foundation_bearing_capacity.constants.constants import PSF2TSF, UNIT_W
 from deep_foundation_bearing_capacity.geomaterials.layer import Layer
 from deep_foundation_bearing_capacity.geomaterials.soil import Soil
 from deep_foundation_bearing_capacity.segments.unit_resistance import (
-    EndResistanceContext,
-    SideResistanceContext,
     SoilEndResistance,
     SoilSideResistance,
 )
@@ -84,15 +82,18 @@ class TestSoilSideResistance:
 
         layer_1_unit_resistance = SoilSideResistance(layer_1)  
         assert layer_1_unit_resistance.side_resistance_unit_cohesionless(effective_stress = 115*2.0, 
-                                                                         beta_override = 0.8) == pytest.approx(0.115 / PSF2TSF * 0.8, rel = 0.01)
+                                                                         beta_override = 0.8) ==(
+                                                    pytest.approx(0.115 / PSF2TSF * 0.8, rel = 0.01))
 
         layer_2_unit_resistance = SoilSideResistance(layer_2)   
-        assert layer_2_unit_resistance.side_resistance_unit_cohesionless(effective_stress = 115*4.0 + (115-UNIT_WEIGHT_WATER) * 13, beta_override=0.8
-                                                                         ) == pytest.approx(0.572 / PSF2TSF * 0.8, rel = 0.01)
+        assert layer_2_unit_resistance.side_resistance_unit_cohesionless(
+            effective_stress = 115*4.0 + (115-UNIT_WEIGHT_WATER) * 13, beta_override=0.8) == (
+                pytest.approx(0.572 / PSF2TSF * 0.8, rel = 0.01))
  
         layer_3_unit_resistance = SoilSideResistance(layer_3) 
-        assert layer_3_unit_resistance.side_resistance_unit_cohesionless(effective_stress = 115*4.0 + (115-UNIT_WEIGHT_WATER) * 41, beta_override=0.8
-                                                                         ) == pytest.approx(1.308 / PSF2TSF * 0.8, rel = 0.01)
+        assert layer_3_unit_resistance.side_resistance_unit_cohesionless(effective_stress = 115*4.0
+            + (115-UNIT_WEIGHT_WATER) * 41, beta_override=0.8) == (
+                pytest.approx(1.308 / PSF2TSF * 0.8, rel = 0.01))
 
     def test_side_unit_resistance_cohesive_1(self):
         """
@@ -106,14 +107,17 @@ class TestSoilSideResistance:
         clay_5ft = Soil(soil_index = 0, cohesion = np.interp(5, xp, yp))
         clay_33_4ft = Soil(soil_index = 0, cohesion = np.interp(33.4, xp, yp))
 
-        clay_layer_5ft = Layer(layer_index = 0, geomaterial = clay_5ft, ground_water_depth = 100, top_depth = 5,thickness = 0.01)
-        clay_layer_33_4ft = Layer(layer_index = 0, geomaterial = clay_33_4ft, ground_water_depth = 100, top_depth = 33.4,thickness = 0.01)
+        clay_layer_5ft = Layer(layer_index = 0, geomaterial = clay_5ft, ground_water_depth = 100,
+                                top_depth = 5,thickness = 0.01)
+        clay_layer_33_4ft = Layer(layer_index = 0, geomaterial = clay_33_4ft, 
+                                  ground_water_depth = 100, top_depth = 33.4,thickness = 0.01)
 
         side_resistance_5ft = SoilSideResistance(clay_layer_5ft)
         side_resistance_33_4ft = SoilSideResistance(clay_layer_33_4ft)
 
-        side_resistance_unit_cohesive = 0.5*(side_resistance_5ft.side_resistance_unit_cohesive(alpha_override = 0.55) + 
-                    side_resistance_33_4ft.side_resistance_unit_cohesive(alpha_override=0.55)) 
+        side_resistance_unit_cohesive = 0.5*(
+            side_resistance_5ft.side_resistance_unit_cohesive(alpha_override = 0.55)
+              + side_resistance_33_4ft.side_resistance_unit_cohesive(alpha_override=0.55)) 
         
         assert side_resistance_unit_cohesive == pytest.approx(1.14 / PSF2TSF * 0.55, rel = 0.01) 
 

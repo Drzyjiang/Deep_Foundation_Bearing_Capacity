@@ -1,5 +1,4 @@
 # test /geomaterials/rock.py
-from dataclasses import dataclass
 
 import numpy as np
 import pytest
@@ -24,7 +23,7 @@ class TestRockConstruction:
         assert competent_rock.rqd == 100
         assert competent_rock.rock_type == "A"
         assert competent_rock.rock_quality == "Very good"
-        assert competent_rock.rock_type_advanced == None 
+        assert competent_rock.rock_type_advanced is None 
         assert competent_rock.joint == "closed"
 
 
@@ -117,7 +116,7 @@ class TestFromDict:
         assert rock.rqd == 100
         assert rock.rock_type == "A"
         assert rock.rock_quality == "Very good"
-        assert rock.rock_type_advanced == None 
+        assert rock.rock_type_advanced is None 
         assert rock.joint == "open"
 
 # =========================================================

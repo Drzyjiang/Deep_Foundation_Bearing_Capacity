@@ -41,6 +41,9 @@ class TestSanityChecks:
         elastic_modulus_too_high = (foundation_concrete_typical.elastic_modulus_upper_bound_percentage+0.01) *(
                                     ELASTIC_MODULUS_CONCRETE)
 
+        with pytest.raises(ValueError, match = "elastic_modulus"):
+            FoundationConcrete(elastic_modulus = elastic_modulus_too_high)
+
     def test_sanity_check_yield_strength(self, foundation_concrete_typical):
         """
         Sanity check on yield strength
@@ -49,3 +52,9 @@ class TestSanityChecks:
                                     YIELD_STRENGTH_CONCRETE)
         yield_strength_too_high = (foundation_concrete_typical.yield_strength_upper_bound_percentage+0.01) *(
                                     YIELD_STRENGTH_CONCRETE)
+
+        with pytest.raises(ValueError, match = "yield_strength"):
+            FoundationConcrete(yield_strength = yield_strength_too_low)
+
+        with pytest.raises(ValueError, match = "yield_strength"):
+            FoundationConcrete(yield_strength = yield_strength_too_high)

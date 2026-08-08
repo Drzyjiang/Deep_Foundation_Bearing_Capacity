@@ -25,7 +25,7 @@ class TestSoilConstruction:
         assert loose_sand.n60 == 8
 
     def test_default_soil_type_advanced_is_none(self, stiff_clay):
-        assert stiff_clay.soil_type_advanced == None
+        assert stiff_clay.soil_type_advanced is None
 
     def test_igm_advanced_type(self, igm_cohesionless):
         assert igm_cohesionless.soil_type_advanced == "igm_cohesionless"
@@ -71,7 +71,7 @@ class TestFromDict:
         assert soil.friction_angle == 30
         assert soil.cohesion == 100
         assert soil.n60 == 30
-        assert soil.soil_type_advanced == None
+        assert soil.soil_type_advanced is None
 
     def test_from_dict_igm(self, dict_igm):
         """
@@ -239,6 +239,6 @@ class TestDisplayProperties:
 # =========================================================
 class TestInheritance:
     def test_is_geomaterial(self, stiff_clay, igm_cohesionless):
-        from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomaterial
+        
         assert isinstance(stiff_clay, Geomaterial)
         assert isinstance(igm_cohesionless, Geomaterial)
