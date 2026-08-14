@@ -282,6 +282,10 @@ class SoilSideResistance(SideResistance):
             effective_stress (SCALAR_TYPE): 
         '''
 
+        # to apply beta method, layer thickness shall not be beyond 30 ft
+        if self.layer.thickness >30:
+            raise ValueError("ERROR: to apply beta method layer.thickness shall be <= 30 ft.")
+
         depth_mid = self.layer.top_depth + 0.5 * self.layer.thickness
 
         beta = 0

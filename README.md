@@ -4,12 +4,13 @@ A project for calculating drilled pier geotechnical axial bearing capacity.
 Author: Zhiyan Jiang [(http://www.linkedin.com/in/zhiyanjiang)](http://www.linkedin.com/in/zhiyanjiang)
 
 ## Overview
-Drilled shafts are widely selected as a common type of deep foundations to support superstructures subject to relatively large loadings or unfavorable surficial geotechnical conditions. In drilled shafts designs, geotechnical axial capacity is a crucial and often the governing factor in pile length and diameter selections.    
-This project implements drill shafts' geotechnical axial capacity by reproducing recommended methods published by Federal Highway Administration (1999) in Python code. Although FHWA later released updated versions in 2010 and 2018, methods in the 1999 report are still considered valid in engineering practice.
+Deep foundations use slender structural elements to transfer superstructure loads to deep geomaterial strata. A typical type of deep foundationss is drilled shaft that is constructed by predrilling a borehole, reinforcing, and placing concrete. Drilled shafts are widely favored, particularly for scenarios with relatively large loadings or poor surficial geotechnical conditions. In drilled shafts designs, geotechnical axial capacity is a crucial and often governing factor in selecting pile length and diameter and thus deserve careful assessment.    
+This project implements drill shafts' geotechnical axial capacity by reproducing in Python code the well-known methods published by Federal Highway Administration (1999). Although FHWA later released updated versions in 2010 and 2018, methods published in the 1999 report are still considered valid in engineering practice.
 
 ## Features
-### Side and end resistances in cohesive soils.
-Side resistance in cohesive soil, i.e., adhesion, is denoted as the product of soil's undrained shear strength and an adhesion factor that is noted as $\alpha$. Thus this method is also known as the "alpha" method. Side resistance is calculated using the following equation:
+Unit side resistance and end resistance are implemented for four different geomaterial types.
+### Cohesive soils
+Side resistance in cohesive soils, i.e., adhesion, is computed as the product of soil's undrained shear strength and an adhesion factor that is noted as $\alpha$. Thus this method is also known as the "alpha" method. Side resistance is calculated using the following equation:
 
 $$f_{max} = \alpha S_u$$
 
@@ -29,7 +30,7 @@ where $N^c_*$ is a function of rigidity index and can be interpolated as below:
 
 In case of embedment less than $3B$, a factor of $\frac {2}{3} [1+\frac {1}{6}\frac{D}{B}]$ is applied, where $D$ is embedment.
 
-### Side and end resistances in cohesionless soils
+### Cohesionless soils
 Side resistance in cohesionless soil is a function of effective normal stress applied on foundations. As normal effective stress is a function of vertical effective stress, side resistance be simplified as vertical effective stress factored by a dimensionless correlation factor typically noted as "beta". Thus this method is also known as the "beta" method.
 
 $$f_{max} = \beta \sigma^\prime _{v}$$
@@ -52,7 +53,7 @@ $$q_{max}= 0.60 N_{60} \le 30$$
 
 where end resistance $q_{max}$ is in unit of ton per square foot. Cohesionless soils with $N_{60}$ greater than 50 shall be treated as cohesionless intermediate material.
 
-### Side and end resistances in rocks
+### Rocks
 Once a drilled pier is socketed in a rock layer, its side resistance depends on the socket's roughness. For conservative design, rock socket is always assumed as smooth and the side unit resistance is computed as:
 
 $$f_{max} = 0.65 p_a[q_u/p_a]^{0.5} \le 0.65 f^{\prime}_c[q_u/p_a]^{0.5}$$
@@ -75,7 +76,7 @@ $$q_{max} = [s^{0.5} + (ms^{0.5}+s)^{0.5}]q_u$$
 
 where parameters $s$ and $m$ can be estimated using FHWA (1999) Table 11.3.   
 
-### Side and end resistances in cohesive intermediate geomaterials
+### Cohesive intermediate geomaterials
 Side ressitance in cohesive intermediate geomaterial (IGM) has a similar form to that for cohesive soil:
 
 $$f_{max} = \alpha \phi q_u$$

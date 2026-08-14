@@ -65,7 +65,14 @@ class TestSoilSideResistance:
 
         assert (beta_upper + beta_lower) / 2.0 == pytest.approx(0.6, rel = 0.01)
 
+    def test_calculate_beta_2(self, dense_sand):
+        """
+        To apply beta method, layer thickness shall be less than 30 ft
+        """
+        sand_layer_40 = Layer(layer_index=0, geomaterial=dense_sand, thickness = 40)
 
+        with pytest.raises(ValueError, match = "thickness"):
+            SoilSideResistance(sand_layer_40)._calculate_beta()
 
     def test_side_unit_resistance_cohesionless_1(self):
         """
