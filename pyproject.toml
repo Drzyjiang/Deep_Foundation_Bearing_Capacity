@@ -9,6 +9,7 @@ description = "Deep foundation bearing capacity."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
+license-files = ["LICENSE"]
 authors = [{name = "Zhiyan Jiang", email = "zyjiang@alumni.iastate.edu"}]
 keywords = ["geotechnical", "deep foundation", "bearing capacity"]
 classifiers = [
@@ -44,7 +45,7 @@ line-length = 120
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+select = ["E", "F", "I", "W", "UP", "B", "SIM"]
 
 [tool.setuptools.package-data]
 "deep_foundation_bearing_capacity" = ["segments/cohesive_igm/*.csv"]
