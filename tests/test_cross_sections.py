@@ -36,10 +36,10 @@ class TestSanityChecks:
         """
         with pytest.raises(ValueError, match = "section_dimension"):
             CircularSection(wrong_dimension)
-        
+
         with pytest.raises(ValueError, match = "section_dimension"):
             SquareSection(wrong_dimension)
-            
+
 
 # =============================
 # 3. test inheritance

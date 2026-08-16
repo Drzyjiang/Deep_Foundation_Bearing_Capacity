@@ -11,20 +11,20 @@ from deep_foundation_bearing_capacity.segments.unit_resistance import EndResista
 
 
 class DeepFoundation:
-    def __init__(self, segments: list[Segment], top_depth: SCALAR_TYPE = 0, 
-                 resistance_corrections=None, fs: FactorOfSafetyDeepFoundation = FactorOfSafetyDeepFoundation(1,1)):
+    def __init__(self, segments: list[Segment], top_depth: SCALAR_TYPE = 0,
+                 resistance_corrections=None, fs: FactorOfSafetyDeepFoundation = None):
         '''
         Args:
-            segments (Segment): list a of segments, in order of from top to bottom 
+            segments (Segment): list a of segments, in order of from top to bottom
                                 note that segments can have different segment.layer.ground_water_depth,
-                                to account for potential artesian  
+                                to account for potential artesian
             top_depth (SCALAR_TYPE): upper depth of the first segment. This overrides segments[0].top_depth
             resistance_corrections (list[]): list of SideResistanceCorrection Obj and/or EndResistanceCorrection Obj
             fs (FactorOfSafetyDeepFoundation): factor of safety
         '''
-        
-        self._sanity_check_segments(segments)  
-        self._sanity_check_top_depth(top_depth) 
+
+        self._sanity_check_segments(segments)
+        self._sanity_check_top_depth(top_depth)
 
         self.segments = segments
         self.top_depth = top_depth
@@ -33,16 +33,16 @@ class DeepFoundation:
         self.resistance_corrections = resistance_corrections or []
 
         # factor of safety
-        self.fs = fs
+        if fs is None:
+            fs = FactorOfSafetyDeepFoundation(1,1)
 
-        
     @property
     def effective_weight(self):
         '''
         calculate deep foundation effective self weight in unit of pound
         '''
         return self.calculate_segment_weights_effective_accumulative()[-1]
-    
+
     def calculate_segment_weights_effective_accumulative(self)->list[float]:
         '''
         To calculate accumulative effective self_weight of segments.
@@ -54,7 +54,7 @@ class DeepFoundation:
             segment_weight_effective_accumulative = (segment_weight_effective_accumulative +
                                                       segment.self_weight_effective)
             segment_weights_effective_accumulative.append(segment_weight_effective_accumulative)
-        
+
         return segment_weights_effective_accumulative
 
 
@@ -65,23 +65,23 @@ class DeepFoundation:
 
         if not isinstance(segments, list):
             raise TypeError("ERROR: segments shall be a list")
-        
+
         for segment in segments:
             if not isinstance(segment, Segment):
                 raise TypeError(f"ERROR: all segments shall be type {Segment}.")
-            
+
         return True
-    
+
     def _sanity_check_top_depth(self, top_depth: SCALAR_TYPE)->bool:
         '''
         Sanity check on top depth
-        
+
         '''
         if not isinstance(top_depth, SCALAR_TYPE):
             raise TypeError(f"ERROR: top_depth shall be type {SCALAR_TYPE}")
-        
+
         return True
-    
+
     def _segment_mid_depths(self):
         '''
         To calculate mid depth of each segment
@@ -97,9 +97,9 @@ class DeepFoundation:
 
             # update mid_depth by increment lower half of segment length
             mid_depth = mid_depth + segment.segment_length  / 2.0
-        
+
         return segment_mid_depths
-    
+
     def _segment_bottom_depths(self):
         '''
         To calculate bottom depth of each segment
@@ -108,11 +108,11 @@ class DeepFoundation:
         bottom_depth = 0
 
         for segment in self.segments:
-            bottom_depth = bottom_depth + segment.segment_length 
+            bottom_depth = bottom_depth + segment.segment_length
             segment_bottom_depths.append(bottom_depth)
 
         return segment_bottom_depths
-    
+
     def _segment_top_depths(self):
         '''
         To calculate top depth of each segment
@@ -122,10 +122,10 @@ class DeepFoundation:
 
         for segment in self.segments:
             segment_top_depths.append(top_depth)
-            top_depth = top_depth + segment.segment_length 
+            top_depth = top_depth + segment.segment_length
 
         return segment_top_depths
-    
+
     def calculate_segment_total_stresses(self)->list[float]:
         '''
         To calculate total stresses at the mid depth of each segment
@@ -138,13 +138,13 @@ class DeepFoundation:
 
         for segment in self.segments:
             segment_total_stress = segment_total_stress + (
-                                    segment.segment_length /2.0 * segment.layer.geomaterial.unit_weight) 
+                                    segment.segment_length /2.0 * segment.layer.geomaterial.unit_weight)
             segment_total_stresses.append(segment_total_stress)
             segment_total_stress = segment_total_stress + (
                                     segment.segment_length /2.0 * segment.layer.geomaterial.unit_weight)
 
         return segment_total_stresses
-    
+
     @cached_property
     def calculate_segment_effective_stresses(self):
         '''
@@ -155,18 +155,18 @@ class DeepFoundation:
         segment_effective_stress = 0
 
         segment_mid_depths = self._segment_mid_depths()
-        
+
         segment_total_stresses = self.calculate_segment_total_stresses()
 
         for segment, segment_total_stress, segment_mid_depth in zip(
-            self.segments, segment_total_stresses, segment_mid_depths):
+            self.segments, segment_total_stresses, segment_mid_depths, strict=False):
 
             water_weight = UNIT_WEIGHT_WATER * (max(0, segment_mid_depth - segment.layer.ground_water_depth))
             segment_effective_stress = segment_total_stress - water_weight
             segment_effective_stresses.append(segment_effective_stress)
-        
+
         return segment_effective_stresses
-    
+
     #@cached_property
     def calculate_segment_side_resistances(self, uplift: bool = False)->list[float]:
         '''
@@ -178,7 +178,7 @@ class DeepFoundation:
         # collect all default side resistance
         segment_side_resistances = []
 
-        for segment, effective_stress in zip(self.segments, self.calculate_segment_effective_stresses):
+        for segment, effective_stress in zip(self.segments, self.calculate_segment_effective_stresses, strict=False):
             side_resistance_context = SideResistanceContext(
                 effective_stress = effective_stress,
                 uplift = uplift
@@ -186,12 +186,9 @@ class DeepFoundation:
             segment_side_resistances.append(segment.calculate_side_resistance(side_resistance_context))
 
         # apply factor of safety
-        if not uplift:
-            fs = self.fs.fs_side_compression
-        else:
-            fs = self.fs.fs_side_uplift
+        fs = self.fs.fs_side_compression if not uplift else self.fs.fs_side_uplift
         segment_side_resistances = [x / fs for x in segment_side_resistances]
-        
+
         # apply correction
         segment_bottom_depth_values = self._segment_bottom_depths()
         segment_top_depth_values = self._segment_top_depths()
@@ -200,9 +197,9 @@ class DeepFoundation:
                                                             segment_bottom_depth_values,
                                                             segment_top_depth_values
                                                             )
-     
+
         return segment_side_resistances
-    
+
     def calculate_segment_end_resistances(self)->list[float]:
         '''
         To caclulate segment end resistances in unit of psf
@@ -233,7 +230,7 @@ class DeepFoundation:
         Returns:
             (list[float]): accumulative side resistance starting from top
         '''
-        
+
         accumulative = 0
         segment_side_resistances_accumulative = []
 
@@ -242,7 +239,7 @@ class DeepFoundation:
             segment_side_resistances_accumulative.append(accumulative)
 
         return segment_side_resistances_accumulative
-    
+
     def calculate_compression_resistances_accumulative(self)->list[float]:
         '''
         To calculate accumulative compression resistance.
@@ -259,30 +256,30 @@ class DeepFoundation:
         segment_side_resistances_accumlative = self.calculate_segment_side_resistances_accumulative(uplift = False)
         segment_end_resistances = self.calculate_segment_end_resistances()
 
-        return [a + b for 
-                a, b in zip(segment_side_resistances_accumlative, segment_end_resistances)]
-    
+        return [a + b for
+                a, b in zip(segment_side_resistances_accumlative, segment_end_resistances, strict=False)]
 
 
-    
+
+
     def calculate_uplift_resistances_accumulative(self)->list[float]:
         '''
         To calculate accumulative uplift resistance.
-        Note: need to apply reduction factor to side resistance to account for 
+        Note: need to apply reduction factor to side resistance to account for
         reduced lateral earth pressure coefficient
 
         Returns:
             uplift_resitances_accumulative (list[float]): accmulative uplift resistances
         '''
-        
-        
+
+
         segment_side_resistances_accumulative = self.calculate_segment_side_resistances_accumulative(uplift = True)
         segment_weights_accumulative = self.calculate_segment_weights_effective_accumulative()
 
         uplift_resitances_accumulative = [a+b for a, b in zip(segment_side_resistances_accumulative,
-                                                                         segment_weights_accumulative)]
+                                                                         segment_weights_accumulative, strict=False)]
         return uplift_resitances_accumulative
-    
+
     def segments_structural_capacity_compression(self):
         '''
         To calculate structural compression capacity of all segments
@@ -291,25 +288,25 @@ class DeepFoundation:
         segments_structural_capacity = []
         for segment in self.segments:
             segments_structural_capacity.append(segment.structural_compression_capacity())
-        
+
         return segments_structural_capacity
 
 
     def visualize_resistances_accumulative(self, target = "compression", style = "piecewise"):
         '''
-        Visualize accumulative compression or uplift resistance 
+        Visualize accumulative compression or uplift resistance
 
         Args:
             fs (float): factor of safety for side resistance and end resistance
             target (str): either "compression" or "uplift"
             style (str): select plot style from ["piecewise", "mid"]
-                        "piecewise": 
+                        "piecewise":
         '''
         style_options = ["piecewise", "mid"]
         # sanity check on style arg
         if style not in style_options:
             raise ValueError(f"ERROR: sytle shall be selected from {style_options}")
-        
+
         # sanity_check on target
         if target != "compression" and target != "uplift":
             raise ValueError("ERROR: target shall be either 'compression' or 'uplift'.")
@@ -318,7 +315,7 @@ class DeepFoundation:
             resistances_accumulative = self.calculate_compression_resistances_accumulative()
         elif target == "uplift":
             resistances_accumulative = self.calculate_uplift_resistances_accumulative()
-        
+
         fig, ax = plt.subplots()
 
         if style == "piecewise":
@@ -332,9 +329,9 @@ class DeepFoundation:
 
         return fig
 
-    
-    def _visualize_resistances_accumulative_piecewise(self, 
-                                                      ax: matplotlib.axes.Axes, target: str, 
+
+    def _visualize_resistances_accumulative_piecewise(self,
+                                                      ax: matplotlib.axes.Axes, target: str,
                                                       resistances_accumulative:list[float])->(
                                                        matplotlib.figure.Figure):
         '''
@@ -348,33 +345,33 @@ class DeepFoundation:
         Returns:
             fig (matplotlib.figure.Figure)
         '''
-        
+
         segment_top_depths = self._segment_top_depths()
         segment_bottom_depths = self._segment_bottom_depths()
 
         # form ys by alternating segment_top_depths and segment_bottom_depths
-        ys = [y for pair in zip(segment_top_depths, segment_bottom_depths) for y in pair]
+        ys = [y for pair in zip(segment_top_depths, segment_bottom_depths, strict=False) for y in pair]
 
         # form xs by shallow copy
         xs = [x/1000.0 for x in resistances_accumulative for _ in range(2)]
-        
+
         ax.plot(xs, ys)
         ax.set_xlabel(f"Accumulative {target} resistance [kip]")
         ax.invert_yaxis()
         ax.set_ylabel("Depth [ft]")
         ax.grid(True)
-      
-        for xi, yi in zip(xs, ys):
+
+        for xi, yi in zip(xs, ys, strict=False):
             ax.annotate(text = f"{xi:.0f}", xy=(xi, yi), textcoords = "offset points", xytext = (5,5), fontsize = 8)
-       
-    
-    def _visualize_resistance_accumulative_mid(self, ax: matplotlib.axes.Axes, 
+
+
+    def _visualize_resistance_accumulative_mid(self, ax: matplotlib.axes.Axes,
                                                target: str, resistance_accumulative)->(
                                                    matplotlib.figure.Figure
                                                ):
         '''
         To visualize accumulative resistance at mid of each segment.
-        Note that even though resistance at shown at mid of segment, side resistance of 
+        Note that even though resistance at shown at mid of segment, side resistance of
         lower half segment is already included.
 
         Args:
@@ -391,9 +388,9 @@ class DeepFoundation:
         ax.set_ylabel("Depth [ft]")
         ax.grid(True)
 
-        for xi, yi in zip(xs, ys):
+        for xi, yi in zip(xs, ys, strict=False):
             ax.annotate(text =f"{xi:.0f}", xy=(xi, yi), textcoords="offset points",xytext = (5,5), fontsize = 8)
-        
+
 
 class SideResistanceCorrections:
     '''
@@ -401,15 +398,17 @@ class SideResistanceCorrections:
     Methods to correct side resistance only
     '''
     def __init__(self,segments:Segment):
-        
+
         self.segments = segments
-    
-    def apply_all(self,  segment_side_resistances, segment_bottom_depth_values, 
-                  segment_top_depth_values, applications = ["correct_moist_change"]):
+
+    def apply_all(self,  segment_side_resistances, segment_bottom_depth_values,
+                  segment_top_depth_values, applications = None):
         '''
         Args:
             applications (list[str]): list of strs that describe applicable functions
         '''
+        if applications is None:
+            applications = ["correct_moist_change"]
         for application in applications:
             segment_side_resistances = getattr(self, application)(segment_side_resistances,
                                                                   segment_bottom_depth_values,
@@ -420,7 +419,7 @@ class SideResistanceCorrections:
         '''
         depth related correction
 
-        '''    
+        '''
         segment_side_resistances_corrected = []
 
         # Between the ground surface and 5 ft, alpha is set to zero
@@ -428,8 +427,8 @@ class SideResistanceCorrections:
         MOISTURE_CHANGE_DEPTH = 5.0
         ABOVE_PILE_BASE = 5.0
         for segment_side_resistance_original, segment, segment_bottom_depth_value, segment_top_depth_value in zip(
-            segment_side_resistances, self.segments, 
-            segment_bottom_depth_values, segment_top_depth_values):
+            segment_side_resistances, self.segments,
+            segment_bottom_depth_values, segment_top_depth_values, strict=False):
             if segment_bottom_depth_value <= MOISTURE_CHANGE_DEPTH or (
                 segment_top_depth_value >= segment_bottom_depth_value - ABOVE_PILE_BASE):
                 # Need to re-calculate unit resistance by overriding alpha
@@ -438,5 +437,4 @@ class SideResistanceCorrections:
                 segment_side_resistances_corrected.append(segment_side_resistance_original)
 
         return segment_side_resistances_corrected
-                
-            
+

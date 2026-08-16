@@ -33,14 +33,14 @@ class TestProperties:
         assert segment_typical_2.side_surface_area == segment_typical_2.segment_length * (
                                                     segment_typical_2.cross_section.perimeter)
 
-   
+
     def test_self_weight_total(self, segment_typical_1, segment_typical_2):
         """
         Test self_weight_total()
         """
         assert segment_typical_1.self_weight_total == pytest.approx(
             150.0 * 10 * np.pi *1*1/4.0, rel = EPSILON)
-        
+
         assert segment_typical_2.self_weight_total == pytest.approx(
             150.0 * 10 * 1*1, rel = EPSILON)
 
@@ -51,5 +51,4 @@ class TestProperties:
         """
         assert segment_typical_1.self_weight_effective == segment_typical_1.cross_section.area * (
             UNIT_WEIGHT_CONCRETE * segment_typical_1.segment_length  -
-            UNIT_WEIGHT_WATER * segment_typical_1.segment_length) 
-        
+            UNIT_WEIGHT_WATER * segment_typical_1.segment_length)

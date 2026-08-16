@@ -26,7 +26,7 @@ class SideResistanceContext:
     Input Parameters shared by RockSideResistance and SoilSideResistance
     """
     # Used by RockSideResistance
-    
+
     # Used by SoilSideReistance
     # effective stress in unit of psf
     effective_stress: float
@@ -47,19 +47,19 @@ class SideResistance:
     '''
     def __init__(self, layer):
         self.layer = layer
-    
+
     @classmethod
     def for_material(cls, layer:Layer)->"SideResistance":
-     
+
         if isinstance(layer.geomaterial, Soil):
             return SoilSideResistance(layer)
         elif isinstance(layer.geomaterial, Rock):
             return RockSideResistance(layer)
 
-      
-        
+
+
         raise TypeError(f"ERROR: layer.geomaterial {layer.geomaterial} is not supported.")
-    
+
     @abstractmethod
     def side_resistance_unit(self, side_resistance_context: SideResistanceContext):
         """
@@ -83,7 +83,7 @@ class RockSideResistance(SideResistance):
             side_resistance_unit = self.side_resistance_unit_igm_cohesive(side_resistance_context)
         else:
             side_resistance_unit = self.side_resistance_unit_rock(side_resistance_context)
-        
+
          # Apply uplift reduction
         if side_resistance_context.uplift:
             side_resistance_unit = side_resistance_unit * self._uplift_resistance_reduction()
@@ -95,18 +95,18 @@ class RockSideResistance(SideResistance):
         To calculate alpha (empirical factor for cohesive igm, not for cohesive soil)
         Reference: FHWA Driller Shaft manual 99 Figure 11.5, Eq.(11.23)
         sigma_n is pressure exerted by fluid concrete at the middle of layer
-        sigma_n is estimated as 65% of total vertical stress at mid depth with constant unit weight 
+        sigma_n is estimated as 65% of total vertical stress at mid depth with constant unit weight
         '''
 
         if sigma_n is None:
-            # depth is capped at 12 m, 
+            # depth is capped at 12 m,
             depth = min(12 / FT2M, self.layer.top_depth + self.layer.thickness * 0.5)
             sigma_n = 0.65 * depth * self.layer.geomaterial.unit_weight
 
         def find_closest(lst:list[float], target:float):
             '''
-            find the index of closest value to a target in a list 
-            
+            find the index of closest value to a target in a list
+
             Args:
                 lst (list[float]): sorted list in ascending order
                                     len(lst) >= 2
@@ -124,7 +124,7 @@ class RockSideResistance(SideResistance):
 
         # load digitized curve
         # first co
-        alpha_curve_names = {0: (1, FILE_DIR/"cohesive_igm/alpha_sigman_pa_1.csv"), 
+        alpha_curve_names = {0: (1, FILE_DIR/"cohesive_igm/alpha_sigman_pa_1.csv"),
                              1: (2, FILE_DIR/"cohesive_igm/alpha_sigman_pa_2.csv"),
                              2: (3, FILE_DIR/"cohesive_igm/alpha_sigman_pa_3.csv"),
                              3: (4, FILE_DIR/"cohesive_igm/alpha_sigman_pa_4.csv"),
@@ -138,18 +138,18 @@ class RockSideResistance(SideResistance):
         for idx in [idx1, idx2]:
 
             df = pd.read_csv(alpha_curve_names[idx][1])
-         
+
             # interpolate by qu
             alpha_values.append(np.interp(self.layer.geomaterial.qu * PSF2MPA, df.iloc[:,0], df.iloc[:,1]))
-      
+
         # Use Fig 11.5 to get alpha through interpolating by sigma_n_pa_ratio
         # use log(sigma_n_pa_ratio) instead of sigma_n_pa_ratio
-        alpha = np.interp(np.log(sigma_n_pa_ratio), [np.log(alpha_curve_names[idx1][0]), 
+        alpha = np.interp(np.log(sigma_n_pa_ratio), [np.log(alpha_curve_names[idx1][0]),
                                                      alpha_curve_names[idx2][0]], alpha_values)
         alpha = alpha * np.tan(np.radians(self.layer.geomaterial.friction_angle)) / np.tan(np.radians(30))
 
         return alpha
-        
+
     def _calculate_phi(self):
         '''
         To calculate joint-effect factor that accounts for the effect of open joints that
@@ -160,7 +160,7 @@ class RockSideResistance(SideResistance):
         # sanity check
         if self.layer.geomaterial.rqd < 20:
             raise ValueError("ERROR: FHWA cannot recommend phi for cohesive IGM with RQD less than 20.")
-        
+
         xp = [20.0, 30.0, 50.0, 70.0, 100.0]
         yp = None
 
@@ -170,7 +170,7 @@ class RockSideResistance(SideResistance):
             yp = [0.45, 0.50, 0.55, 0.55, 0.85]
 
         return np.interp(self.layer.geomaterial.rqd, xp, yp)
-        
+
 
     def side_resistance_unit_igm_cohesive(self, side_reistance_context: SideResistanceContext):
         '''
@@ -180,13 +180,13 @@ class RockSideResistance(SideResistance):
 
         Args:
             side_resistance_context (SideResistanceContext):
-            
+
         '''
         alpha = self._calculate_alpha()
         phi = self._calculate_phi()
 
         return alpha * phi * self.layer.geomaterial.qu
-    
+
     def side_resistance_unit_rock(self, side_resistance_context: SideResistanceContext, uplift:bool = False):
         '''
         Top wrapper of side resistance of rock
@@ -198,7 +198,7 @@ class RockSideResistance(SideResistance):
         '''
         qu = min(self.layer.geomaterial.qu, YIELD_STRENGTH_CONCRETE)
         return 0.65 * ATM_APPROXIMATE * (qu/ATM_APPROXIMATE)**0.5
-    
+
     def _uplift_resistance_reduction(self)->float:
         '''
         To derive reduction for uplift side resistance for rock.
@@ -224,23 +224,20 @@ class SoilSideResistance(SideResistance):
         # negative effective stress is currently not applicable
         if side_resistance_context.effective_stress < 0:
             raise ValueError("ERROR: negative effective stress is currently not applicable.")
-        
+
         # sanity check on alpha_override
         if side_resistance_context.alpha_override is not None and (
             side_resistance_context.alpha_override < 0.45 or side_resistance_context.alpha_override > 0.55):
             raise ValueError("ERROR: typical alpha_override shall be between 0.45 and 0.55.")
-        
+
         # sanity check on beta_override
         if side_resistance_context.beta_override is not None and (
             side_resistance_context.beta_override <0.25 or side_resistance_context.beta_override > 1.80):
             raise ValueError("ERROR: typical beta_override shall be between 0.25 and 1.80.")
 
         # judge by soil_type_advanced
-        if self.layer.geomaterial.soil_type_advanced == "gs":
-            return self.side_resistance_unit_cohesionless(side_resistance_context.effective_stress,
-                                                          side_resistance_context.beta_override,
-                                                          side_resistance_context.uplift)
-        elif self.layer.geomaterial.soil_type_advanced == "igm_cohesionless":
+        if self.layer.geomaterial.soil_type_advanced == "gs" or (
+            self.layer.geomaterial.soil_type_advanced == "igm_cohesionless"):
             return self.side_resistance_unit_cohesionless(side_resistance_context.effective_stress,
                                                           side_resistance_context.beta_override,
                                                           side_resistance_context.uplift)
@@ -268,7 +265,7 @@ class SoilSideResistance(SideResistance):
         su_to_pa = self.layer.geomaterial.cohesion / ATM_APPROXIMATE
         XP = [1.5, 2.5]
         YP = [0.55, 0.45]
-        
+
         alpha = float(np.interp(su_to_pa, XP, YP))
 
         return alpha
@@ -279,7 +276,7 @@ class SoilSideResistance(SideResistance):
         Note: length is in unit of foot, NOT meter.
 
         Args:
-            effective_stress (SCALAR_TYPE): 
+            effective_stress (SCALAR_TYPE):
         '''
 
         # to apply beta method, layer thickness shall not be beyond 30 ft
@@ -312,15 +309,15 @@ class SoilSideResistance(SideResistance):
                 beta =  1.5 - 0.245 * (depth_mid * FT2M)**0.5
             else:
                 beta = (self.layer.geomaterial.n60 / 15.0) * (1.5 - 0.245 * (depth_mid *FT2M)**0.5)
-  
+
             # minimum beta is 0.25
             beta = max(beta, 0.25)
 
             # maximum beta is 1.20 for sand
             beta = min(beta, 1.20)
-  
+
         return beta
-    
+
     def _calculate_phi_prime(self, effective_stress:SCALAR_TYPE)->SCALAR_TYPE:
         '''
         To estimate effective friction angle
@@ -329,15 +326,15 @@ class SoilSideResistance(SideResistance):
         Return:
             deg (SCALAR_TYPE): friction angle in unit of deg
         '''
-        deg = np.degrees(np.atan( (self.layer.geomaterial.n60/ 
+        deg = np.degrees(np.atan( (self.layer.geomaterial.n60/
                                    (12.3 + 20.3 * effective_stress/ATM_APPROXIMATE))**0.34))
         deg = min(deg, 45)
 
         return deg
-    
+
     def _calculate_ko(self, effective_stress: SCALAR_TYPE):
         '''
-        To calcualte earth pressure coefficient 
+        To calcualte earth pressure coefficient
         '''
         phi_prime_rad = np.radians(self._calculate_phi_prime(effective_stress))
         ko = (1 - np.sin(phi_prime_rad)) * (
@@ -345,26 +342,23 @@ class SoilSideResistance(SideResistance):
 
         return ko
 
-    def side_resistance_unit_cohesionless(self, effective_stress: float, 
+    def side_resistance_unit_cohesionless(self, effective_stress: float,
                                           beta_override:float = None, uplift:bool = False):
         '''
         To calculate side resistance for cohesionless layer
 
         Args:
-            effective_stress (float): effective stress 
+            effective_stress (float): effective stress
             beta_override (float): override beta when calculate side resistance for cohesionless
             uplift (bool): whether side resistance is for uplift
                                     layer
         Returns:
-            side_resistance_cohesionless (constants.SCALR_TYPE): side resistance of coheionless 
+            side_resistance_cohesionless (constants.SCALR_TYPE): side resistance of coheionless
                                                                  soil in unit of psf
 
         '''
 
-        if beta_override is not None:
-            beta = beta_override
-        else:
-            beta = self._calculate_beta(effective_stress) 
+        beta = beta_override if beta_override is not None else self._calculate_beta(effective_stress)
 
         side_resistance_cohesionless = beta * effective_stress
 
@@ -374,7 +368,7 @@ class SoilSideResistance(SideResistance):
             side_resistance_cohesionless = side_resistance_cohesionless * uplift_reduction
 
         return side_resistance_cohesionless
-    
+
     def side_resistance_unit_cohesive(self, alpha_override:float = None, uplift: bool = False)->float:
         '''
         To calculate side resistance for cohesive layer
@@ -386,10 +380,7 @@ class SoilSideResistance(SideResistance):
             side_resistance_cohesionless (constants.SCALR_TYPE): side resistance of coheionless soil in unit of psf
         '''
 
-        if alpha_override is not None:
-            alpha = alpha_override
-        else:
-            alpha = self._calculate_alpha()
+        alpha = alpha_override if alpha_override is not None else self._calculate_alpha()
 
         side_resistance_cohesive = alpha * self.layer.geomaterial.cohesion
 
@@ -399,7 +390,7 @@ class SoilSideResistance(SideResistance):
             side_resistance_cohesive = side_resistance_cohesive * uplift_reduction
 
         return side_resistance_cohesive
-    
+
     def _uplift_resistance_reduction(self)->float:
         '''
         To derive reduction for uplift side resistance.
@@ -408,7 +399,7 @@ class SoilSideResistance(SideResistance):
         '''
         if self.layer.geomaterial.soil_type_general == 1 or (
             self.layer.geomaterial.soil_type_advanced == "igm_cohesionless") or (
-            self.layer.geomaterial.soil_type_advanced == "gs"):   
+            self.layer.geomaterial.soil_type_advanced == "gs"):
             return 0.75
         else:
             return 1.0
@@ -421,14 +412,14 @@ class EndResistance:
     @classmethod
     def for_material(cls, layer:Layer)->"SideResistance":
         '''
-        
+
         '''
         if isinstance(layer.geomaterial, Soil):
             return SoilEndResistance(layer)
         elif isinstance(layer.geomaterial, Rock):
             return RockEndResistance(layer)
         raise TypeError(f"ERROR: layer.geomaterial {layer.geomaterial} is not supported.")
-    
+
     @abstractmethod
     def end_resistance_unit(self, context):
         '''
@@ -446,7 +437,7 @@ class EndResistanceContext:
 
     # parameters for soil
 
-    
+
 class RockEndResistance(EndResistance):
     def __init__(self, layer: Layer, socket_width_ratio: float = 1.0):
         '''
@@ -471,7 +462,7 @@ class RockEndResistance(EndResistance):
             return self.end_resistance_unit_igm_coheisve()
         else:
             return self.end_resistance_unit_rock()
-    
+
     def end_resistance_unit_igm_coheisve(self):
         '''
         Calculate unit end resistance for cohesive IGM.
@@ -488,7 +479,7 @@ class RockEndResistance(EndResistance):
             return self.layer.geomaterial.qu * 2.5
         elif self.layer.geomaterial.joint == "closed" and self.layer.geomaterial.rqd >= 70 and (
             self.layer.geomaterial.qu >5.2 / PSF2TSF): # FHWA 99 (Eq. 11.6)
-            
+
             return 4.83 * (self.layer.geomaterial.qu * PSF2MPA)**0.51 / PSF2MPA
         else: # FHWA 99 (Eq.11.7)
             s = self.get_s()
@@ -498,7 +489,7 @@ class RockEndResistance(EndResistance):
     def get_s(self):
         '''
         Derive rock mass quality parameter s
-        Reference: FHWA Drilled Shaft Manual 99 Table 11.2    
+        Reference: FHWA Drilled Shaft Manual 99 Table 11.2
         '''
         rock_quality_s_dict = {"Excellent": 1.0,
                                "Very good": 0.1,
@@ -509,7 +500,7 @@ class RockEndResistance(EndResistance):
                                 }
 
         return rock_quality_s_dict.get(self.layer.geomaterial.rock_quality)
-    
+
     def get_m(self):
         '''
         Derive rock mass quality parameter m
@@ -534,22 +525,21 @@ class SoilEndResistance(EndResistance):
     def __init__(self, layer: Layer):
         self.layer = layer
 
-    def end_resistance_unit(self, end_resistance_context = EndResistanceContext()):
+    def end_resistance_unit(self):
         '''
         Top wrapper for end resistance
-
         Args:
-            end_resistance_content: parameters for both SoilEndResistance and RockEndResistance
+
         '''
 
         if self.layer.geomaterial.soil_type_general == 1:
             return self.end_resistance_unit_cohesionless()
         elif self.layer.geomaterial.soil_type_general == 2:
-            return self.end_resistance_unit_cohesive() 
+            return self.end_resistance_unit_cohesive()
 
     def end_resistance_unit_cohesionless(self):
         '''
-        To calculate end unit resistance of cohesionless layer 
+        To calculate end unit resistance of cohesionless layer
         Reference: FHWA Drilled Shaft Manual 99,  Eq.(11.4b)
         '''
         # Sanity check on layer.geomaterial.n60
@@ -557,7 +547,7 @@ class SoilEndResistance(EndResistance):
             raise ValueError("ERROR: cohesionless soil shall not have negative N60.")
 
         return  min(0.60 * self.layer.geomaterial.n60, 30) / PSF2TSF
-    
+
     def end_resistance_unit_cohesive(self):
         '''
         To calculate end unit resistance of cohesive layer
@@ -570,7 +560,7 @@ class SoilEndResistance(EndResistance):
         XP = [500, 1000, 2000]
         YP = [6.5, 8.0, 9.0]
         N_ast = float(np.interp(self.layer.geomaterial.cohesion, XP, YP))
-    
+
         return  N_ast * self.layer.geomaterial.cohesion
 
 

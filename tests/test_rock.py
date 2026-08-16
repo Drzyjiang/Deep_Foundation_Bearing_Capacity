@@ -23,7 +23,7 @@ class TestRockConstruction:
         assert competent_rock.rqd == 100
         assert competent_rock.rock_type == "A"
         assert competent_rock.rock_quality == "Very good"
-        assert competent_rock.rock_type_advanced is None 
+        assert competent_rock.rock_type_advanced is None
         assert competent_rock.joint == "closed"
 
 
@@ -91,18 +91,18 @@ class TestFromDict:
         dictionary for rock
         """
         return {
-                "rock_index": 0, 
+                "rock_index": 0,
                 "unit_weight": 150,
-                "elastic_modulus": 5000 * PSI2PSF, 
+                "elastic_modulus": 5000 * PSI2PSF,
                 "friction_angle": 30,
                 "qu": 5e6 * PSI2PSF,
                 "rqd": 100,
-                "rock_type": "A", 
+                "rock_type": "A",
                 "rock_quality": "Very good",
                 "rock_type_advanced": None,
                 "joint": "open"
             }
-    
+
     def test_from_dict(self, dict_rock):
         """
         Test construction by dict
@@ -116,7 +116,7 @@ class TestFromDict:
         assert rock.rqd == 100
         assert rock.rock_type == "A"
         assert rock.rock_quality == "Very good"
-        assert rock.rock_type_advanced is None 
+        assert rock.rock_type_advanced is None
         assert rock.joint == "open"
 
 # =========================================================
@@ -138,7 +138,7 @@ class TestNumpyInput:
         assert rock.rock_index == rock_index
         assert rock.friction_angle == friction_angle
         assert rock.qu == qu
-        assert rock.rqd == rqd 
+        assert rock.rqd == rqd
 
 # =========================================================
 # 5. test display_properties

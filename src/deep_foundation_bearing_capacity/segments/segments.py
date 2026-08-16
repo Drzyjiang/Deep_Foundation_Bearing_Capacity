@@ -15,15 +15,15 @@ from deep_foundation_bearing_capacity.segments.unit_resistance import (
 
 class Segment:
     '''
-    Segment accounts for not only cross section and section_length, 
+    Segment accounts for not only cross section and section_length,
     but also layer and side resistance and end bearing
     One segment corresponds to only one layer and one cross_section.
-    
+
     '''
-    def __init__(self, cross_section: CrossSection, layer: Layer, 
+    def __init__(self, cross_section: CrossSection, layer: Layer,
                  foundation_material:FoundationMaterial = None):
         '''
-        
+
         '''
         # segment length is layer's thickness
         self.segment_length = layer.thickness
@@ -43,16 +43,16 @@ class Segment:
         # estabhlish EndResistance Obj
         self.end_resistance_obj = EndResistance.for_material(self.layer)
 
-        
+
     @property
     def side_surface_area(self):
         '''
         # calculate side surface area
-        
+
         '''
         return self.cross_section.perimeter * self.segment_length
-    
-    
+
+
     @property
     def self_weight_total(self)->float:
         '''
@@ -63,7 +63,7 @@ class Segment:
             return -1
         else:
             return self.foundation_material.unit_weight * (self.cross_section.area
-                                                            * self.segment_length) 
+                                                            * self.segment_length)
 
     @property
     def self_weight_effective(self)->float:
@@ -79,15 +79,15 @@ class Segment:
                                            self.layer.ground_water_depth, 0), self.layer.thickness)
 
             return self.cross_section.area * (self.foundation_material.unit_weight
-                    * dry_thickness + (self.foundation_material.unit_weight - 
-                    constants.UNIT_WEIGHT_WATER) * saturated_thickness)         
-        
-        
+                    * dry_thickness + (self.foundation_material.unit_weight -
+                    constants.UNIT_WEIGHT_WATER) * saturated_thickness)
+
+
     def calculate_side_resistance(self, side_resistance_context: SideResistanceContext):
         '''
         To calculate side resistance.
         Note: this is not unit resistance.
-        
+
         Args:
             side_resistance_context (SideResistanceContext)
         '''
@@ -96,9 +96,9 @@ class Segment:
         side_resistance = side_resistance_unit * self.side_surface_area
 
         return side_resistance
-    
 
-        
+
+
     def calculate_end_resistance(self, end_resistance_context: EndResistanceContext):
         '''
         To calculate end resistance.
@@ -108,7 +108,7 @@ class Segment:
         end_resistance = end_resistance_unit * self.cross_section.area
 
         return end_resistance
-    
+
     def structural_compression_capacity(self):
         '''
         To caclulate structural compression capacity
@@ -120,7 +120,7 @@ class Segment:
             return self.structural_compression_capacity_concrete()
         else:
             raise ValueError("Current FoundationMaterial type is not implemented yet.")
-    
+
     def structural_compression_capacity_concrete(self):
         '''
         To calculate structural compression capacity for pure concrete cross-section

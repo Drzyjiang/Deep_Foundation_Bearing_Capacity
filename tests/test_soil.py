@@ -10,7 +10,7 @@ from deep_foundation_bearing_capacity.geomaterials.soil import Soil
 # 1. Test construction
 # =========================================================
 class TestSoilConstruction:
-    def test_clay_construction(self, stiff_clay): 
+    def test_clay_construction(self, stiff_clay):
         assert stiff_clay.soil_index == 1
         assert stiff_clay.unit_weight == 120.0
         assert stiff_clay.friction_angle == 0.0
@@ -134,7 +134,7 @@ class TestModifyMethods:
             assert loose_sand.friction_angle == friction_angle_new
 
     @pytest.mark.parametrize("friction_angle_new_invalid", [-1, -100])
-    def test_modify_friction_angle_invalid(self, friction_angle_new_invalid, stiff_clay, mixed_soil, 
+    def test_modify_friction_angle_invalid(self, friction_angle_new_invalid, stiff_clay, mixed_soil,
                                            loose_sand, igm_cohesionless):
         """
         Test modifying friction angle with invalid values
@@ -150,8 +150,8 @@ class TestModifyMethods:
 
         with pytest.raises(ValueError, match = "friction_angle"):
             igm_cohesionless.modify_friction_angle(friction_angle_new_invalid)
-        
-            
+
+
     @pytest.mark.parametrize("cohesion_new", [0, 1000,10000])
     def test_modify_cohesion(self, cohesion_new, stiff_clay, mixed_soil, dense_sand):
         """
@@ -171,7 +171,7 @@ class TestModifyMethods:
         assert dense_sand.cohesion == cohesion_new
 
     @pytest.mark.parametrize("cohesion_new_invalid", [-1, -1000])
-    def test_modify_cohesion_invalid(self, cohesion_new_invalid, stiff_clay, mixed_soil, 
+    def test_modify_cohesion_invalid(self, cohesion_new_invalid, stiff_clay, mixed_soil,
                                            loose_sand, igm_cohesionless):
         """
         Test modifying cohesion with invalid values
@@ -193,10 +193,10 @@ class TestModifyMethods:
         Test modifying soil_type_advanced
         """
         igm_cohesionless.modify_soil_type_advanced( "gs")
-        assert igm_cohesionless.soil_type_advanced == "gs" 
+        assert igm_cohesionless.soil_type_advanced == "gs"
 
         igm_cohesionless.modify_soil_type_advanced( "igm_cohesionless")
-        assert igm_cohesionless.soil_type_advanced == "igm_cohesionless" 
+        assert igm_cohesionless.soil_type_advanced == "igm_cohesionless"
 
 # =========================================================
 # 6. test numpy array input
@@ -239,6 +239,6 @@ class TestDisplayProperties:
 # =========================================================
 class TestInheritance:
     def test_is_geomaterial(self, stiff_clay, igm_cohesionless):
-        
+
         assert isinstance(stiff_clay, Geomaterial)
         assert isinstance(igm_cohesionless, Geomaterial)

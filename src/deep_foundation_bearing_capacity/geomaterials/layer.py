@@ -61,12 +61,12 @@ class Layer:
         '''
         if ground_water_depth is None:
             return True
-      
+
         if not isinstance(ground_water_depth, NUMERIC_TYPE):
             raise TypeError("ground_water_depth data type shall be float, int, np.ndarray, np.generic.")
-    
+
         return True
-        
+
     def _sanity_check_top_depth(self, top_depth):
         '''
         To perform sanity check on top_depth
@@ -76,9 +76,9 @@ class Layer:
 
         if not isinstance(top_depth, NUMERIC_TYPE):
             raise TypeError("ground_water_depth data type shall be float, int, np.ndarray, np.generic.")
-    
+
         return True
-    
+
     def _sanity_check_thickness(self,thickness):
         '''
         To perform sanity check on thickness
@@ -88,24 +88,26 @@ class Layer:
 
         if not isinstance(thickness, NUMERIC_TYPE):
             raise TypeError("thickness data type shall be float, int, np.ndarray, np.generic.")
-        
+
         if thickness < 0:
             raise ValueError("layer thickness shall be a non-negative value.")
-    
+
         return True
 
 
-    
-    def display_properties(self, properties = ["layer_index", "ground_water_depth", "top_depth", "thickness"], 
+
+    def display_properties(self, properties = None,
                            display_geomaterial:bool = False):
         '''
         To display layer properties
-        
+
         Args:
             properties (list[str]): layer property to diplay
             print_geomaterial (bool): whether to plot geomaterial properties
         '''
 
+        if properties is None:
+            properties = ["layer_index", "ground_water_depth", "top_depth", "thickness"]
         for property in properties:
             print(f"{property} is: {getattr(self, property)}")
 

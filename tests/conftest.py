@@ -18,7 +18,7 @@ from deep_foundation_bearing_capacity.segments.segments import Segment
 def mixed_soil():
     """
     Mixed soil: c > 0, phi > 0.
-    
+
     Guaranteed properties (tests may depend on these):
     ALL
     """
@@ -34,11 +34,11 @@ def mixed_soil():
 def stiff_clay():
     """
     Cohesive soil (clay): c > 0, phi = 0.
-    
+
     Guaranteed properties (tests may depend on these):
     ALL
     """
- 
+
     return Soil(
         soil_index=1,
         unit_weight=120.0,
@@ -54,7 +54,7 @@ def soft_clay():
     Guaranteed properties (tests may depend on these):
     ALL
     """
-    
+
     return Soil(
         soil_index=2,
         unit_weight=100.0,
@@ -68,7 +68,7 @@ def soft_clay():
 def loose_sand():
     """
     Cohesionless soil (sand): c = 0, phi > 0.
-    
+
     Guaranteed properties (tests may depend on these):
     ALL
     """
@@ -100,11 +100,11 @@ def dense_sand():
 def igm_cohesionless():
     """
     Cohesionless IGM: sand with special advanced type.
-    
+
     Guaranteed properties (tests may depend on these):
     ALL
     """
- 
+
     return Soil(
         soil_index=5,
         unit_weight=135.0,
@@ -120,10 +120,10 @@ def dict_basic():
     dictionary basic for initialization
     """
     return {
-            "soil_index": 0, 
-            "unit_weight": 120, 
+            "soil_index": 0,
+            "unit_weight": 120,
             "friction_angle": 30,
-            "cohesion": 100, 
+            "cohesion": 100,
             "n60": 30,
             "soil_type_advanced": None
         }
@@ -134,10 +134,10 @@ def dict_igm():
     dictionary for igm
     """
     return {
-            "soil_index": 0, 
-            "unit_weight": 120, 
+            "soil_index": 0,
+            "unit_weight": 120,
             "friction_angle": 30,
-            "cohesion": 100, 
+            "cohesion": 100,
             "n60": 30,
             "soil_type_advanced": "igm_cohesionless"
             }
@@ -148,10 +148,10 @@ def dict_gs():
     dictionary for gs
     """
     return {
-            "soil_index": 0, 
-            "unit_weight": 120, 
+            "soil_index": 0,
+            "unit_weight": 120,
             "friction_angle": 30,
-            "cohesion": 100, 
+            "cohesion": 100,
             "n60": 30,
             "soil_type_advanced": "gs"
             }
@@ -164,9 +164,9 @@ def competent_rock():
     ALL
     """
     return Rock(rock_index = 0, unit_weight = 150, elastic_modulus = 5000 * PSI2PSF,
-                 friction_angle = 30, qu = 5e6 * PSI2PSF, rqd = 100, 
-                 rock_type = "A", rock_quality = "Very good", 
-                 rock_type_advanced = None, 
+                 friction_angle = 30, qu = 5e6 * PSI2PSF, rqd = 100,
+                 rock_type = "A", rock_quality = "Very good",
+                 rock_type_advanced = None,
                  joint = "closed")
 
 @pytest.fixture
@@ -176,9 +176,9 @@ def igm_cohesive():
     ALL
     """
     return Rock(rock_index = 0, unit_weight = 135, elastic_modulus = 1000 * PSI2PSF,
-                 friction_angle = 27, qu = 1e4, rqd = 50, 
-                 rock_type = "B", rock_quality = "Fair", 
-                 rock_type_advanced = "igm_cohesive", 
+                 friction_angle = 27, qu = 1e4, rqd = 50,
+                 rock_type = "B", rock_quality = "Fair",
+                 rock_type_advanced = "igm_cohesive",
                  joint = "closed")
 
 @pytest.fixture
@@ -238,30 +238,30 @@ def foundation_concrete_typical():
 @pytest.fixture
 def segment_typical_1(layer_typical_1, circular_section_typical, foundation_concrete_typical):
     """
-    Typical segment, made of circular_section typical, layer_typical_1, 
+    Typical segment, made of circular_section typical, layer_typical_1,
     and foundation_concrete_typical
     """
-    return Segment(cross_section = circular_section_typical, 
+    return Segment(cross_section = circular_section_typical,
                    layer = layer_typical_1,
                    foundation_material = foundation_concrete_typical)
 
 @pytest.fixture
 def segment_typical_2(layer_typical_2, square_section_typical, foundation_concrete_typical):
     """
-    Typical segment, made of square_section typical, layer_typical_2, 
+    Typical segment, made of square_section typical, layer_typical_2,
     and foundation_concrete_typical
     """
-    return Segment(cross_section = square_section_typical, 
+    return Segment(cross_section = square_section_typical,
                    layer = layer_typical_2,
                    foundation_material = foundation_concrete_typical)
 
 @pytest.fixture
 def segment_typical_3(layer_typical_3, square_section_typical, foundation_concrete_typical):
     """
-    Typical segment, made of square_section typical, layer_typical_3, 
+    Typical segment, made of square_section typical, layer_typical_3,
     and foundation_concrete_typical
     """
-    return Segment(cross_section = square_section_typical, 
+    return Segment(cross_section = square_section_typical,
                    layer = layer_typical_3,
                    foundation_material = foundation_concrete_typical)
 

@@ -1,4 +1,3 @@
-from typing import Union
 
 import numpy as np
 
@@ -47,11 +46,11 @@ ATM = 2116.22 # accurate
 ATM_APPROXIMATE = 2000 # approximate
 
 # scalar data type
-SCALAR_TYPE = Union[int, float, np.integer, np.floating]
+SCALAR_TYPE = int|float|np.integer|np.floating
 SCALAR_TYPES = (int, float, np.integer, np.floating)
 
 # array data type
-ARRAY_TYPE = Union[np.ndarray]
+ARRAY_TYPE = np.ndarray
 ARRAY_TYPES = (np.ndarray,)
 
 # numeric types

@@ -15,13 +15,13 @@ class Geomaterial:
         '''
 
         self._sanity_check_unit_weight(unit_weight)
-        
+
         # TODO
         # self._sanity_check_elastic_modulus(elastic_modulus)
 
         self.unit_weight = unit_weight
         self.elastic_modulus = elastic_modulus
-        
+
 
 
     def _sanity_check_unit_weight(self, unit_weight):
@@ -31,14 +31,14 @@ class Geomaterial:
 
         if not isinstance(unit_weight, constants.NUMERIC_TYPES):
             raise TypeError("unit_weight data type shall be float, int, np.ndarray, np.generic.")
-        
+
         # sanity check on soil unit weight
 
         if np.min(np.asarray(unit_weight)) < constants.UNIT_WEIGHT_WATER:
             raise ValueError("ERROR: soil unit_weight is unlikely smaller than water unit weight.")
 
-        return True    
-    
+        return True
+
     # TODO
     def _sanity_check_elastic_modulus(elastic_modulus):
         '''

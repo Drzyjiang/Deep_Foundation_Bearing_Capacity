@@ -29,7 +29,7 @@ class TestFactorOfSafety:
 
 # =====================
 # 2. Test FactorOfSafetyDeepFoundation
-# ===================== 
+# =====================
 class TestFactorOfSafetyDeepFoundation:
     def test_construction(self):
         """

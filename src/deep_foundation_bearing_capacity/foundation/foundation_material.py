@@ -25,25 +25,25 @@ class FoundationMaterial:
         self.unit_weight = unit_weight
         self.elastic_modulus = elastic_modulus
 
-    
+
     def _sanity_check_unit_weight(self, unit_weight:float)->bool:
         '''
         To perform sanity check on unit_weight
         '''
         if unit_weight <= 0:
             raise ValueError("ERROR: unit_weight shall be a positive value.")
-        
+
 
         return True
-    
 
-    
+
+
     def _sanity_check_elastic_modulus(self, elastic_modulus: float) -> bool:
         if elastic_modulus <= 0:
             raise ValueError("ERROR: elastic_modulus shall be a positive value.")
 
 class FoundationConcrete(FoundationMaterial):
-    # arbitrary modulus lower and upper bounds 
+    # arbitrary modulus lower and upper bounds
     # open to modify
     elastic_modulus_lower_bound_percentage = 0.7
     elastic_modulus_upper_bound_percentage = 10.0
@@ -53,7 +53,7 @@ class FoundationConcrete(FoundationMaterial):
     yield_strength_lower_bound_percentage = 0.7
     yield_strength_upper_bound_percentage = 5.0
 
-    def __init__(self, unit_weight:float = UNIT_WEIGHT_CONCRETE, elastic_modulus:float = ELASTIC_MODULUS_CONCRETE, 
+    def __init__(self, unit_weight:float = UNIT_WEIGHT_CONCRETE, elastic_modulus:float = ELASTIC_MODULUS_CONCRETE,
                  yield_strength: float = YIELD_STRENGTH_CONCRETE):
         super().__init__(unit_weight, elastic_modulus)
 
@@ -70,12 +70,12 @@ class FoundationConcrete(FoundationMaterial):
         Args:
             elastic_modulus (float): concrete elastic modulus in unit of psf
         '''
-        
 
-        if elastic_modulus < (self.elastic_modulus_lower_bound_percentage * ELASTIC_MODULUS_CONCRETE) or ( 
+
+        if elastic_modulus < (self.elastic_modulus_lower_bound_percentage * ELASTIC_MODULUS_CONCRETE) or (
            elastic_modulus > (self.elastic_modulus_upper_bound_percentage * ELASTIC_MODULUS_CONCRETE)):
             raise ValueError("ERROR: concrete elastic_modulus is out of normal range.")
-        
+
         return True
 
     def _sanity_check_yield_strength(self, yield_strength:float)->bool:

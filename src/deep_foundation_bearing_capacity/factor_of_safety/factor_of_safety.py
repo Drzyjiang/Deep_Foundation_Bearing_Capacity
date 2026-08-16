@@ -13,7 +13,7 @@ class FactorOfSafety:
         Args:
             factor_of_safety (NUMERIC_TYPE): for shallow foundation, typically use 3.0
         """
-        
+
         # sanity check
         self._sanity_check_fs(factor_of_safety)
         self.factor_of_safety = factor_of_safety
@@ -25,7 +25,7 @@ class FactorOfSafety:
 
         Args:
             fs: factor of safety
-        
+
         Returns:
             result (bool): True or False
         '''
@@ -40,14 +40,14 @@ class FactorOfSafety:
 class FactorOfSafetyDeepFoundation (FactorOfSafety):
     '''
     Class for deep foundations
-    
+
     '''
     def __init__(self, factor_of_safety: NUMERIC_TYPE = 3.0, fs_end_bearing: NUMERIC_TYPE = 3.0):
         '''
         Args:
             fs (constants.SCALAR_TYPE): used for skin friction
                                         without load test (typical), use 3.0;
-                                        with laod test, use 2.0 
+                                        with laod test, use 2.0
             fs_end_bearing (constants.SCALAR_TYPE): used for end bearing
         '''
         super().__init__(factor_of_safety)
@@ -64,4 +64,4 @@ class FactorOfSafetyDeepFoundation (FactorOfSafety):
         self.fs_end = fs_end_bearing
 
 
-        
+

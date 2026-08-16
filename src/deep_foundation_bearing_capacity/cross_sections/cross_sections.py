@@ -33,14 +33,14 @@ class CrossSection(ABC):
             raise ValueError("ERROR: section_dimension shall be greater than zero.")
         else:
             return True
-   
+
 
     # calculate cross-section area
     @property
     @abstractmethod
     def area(self):
         ...
-    
+
     # calculate perimeter
     @property
     @abstractmethod
@@ -75,7 +75,7 @@ class CircularSection(CrossSection):
         '''
 
         return 0.25* np.pi *self.diameter*self.diameter
-    
+
     @property
     def perimeter(self):
         '''
@@ -83,14 +83,15 @@ class CircularSection(CrossSection):
         '''
         return np.pi *  self.diameter
 
-    def display_properties(self, properties: list[str] = ["CROSS_SECTION_NAME", "diameter", 
-                                                          "perimeter", "area"]):
+    def display_properties(self, properties: list[str] = None):
         """
         Display properties
         """
         #sanity check
+        if properties is None:
+            properties = ["CROSS_SECTION_NAME", "diameter", "perimeter", "area"]
         for property in properties:
-            try: 
+            try:
                 print(f"{property} is: {getattr(self, property)}")
             except AttributeError:
                 print(f"ERROR: {property} does not exist.")
@@ -104,7 +105,7 @@ class SquareSection(CrossSection):
     def __init__(self, section_dimension):
         super().__init__(section_dimension)
 
-        # 
+        #
 
         self.length = section_dimension
 
@@ -123,14 +124,15 @@ class SquareSection(CrossSection):
         '''
         return  4 * self.length
 
-    def display_properties(self, properties: list[str] = ["CROSS_SECTION_NAME", "length", 
-                                                          "perimeter", "area"]):
+    def display_properties(self, properties: list[str] = None):
         """
         Display properties
         """
         #sanity check
+        if properties is None:
+            properties = ["CROSS_SECTION_NAME", "length", "perimeter", "area"]
         for property in properties:
-            try: 
+            try:
                 print(f"{property} is: {getattr(self, property)}")
             except AttributeError:
                 print(f"ERROR: {property} does not exist.")

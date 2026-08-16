@@ -1,12 +1,12 @@
-# classes for rock 
+# classes for rock
 # Currently not including cohesionless IGM
 from deep_foundation_bearing_capacity.geomaterials.geomaterial import Geomaterial
 
 
 class Rock(Geomaterial):
     def __init__(self, rock_index, unit_weight: float = 150, elastic_modulus: float = 0,
-                 friction_angle: float = None, qu: float = None, rqd: float = None, 
-                 rock_type:str = None, rock_quality: str = None, rock_type_advanced: str = None, 
+                 friction_angle: float = None, qu: float = None, rqd: float = None,
+                 rock_type:str = None, rock_quality: str = None, rock_type_advanced: str = None,
                  joint: str = "open"):
         '''
         A class for (competent) rock material.
@@ -17,16 +17,16 @@ class Rock(Geomaterial):
             rqd (float): rock quality designation, no unit, between [0,100]
             rock_type (str): one from ["A", "B", "C", "D", "E"]
                             Reference: FHWA Drilled Shaft Manual Table 11.2
-                            A: Carbonate rocks with well-developed crystal cleavage (e.g., 
+                            A: Carbonate rocks with well-developed crystal cleavage (e.g.,
                             dolostone, limestone, marble)
                             B: Lithified argillaeous rocks (mudstone, siltstone, shale,
                               slate)
                             C: Arenaceous rocks (sandstone, quartzite)
                             D: Fine-grained igneous rocks (andesite, dolerite, diabase,
                               rhyolite)
-                            E: Coarse-grained igneous and metamorphic rocks (amphibole, 
+                            E: Coarse-grained igneous and metamorphic rocks (amphibole,
                                garbro, gnesis, granite, norite, quartz-diorite)
-            rock_quality (str): one from ["Excellent", "Very good", "Good", "Fair", "Poor", 
+            rock_quality (str): one from ["Excellent", "Very good", "Good", "Fair", "Poor",
                                      "Very poor"]
 
             rock_type_advanced (str): one from [None, "igm_cohesive"]
@@ -38,7 +38,7 @@ class Rock(Geomaterial):
         super().__init__(unit_weight, elastic_modulus)
 
         self.rock_type_options = ["A", "B", "C", "D", "E"]
-        self.rock_quality_options = ["Excellent", "Very good", "Good", "Fair", "Poor", 
+        self.rock_quality_options = ["Excellent", "Very good", "Good", "Fair", "Poor",
                                      "Very poor"]
         self.rock_type_advanced_options = ["igm_cohesive", None]
 
@@ -122,7 +122,7 @@ class Rock(Geomaterial):
                 raise ValueError("ERROR: cohesive IGM typically has qu less than 100,000 psf")
         else:
             return True
-    
+
     def _sanity_check_rqd(self, rqd:float)->bool:
         '''
         To perform sanity check on rock quality designation
@@ -136,7 +136,7 @@ class Rock(Geomaterial):
             raise ValueError("ERROR: rock RQD shall be less than 100.")
         else:
             return True
-        
+
     def _sanity_check_rock_type(self, rock_type:str)->bool:
         '''
         To perform sanity check on rock_type
@@ -149,12 +149,12 @@ class Rock(Geomaterial):
             raise ValueError(f"ERROR: rock_type shall be one from {self.rock_type_options}.")
         else:
             return True
-    
+
     def _sanity_check_rock_quality(self, rock_quality:str = None)->bool:
         '''
         To perform sanity check on rock_quality.
         '''
-    
+
         if isinstance(rock_quality, str) and rock_quality == "None":
             raise TypeError("ERROR: rock_type_advanced cannot be 'None'")
 
@@ -169,12 +169,12 @@ class Rock(Geomaterial):
         '''
         if rock_type_advanced == "None":
             raise ValueError("ERROR: rock_type_advanced cannot be 'None'. Should be None")
-        
+
         if (rock_type_advanced is not None) and (rock_type_advanced not in self.rock_type_advanced_options):
             raise ValueError(f"ERROR: rock_type_advanced shall be one from {self.rock_type_advanced_options}")
-        
+
         return True
-    
+
     def _sanity_check_joint(self, joint:str)->bool:
         '''
         To perform sanity check on joint
@@ -182,11 +182,10 @@ class Rock(Geomaterial):
 
         if joint is not None and joint != "open" and joint != "closed":
             raise ValueError("ERROR: joint shall be either 'open' or 'closed'")
-        
+
         return True
-    
-    def display_properties(self, properties = ["rock_index", "unit_weight", "friction_angle", "qu", "rqd", "rock_type",
-                                               "rock_quality", "rock_type_advanced", "joint"]):
+
+    def display_properties(self, properties = None):
         '''
         To display specified soil properties
 
@@ -194,5 +193,8 @@ class Rock(Geomaterial):
             properties (list[str]): strs that match rock properties in the class
         '''
 
+        if properties is None:
+            properties = ["rock_index", "unit_weight", "friction_angle", "qu", "rqd", "rock_type",
+                           "rock_quality", "rock_type_advanced", "joint"]
         for property in properties:
             print(f"{property} is: {getattr(self, property)}")

@@ -25,15 +25,15 @@ class TestSoilSideResistance:
         Reference: FHWA Drilled Shaft Manual 2010 Page 13-18
                    when cohesion = 2395 psf, alpha shall be 0.55
         """
-        clay = Soil(soil_index = 0, 
+        clay = Soil(soil_index = 0,
                        unit_weight = 120,
-                       friction_angle = 0, 
-                       cohesion = 2395, 
+                       friction_angle = 0,
+                       cohesion = 2395,
                        n60 = 8)
-              
-        clay_layer = Layer(layer_index = 0, 
+
+        clay_layer = Layer(layer_index = 0,
                       geomaterial = clay, ground_water_depth = 100,
-                      top_depth = 0, 
+                      top_depth = 0,
                       thickness = 20)
 
         clay_unit_resistance = SoilSideResistance(clay_layer)
@@ -47,13 +47,13 @@ class TestSoilSideResistance:
                    Note that an average beta (of upper and lower interfaces) are manually calcualted
         """
         # fictious friction_angle
-        sand_1 = Soil(soil_index = 0, 
-                    friction_angle = 30, 
+        sand_1 = Soil(soil_index = 0,
+                    friction_angle = 30,
                     n60 = 20)
-        sand_2 = Soil(soil_index = 1, 
-                    friction_angle = 30, 
+        sand_2 = Soil(soil_index = 1,
+                    friction_angle = 30,
                     n60 = 25)
-              
+
         sand_layer_upper = Layer(layer_index = 0, geomaterial = sand_1, ground_water_depth = 100,
                                 top_depth = 32, thickness = 0.01)
 
@@ -82,22 +82,22 @@ class TestSoilSideResistance:
         sand_1 = Soil(soil_index = 0, unit_weight = 115, friction_angle = 30, n60 = 11)
         sand_2 = Soil(soil_index = 0, unit_weight = 115, friction_angle = 30, n60 = 14)
         sand_3 = Soil(soil_index = 0, unit_weight = 115, friction_angle = 30, n60 = 19)
-        
+
         layer_1 = Layer(layer_index = 0, geomaterial = sand_1, ground_water_depth = 4, top_depth = 0,thickness = 4)
         layer_2 = Layer(layer_index = 1, geomaterial = sand_2, ground_water_depth = 4, top_depth = 4,thickness = 26)
         layer_3 = Layer(layer_index = 2, geomaterial = sand_3, ground_water_depth = 4, top_depth = 30, thickness = 60)
 
-        layer_1_unit_resistance = SoilSideResistance(layer_1)  
-        assert layer_1_unit_resistance.side_resistance_unit_cohesionless(effective_stress = 115*2.0, 
+        layer_1_unit_resistance = SoilSideResistance(layer_1)
+        assert layer_1_unit_resistance.side_resistance_unit_cohesionless(effective_stress = 115*2.0,
                                                                          beta_override = 0.8) ==(
                                                     pytest.approx(0.115 / PSF2TSF * 0.8, rel = 0.01))
 
-        layer_2_unit_resistance = SoilSideResistance(layer_2)   
+        layer_2_unit_resistance = SoilSideResistance(layer_2)
         assert layer_2_unit_resistance.side_resistance_unit_cohesionless(
             effective_stress = 115*4.0 + (115-UNIT_WEIGHT_WATER) * 13, beta_override=0.8) == (
                 pytest.approx(0.572 / PSF2TSF * 0.8, rel = 0.01))
- 
-        layer_3_unit_resistance = SoilSideResistance(layer_3) 
+
+        layer_3_unit_resistance = SoilSideResistance(layer_3)
         assert layer_3_unit_resistance.side_resistance_unit_cohesionless(effective_stress = 115*4.0
             + (115-UNIT_WEIGHT_WATER) * 41, beta_override=0.8) == (
                 pytest.approx(1.308 / PSF2TSF * 0.8, rel = 0.01))
@@ -116,7 +116,7 @@ class TestSoilSideResistance:
 
         clay_layer_5ft = Layer(layer_index = 0, geomaterial = clay_5ft, ground_water_depth = 100,
                                 top_depth = 5,thickness = 0.01)
-        clay_layer_33_4ft = Layer(layer_index = 0, geomaterial = clay_33_4ft, 
+        clay_layer_33_4ft = Layer(layer_index = 0, geomaterial = clay_33_4ft,
                                   ground_water_depth = 100, top_depth = 33.4,thickness = 0.01)
 
         side_resistance_5ft = SoilSideResistance(clay_layer_5ft)
@@ -124,9 +124,9 @@ class TestSoilSideResistance:
 
         side_resistance_unit_cohesive = 0.5*(
             side_resistance_5ft.side_resistance_unit_cohesive(alpha_override = 0.55)
-              + side_resistance_33_4ft.side_resistance_unit_cohesive(alpha_override=0.55)) 
-        
-        assert side_resistance_unit_cohesive == pytest.approx(1.14 / PSF2TSF * 0.55, rel = 0.01) 
+              + side_resistance_33_4ft.side_resistance_unit_cohesive(alpha_override=0.55))
+
+        assert side_resistance_unit_cohesive == pytest.approx(1.14 / PSF2TSF * 0.55, rel = 0.01)
 
 class TestSoilEndResistance:
     """
@@ -141,15 +141,15 @@ class TestSoilEndResistance:
                    when cohesion = 3800 psf, unit end resistance shall be 9 *cohesion
         """
 
-        clay = Soil(soil_index = 0, 
+        clay = Soil(soil_index = 0,
                        unit_weight = 120,
-                       friction_angle = 0, 
-                       cohesion = 1900*2, 
+                       friction_angle = 0,
+                       cohesion = 1900*2,
                        n60 = 8)
-              
-        clay_layer = Layer(layer_index = 0, 
+
+        clay_layer = Layer(layer_index = 0,
                       geomaterial = clay, ground_water_depth = 100,
-                      top_depth = 0, 
+                      top_depth = 0,
                       thickness = 20)
         soil_end_resistance = SoilEndResistance(clay_layer)
 
@@ -163,8 +163,8 @@ class TestSoilEndResistance:
         """
 
         sand = Soil(soil_index = 0, friction_angle = 30, n60 = 25)
-              
-        sand_layer = Layer(layer_index = 0, geomaterial = sand, ground_water_depth = 100, top_depth = 59, 
+
+        sand_layer = Layer(layer_index = 0, geomaterial = sand, ground_water_depth = 100, top_depth = 59,
                       thickness = 0.01)
         soil_end_resistance = SoilEndResistance(sand_layer)
 
