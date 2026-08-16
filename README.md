@@ -1,11 +1,37 @@
 # Deep Foundation Bearing Capacity
-![CI](https://github.com/Drzyjiang/Deep_Foundation_Bearing_Capacity)
+![CI](https://github.com/Drzyjiang/Deep_Foundation_Bearing_Capacity/actions/workflows/ci.yml/badge.svg)
 A project for calculating drilled pier geotechnical axial bearing capacity.   
-Author: Zhiyan Jiang [(http://www.linkedin.com/in/zhiyanjiang)](http://www.linkedin.com/in/zhiyanjiang)
+Author: [Zhiyan Jiang](http://www.linkedin.com/in/zhiyanjiang)
 
 ## Overview
-Deep foundations use slender structural elements to transfer superstructure loads to deep geomaterial strata. A typical type of deep foundationss is drilled shaft that is constructed by predrilling a borehole, reinforcing, and placing concrete. Drilled shafts are widely favored, particularly for scenarios with relatively large loadings or poor surficial geotechnical conditions. In drilled shafts designs, geotechnical axial capacity is a crucial and often governing factor in selecting pile length and diameter and thus deserve careful assessment.    
-This project implements drill shafts' geotechnical axial capacity by reproducing in Python code the well-known methods published by Federal Highway Administration (1999). Although FHWA later released updated versions in 2010 and 2018, methods published in the 1999 report are still considered valid in engineering practice.
+Deep foundations use slender structural elements to transfer superstructure loads to deep geomaterial strata. A typical type of deep foundations is drilled shaft that is constructed by predrilling a borehole, reinforcing, and placing concrete. Drilled shafts are widely favored, particularly for scenarios with relatively large loadings or poor surficial geotechnical conditions. In drilled shafts designs, geotechnical axial capacity is a crucial and often governing factor in selecting pile length and diameter and thus deserve careful assessment.    
+This project implements drilled shafts' geotechnical axial capacity by reproducing in Python code the well-known methods published by Federal Highway Administration (1999). Although FHWA later released updated versions in 2010 and 2018, methods published in the 1999 report are still considered valid in engineering practice.
+
+```python
+from deep_foundation_bearing_capacity.geomaterials.soil import Soil
+from deep_foundation_bearing_capacity.geomaterials.layer import Layer
+from deep_foundation_bearing_capacity.cross_sections.cross_sections import CircularSection
+from deep_foundation_bearing_capacity.foundation.foundation_material import FoundationConcrete
+from deep_foundation_bearing_capacity.segments.segments import Segment
+from deep_foundation_bearing_capacity.foundation.deep_foundation import DeepFoundation
+
+# 1. Define material and layer
+soil = Soil(soil_index=1, unit_weight=120, friction_angle=0, cohesion=2000, n60=15)
+layer = Layer(layer_index=0, geomaterial=soil, top_depth=0,
+              thickness=10, ground_water_depth=15)
+
+# 2. Define pile cross section and concrete
+section = CircularSection(section_dimension=3)  # 3 ft diameter
+concrete = FoundationConcrete()
+
+# 3. Assemble segment and pile
+segment = Segment(cross_section=section, layer=layer,
+                  foundation_material=concrete)
+pile = DeepFoundation(segments=[segment])
+
+# 4. Access capacity
+capacity = pile.
+```
 
 ## Features
 Unit side resistance and end resistance are implemented for four different geomaterial types.
@@ -14,7 +40,7 @@ Side resistance in cohesive soils, i.e., adhesion, is computed as the product of
 
 $$f_{max} = \alpha S_u$$
 
-where adhesion factor $\alpha$ is a function of $S_u/p_a$ ratio and varies linearly from 0.55 with $S_u/p_a$ ratio 1.5 to 0.45 with the ratio of 2.5 and remains constant beyond; $S_u$ is soil's undrained shear strength.  It is also noted that adhesion shall be neglected for the upper 5 ft or depth of seasonal moisture change, whichever is deeper, and for the shaft section $B$ (shaft diameter) above bottom.
+where adhesion factor $\alpha$ is a function of $S_u/p_a$ ratio and varies linearly from 0.55 with $S_u/p_a$ ratio 1.5 to 0.45 with the ratio of 2.5 and remains constant beyond; $S_u$ is soil's undrained shear strength.  Adhesion is neglected for the top 5 ft (or seasonal moisture zone, whichever is greater) and for the bottom legnth equal to one shaft diameter (B).
 
 End resistance in cohesive soil is calculated using the equation below when depth of shafts is greater than $3B$:
 
@@ -31,25 +57,25 @@ where $N^c_*$ is a function of rigidity index and can be interpolated as below:
 In case of embedment less than $3B$, a factor of $\frac {2}{3} [1+\frac {1}{6}\frac{D}{B}]$ is applied, where $D$ is embedment.
 
 ### Cohesionless soils
-Side resistance in cohesionless soil is a function of effective normal stress applied on foundations. As normal effective stress is a function of vertical effective stress, side resistance be simplified as vertical effective stress factored by a dimensionless correlation factor typically noted as "beta". Thus this method is also known as the "beta" method.
+Side resistance in cohesionless soil is a function of effective normal stress applied on foundations. As normal effective stress is a function of vertical effective stress, side resistance can be simplified as vertical effective stress factored by a dimensionless correlation factor typically noted as "beta". Thus this method is also known as the "beta" method.
 
 $$f_{max} = \beta \sigma^\prime _{v}$$
 
-where $\beta$ can be determined by standard penetration test blowcounts $N_{60}$ and depth. 
+where $\beta$ can be determined by standard penetration test blowcounts $N_{60}$ and depth. To ease comparison of this project with existing implementations, vertical effective stress of a given layer is calculated at the middle depth. 
 For sand,
 
 $$ \beta = \frac {N_{60}} {15}(1.5-0.135 z^{0.5})$$ 
 
-where $z$ is depth in unit of foot and $N_{60}$ is upper-bounded by 15. This equation also applies to gravelly sand or gravels with $N_{60} \le 15$.
-For gravelly sand or gravels with $N_{60} \ge 15$, the follow equation applies:
+where $z$ is depth in unit of foot. For $N_{60} \ge 15$, the modifier ${N_{60}}/{15}$ is set to 1.0 (i.e., $N_{60}$ is capped at 15). For $N_{60} < 15$, apply the modifier directly. This formula also applies to gravelly sand or gravels with $N_{60} \le 15$.
+For gravelly sand or gravels with $N_{60} \ge 15$, the following equation applies:
 
-$$ \beta = 2.0-0.366 z^{0.75}$$ 
+$$ \beta = 2.0-0.06 z^{0.75}$$ 
 
 Coefficient $\beta$ is bounded by 0.25 and 1.20 for sand, and by 0.25 and 1.80 for gravelly sand and gravel. To minimize the discretization error introduced by layering, the thickness of each cohesionless layer is limited to 30 ft.
 
 End resistance in cohesionless soil is correlated to $N_{60}$ as:
 
-$$q_{max}= 0.60 N_{60} \le 30$$
+$$q_{max}= 0.60 \, N_{60} \quad \text{(tsf)}, \quad q_{max} \leq 30 \text{ tsf}$$
 
 where end resistance $q_{max}$ is in unit of ton per square foot. Cohesionless soils with $N_{60}$ greater than 50 shall be treated as cohesionless intermediate material.
 
@@ -61,7 +87,7 @@ $$f_{max} = 0.65 p_a[q_u/p_a]^{0.5} \le 0.65 f^{\prime}_c[q_u/p_a]^{0.5}$$
 where $q_u$ is the rock unconfined compressive strength and $f^\prime_c$ is 28-day compressive cylinder strength of the concrete material. 
 
 End resistance in rock is determined by not only unconfined compressive strength, but also rock quality designation (RQD), socket depth, and joint conditions.
-If RQD is 100% and socket depth is greater than 1.5 times shaft's diameter, the following equation applies:
+If the rock mass is essentially unfractured (RQD ≈ 100%) and socket depth exceeds 1.5 times the shaft diameter, the following equation applies:
 
 $$q_{max} = 2.5 q_u$$
 
@@ -77,14 +103,14 @@ $$q_{max} = [s^{0.5} + (ms^{0.5}+s)^{0.5}]q_u$$
 where parameters $s$ and $m$ can be estimated using FHWA (1999) Table 11.3.   
 
 ### Cohesive intermediate geomaterials
-Side ressitance in cohesive intermediate geomaterial (IGM) has a similar form to that for cohesive soil:
+Side resistance in cohesive intermediate geomaterial (IGM) has a similar form to that for cohesive soil with an exception of an additional factor $\psi$:
 
-$$f_{max} = \alpha \phi q_u$$
+$$f_{max} = \alpha \psi q_u$$
 
-where coefficient $\alpha$ is esimated using FHWA (1999) Figure 11.5. It has a decreasing trend with $q_u$ and an increasing trend with pressure exerted by fluid concrete. If rock's angle of interface friction substantially deviates from 30°, $\alpha$ is also factored by $\tan(\phi_{rc})/\tan30°$ where $\tan(\phi_{rc})$ is angle of interface friction. Factor $\phi$ is determined by RQD and joint condition as show in the table below:
-||$\phi$|$\phi$|
+where coefficient $\alpha$ is estimated using FHWA (1999) Figure 11.5 by digitization and bilinear interpolation. It has a decreasing trend with $q_u$ and an increasing trend with pressure exerted by fluid concrete. If rock's angle of interface friction substantially deviates from 30°, $\alpha$ is also factored by $\tan(\phi_{rc})/\tan30°$ where $\tan(\phi_{rc})$ is angle of interface friction. Factor $\psi$ is determined by RQD and joint condition as shown in the table below:
+
+|RQD|closed joints $\psi$|open gouge-filled joints $\psi$| 
 |:------:|:--:|:--:|
-|RQD|closed joints|open gouge-filled joints| 
 |100|1.00|0.85|
 |70|0.85|0.55|
 |50|0.60|0.55|
@@ -94,8 +120,8 @@ where coefficient $\alpha$ is esimated using FHWA (1999) Figure 11.5. It has a d
 
 End resistance in cohesive IGM is the same as in rock.
 
-### Side and end resistances in cohesionless intermediate geomaterials 
-Side resistance in cohesionless IGM has a smilar form as the "beta" method, except that $\beta$ is explicitly expressed as the product of at-rest earth pressure coefficient and tangent of internal friction angle:
+### Cohesionless intermediate geomaterials 
+Side resistance in cohesionless IGM has a similar form as the "beta" method, except that $\beta$ is explicitly expressed as the product of at-rest earth pressure coefficient and tangent of internal friction angle:
 
 $$f_{max}=\sigma^\prime_{v} K_o \tan \phi^\prime$$
 
@@ -111,7 +137,6 @@ End resistance in cohesionless IGM is computed as:
 
 $$q_{max} = 0.59[N_{60}(p_a/\sigma ^{\prime}_{v})]^{0.8}\sigma ^{\prime}_{v}$$
 
-To ease comparison of this project with existing implementations, vertical effective stress of a given layer is calculated at the middle depth.   
 
 ## Installation
 ```bash
@@ -132,10 +157,11 @@ pytest
 ```bash
 jupyter notebook
 ```
-3. Open notebook \'deep_foundation_bearing_capacity_soil.ipynb' or 
-                 \'deep_foundation_bearing_capacity_rock.ipynb' and run all cells (Cell -> Run All).
+3. Open notebooks `deep_foundation_bearing_capacity_soil.ipynb`,
+                 'deep_foundation_bearing_capacity_rock.ipynb',
+                 'deep_foundation_bearing_capacity_soil_rock.ipynb' and run all cells (Cell -> Run All).
 
-4. Soil parameters and associated layer parameters are configured in 'data/soil_params.yaml' and 'data/layer_params.yaml', respsectively.
+4. Soil parameters and associated layer parameters are configured in 'data/soil_params.yaml' and 'data/layer_params.yaml', respectively.
    Rock parameters and associated layer parameters are configured in 'data/rock_params.yaml' and 'data/layer_params1.yaml', respectively.
    Edit these files to analyze different profiles.
 
@@ -153,11 +179,12 @@ Deep_Foundation_Bearing_Capacity/
 |     |---layer_params1.yaml
 |     |---rock_params.yaml
 |     |---soil_params.yaml
-+---notebooks                        # for demonstration
-|     |---deep_foundation_capacity_rock.ipynb # for rock strata
-|     |---deep_fouddation_capacity_soil.ipynb # for soil strata
++---notebooks/                        # for demonstration
+|     |---deep_foundation_bearing_capacity_rock.ipynb # for rock strata
+|     |---deep_foundation_bearing_capacity_soil.ipynb # for soil strata
+|     |---deep_foundation_bearing_capacity_soil_rock.ipynb # for soil and rock strata
 |     |---nb_utilis.py                        
-+---src
++---src/
 |    +---deep_foundation_bearing_capacity/   # main package
 |    |    +---constants/                 # engineering constants
 |    |    |     |---constants.py
@@ -168,7 +195,7 @@ Deep_Foundation_Bearing_Capacity/
 |    |    |     |---layer.py
 |    |    |     |---rock.py
 |    |    |     |---soil.py
-|    |    +---segement/                 # pile segment class
+|    |    +---segments/                 # pile segment class
 |    |    |     +---cohesive_igm/        # digitized alpha vs sigma_n data
 |    |    |     |    |---...
 |    |    |     |---segment.py
@@ -182,12 +209,11 @@ Deep_Foundation_Bearing_Capacity/
 |     |---...
 +---.github/---workflows/ci.yml          # CI
 
-
 ```
 
 Key entry points:
 - `deep_foundation.DeepFoundation` — construct a pile from segments
-- `segments.unit_resistance` - develop unit resistance values
+- `segments.unit_resistance` - compute unit side and end resistance values
 
 ## Calculation Examples
 ### Example 1: soil strata
@@ -346,7 +372,7 @@ Rock parameters are:
 - rock_index: 1
   unit_weight: 150 # pcf
   friction_angle: 27 # degree
-  qu: 10000 # psf
+  qu: 10000 # psf, use low value for demonstration only
   rqd: 100
   rock_type: A
   rock_quality: "Excellent"
@@ -356,7 +382,7 @@ Rock parameters are:
 - rock_index: 2
   unit_weight: 150 # pcf
   friction_angle: 30 # degree
-  qu: 10000 # psf
+  qu: 10000 # psf, use low value for demonstration only
   rqd: 90
   rock_type: A
   rock_quality: "Very good"
@@ -387,3 +413,4 @@ Ultimate uplift capacity is: <br>
 
 ## References
 1. Federal Highway Administration. (1999). Drilled Shafts Construction Procedures and Design Methods. FHWA-IF-99-025.
+2. Federal Highway Administration. (2018). Drilled Shafts: Construction Procedures and LRFD Design Methods. FHWA-NHI-18-024 (GEC-10). Brown, Turner, Castelli, & Loehr.

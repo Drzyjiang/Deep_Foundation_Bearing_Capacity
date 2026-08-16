@@ -12,7 +12,7 @@ from deep_foundation_bearing_capacity.segments.unit_resistance import EndResista
 
 class DeepFoundation:
     def __init__(self, segments: list[Segment], top_depth: SCALAR_TYPE = 0, 
-                 resistance_corrections=None, fs: FactorOfSafetyDeepFoundation = None):
+                 resistance_corrections=None, fs: FactorOfSafetyDeepFoundation = FactorOfSafetyDeepFoundation(1,1)):
         '''
         Args:
             segments (Segment): list a of segments, in order of from top to bottom 
@@ -295,7 +295,7 @@ class DeepFoundation:
         return segments_structural_capacity
 
 
-    def visualize_resistances_accumulative(self, fs:float = 1.0, target = "compression", style = "piecewise"):
+    def visualize_resistances_accumulative(self, target = "compression", style = "piecewise"):
         '''
         Visualize accumulative compression or uplift resistance 
 

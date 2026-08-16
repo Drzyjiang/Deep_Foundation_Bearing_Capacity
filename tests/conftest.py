@@ -268,6 +268,6 @@ def segment_typical_3(layer_typical_3, square_section_typical, foundation_concre
 @pytest.fixture(scope = "function")
 def deep_foundation_typical(segment_typical_1, segment_typical_2, segment_typical_3):
     """
-    Tyical deep foundation
+    Typical deep foundation
     """
     return DeepFoundation(segments=[segment_typical_1, segment_typical_2, segment_typical_3])
