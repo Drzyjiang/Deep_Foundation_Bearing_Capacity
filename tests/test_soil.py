@@ -75,7 +75,7 @@ class TestFromDict:
 
     def test_from_dict_igm(self, dict_igm):
         """
-        Test initizalization by dict_igm
+        Test initialization by dict_igm
         """
         soil = Soil.from_dict(dict_igm)
         assert soil.soil_type_advanced == "igm_cohesionless"

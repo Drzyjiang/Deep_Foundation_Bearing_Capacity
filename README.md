@@ -40,7 +40,7 @@ Side resistance in cohesive soils, i.e., adhesion, is computed as the product of
 
 $$f_{max} = \alpha S_u$$
 
-where adhesion factor $\alpha$ is a function of $S_u/p_a$ ratio and varies linearly from 0.55 with $S_u/p_a$ ratio 1.5 to 0.45 with the ratio of 2.5 and remains constant beyond; $S_u$ is soil's undrained shear strength.  Adhesion is neglected for the top 5 ft (or seasonal moisture zone, whichever is greater) and for the bottom legnth equal to one shaft diameter (B).
+where adhesion factor $\alpha$ is a function of $S_u/p_a$ ratio and varies linearly from 0.55 with $S_u/p_a$ ratio 1.5 to 0.45 with the ratio of 2.5 and remains constant beyond; $S_u$ is soil's undrained shear strength.  Adhesion is neglected for the top 5 ft (or seasonal moisture zone, whichever is greater) and for the bottom length equal to one shaft diameter (B).
 
 End resistance in cohesive soil is calculated using the equation below when depth of shafts is greater than $3B$:
 
@@ -183,7 +183,7 @@ Deep_Foundation_Bearing_Capacity/
 |     |---deep_foundation_bearing_capacity_rock.ipynb # for rock strata
 |     |---deep_foundation_bearing_capacity_soil.ipynb # for soil strata
 |     |---deep_foundation_bearing_capacity_soil_rock.ipynb # for soil and rock strata
-|     |---nb_utilis.py                        
+|     |---nb_utils.py                        
 +---src/
 |    +---deep_foundation_bearing_capacity/   # main package
 |    |    +---constants/                 # engineering constants

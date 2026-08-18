@@ -200,7 +200,7 @@ def layer_typical_2(loose_sand):
 @pytest.fixture
 def layer_typical_3(competent_rock):
     """
-    A typical layer with compent rock
+    A typical layer with competent rock
     """
     return Layer(layer_index = 2, geomaterial = competent_rock, ground_water_depth = 0,
                  top_depth = 20, thickness = 10)
