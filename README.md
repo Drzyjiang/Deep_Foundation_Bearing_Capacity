@@ -352,10 +352,10 @@ Soil layer parameters are:
   ground_water_depth: 15.0 # ft
   
 Ultimate compression capacity is: <br>
-<img src="notebooks/soil_compression capacity.png" width="40%"> <br>
+<img src="docs/images/soil_compression capacity.png" width="40%"> <br>
 
 Ultimate uplift capacity is: <br>
-<img src="notebooks/soil_uplift capacity.png" width="40%"> <br>
+<img src="docs/images/soil_uplift capacity.png" width="40%"> <br>
 
 ### Example 2: rock strata
 Rock parameters are:
@@ -406,10 +406,10 @@ Rock layer parameters are:
   ground_water_depth: 15.0 # ft
 
 Ultimate compression capacity is: <br>
-<img src="notebooks/rock_compression capacity.png" width="40%"> <br>
+<img src="docs/images/rock_compression capacity.png" width="40%"> <br>
 
 Ultimate uplift capacity is: <br>
-<img src="notebooks/rock_uplift capacity.png" width="40%"> <br>
+<img src="docs/images/rock_uplift capacity.png" width="40%"> <br>
 
 ## References
 1. Federal Highway Administration. (1999). Drilled Shafts Construction Procedures and Design Methods. FHWA-IF-99-025.
